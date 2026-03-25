@@ -4,8 +4,11 @@ import (
 	"net/http"
 	"sync"
 
+	"github.com/raynaythegreat/ai-business-hq/pkg/tenant"
 	"github.com/raynaythegreat/ai-business-hq/web/backend/launcherconfig"
 )
+
+var postInitFuncs []func(h *Handler)
 
 // Handler serves HTTP API requests.
 type Handler struct {
@@ -21,18 +24,27 @@ type Handler struct {
 	weixinFlows          map[string]*weixinFlow
 	wecomMu              sync.Mutex
 	wecomFlows           map[string]*wecomFlow
+	tenantStore          tenant.TenantStore
+	analyticsCache       map[string]interface{}
+	membershipIDs        map[string]string
 }
 
 // NewHandler creates an instance of the API handler.
 func NewHandler(configPath string) *Handler {
-	return &Handler{
-		configPath:  configPath,
-		serverPort:  launcherconfig.DefaultPort,
-		oauthFlows:  make(map[string]*oauthFlow),
-		oauthState:  make(map[string]string),
-		weixinFlows: make(map[string]*weixinFlow),
-		wecomFlows:  make(map[string]*wecomFlow),
+	h := &Handler{
+		configPath:     configPath,
+		serverPort:     launcherconfig.DefaultPort,
+		oauthFlows:     make(map[string]*oauthFlow),
+		oauthState:     make(map[string]string),
+		weixinFlows:    make(map[string]*weixinFlow),
+		wecomFlows:     make(map[string]*wecomFlow),
+		analyticsCache: make(map[string]interface{}),
+		membershipIDs:  make(map[string]string),
 	}
+	for _, fn := range postInitFuncs {
+		fn(h)
+	}
+	return h
 }
 
 // SetServerOptions stores current backend listen options for fallback behavior.
@@ -81,6 +93,12 @@ func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
 
 	// WeCom QR login flow
 	h.registerWecomRoutes(mux)
+
+	// API v2 - SaaS features
+	h.registerOrganizationRoutes(mux)
+	h.registerMembershipRoutes(mux)
+	h.registerSubscriptionRoutes(mux)
+	h.registerAnalyticsRoutes(mux)
 }
 
 // Shutdown gracefully shuts down the handler, stopping the gateway if it was started by this handler.
