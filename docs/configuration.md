@@ -12,23 +12,25 @@ You can override default paths using environment variables. This is useful for p
 
 | Variable          | Description                                                                                                                             | Default Path              |
 |-------------------|-----------------------------------------------------------------------------------------------------------------------------------------|---------------------------|
-| `PICOCLAW_CONFIG` | Overrides the path to the configuration file. This directly tells aibhq which `config.json` to load, ignoring all other locations. | `~/.aibhq/config.json` |
-| `PICOCLAW_HOME`   | Overrides the root directory for aibhq data. This changes the default location of the `workspace` and other data directories.          | `~/.aibhq`             |
+| `AIBHQ_CONFIG` | Overrides the path to the configuration file. This directly tells aibhq which `config.json` to load, ignoring all other locations. | `~/.aibhq/config.json` |
+| `AIBHQ_HOME`   | Overrides the root directory for aibhq data. This changes the default location of the `workspace` and other data directories.          | `~/.aibhq`             |
+
+> **Note**: Legacy environment variables `PICOCLAW_CONFIG` and `PICOCLAW_HOME` are still supported for backward compatibility.
 
 **Examples:**
 
 ```bash
 # Run aibhq using a specific config file
 # The workspace path will be read from within that config file
-PICOCLAW_CONFIG=/etc/aibhq/production.json aibhq gateway
+AIBHQ_CONFIG=/etc/aibhq/production.json aibhq gateway
 
 # Run aibhq with all its data stored in /opt/aibhq
 # Config will be loaded from the default ~/.aibhq/config.json
 # Workspace will be created at /opt/aibhq/workspace
-PICOCLAW_HOME=/opt/aibhq aibhq agent
+AIBHQ_HOME=/opt/aibhq aibhq agent
 
 # Use both for a fully customized setup
-PICOCLAW_HOME=/srv/aibhq PICOCLAW_CONFIG=/srv/aibhq/main.json aibhq gateway
+AIBHQ_HOME=/srv/aibhq AIBHQ_CONFIG=/srv/aibhq/main.json aibhq gateway
 ```
 
 ### Workspace Layout
@@ -62,7 +64,7 @@ By default, skills are loaded from:
 For advanced/test setups, you can override the builtin skills root with:
 
 ```bash
-export PICOCLAW_BUILTIN_SKILLS=/path/to/skills
+export AIBHQ_BUILTIN_SKILLS=/path/to/skills
 ```
 
 ### Using Skills From Chat Channels
@@ -328,7 +330,7 @@ If you need the agent to access paths outside the workspace:
 **Method 2: Environment variable**
 
 ```bash
-export PICOCLAW_AGENTS_DEFAULTS_RESTRICT_TO_WORKSPACE=false
+export AIBHQ_AGENTS_DEFAULTS_RESTRICT_TO_WORKSPACE=false
 ```
 
 > ⚠️ **Warning**: Disabling this restriction allows the agent to access any path on your system. Use with caution in controlled environments only.
@@ -421,8 +423,8 @@ The subagent has access to tools (message, web_search, etc.) and can communicate
 
 **Environment variables:**
 
-* `PICOCLAW_HEARTBEAT_ENABLED=false` to disable
-* `PICOCLAW_HEARTBEAT_INTERVAL=60` to change interval
+* `AIBHQ_HEARTBEAT_ENABLED=false` to disable
+* `AIBHQ_HEARTBEAT_INTERVAL=60` to change interval
 
 ### Providers
 

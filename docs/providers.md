@@ -63,11 +63,15 @@ This design also enables **multi-agent support** with flexible provider selectio
 | **BytePlus**        | `byteplus/`       | `https://ark.ap-southeast.bytepluses.com/api/v3`    | OpenAI    | [Get Key](https://www.byteplus.com)                        |
 | **Vivgrid**         | `vivgrid/`        | `https://api.vivgrid.com/v1`                        | OpenAI    | [Get Key](https://vivgrid.com)                                   |
 | **LongCat**         | `longcat/`        | `https://api.longcat.chat/openai`                   | OpenAI    | [Get Key](https://longcat.chat/platform)                         |
-| **ModelScope (魔搭)**| `modelscope/`    | `https://api-inference.modelscope.cn/v1`            | OpenAI    | [Get Token](https://modelscope.cn/my/tokens)                     |
+| **ModelScope**      | `modelscope/`    | `https://api-inference.modelscope.cn/v1`            | OpenAI    | [Get Token](https://modelscope.cn/my/tokens)                     |
 | **Xiaomi MiMo**     | `mimo/`           | `https://api.xiaomimimo.com/v1`                     | OpenAI    | [Get Key](https://platform.xiaomimimo.com)                       |
 | **Azure OpenAI**    | `azure/`          | `https://{resource}.openai.azure.com`               | Azure     | [Get Key](https://portal.azure.com)                              |
+| **AWS Bedrock**     | `bedrock/`        | AWS region                                           | AWS       | IAM credentials                                                  |
 | **Antigravity**     | `antigravity/`    | Google Cloud                                        | Custom    | OAuth only                                                       |
 | **GitHub Copilot**  | `github-copilot/` | `localhost:4321`                                    | gRPC      | -                                                                |
+| **Mistral**         | `mistral/`        | `https://api.mistral.ai/v1`                          | OpenAI    | [Get Key](https://console.mistral.ai)                            |
+| **Minimax**         | `minimax/`        | `https://api.minimax.chat/v1`                        | OpenAI    | [Get Key](https://platform.minimaxi.com)                         |
+| **Avian**           | `avian/`          | `https://api.avian.io/v1`                            | OpenAI    | [Get Key](https://avian.io)                                       |
 
 #### Basic Configuration
 
