@@ -12,9 +12,9 @@ import (
 	"go.mau.fi/whatsmeow/types/events"
 	"google.golang.org/protobuf/proto"
 
-	"github.com/sipeed/picoclaw/pkg/bus"
-	"github.com/sipeed/picoclaw/pkg/channels"
-	"github.com/sipeed/picoclaw/pkg/config"
+	"github.com/raynaythegreat/ai-business-hq/pkg/bus"
+	"github.com/raynaythegreat/ai-business-hq/pkg/channels"
+	"github.com/raynaythegreat/ai-business-hq/pkg/config"
 )
 
 func TestHandleIncoming_DoesNotConsumeGenericCommandsLocally(t *testing.T) {

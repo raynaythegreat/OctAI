@@ -1,15 +1,15 @@
-// PicoClaw - Ultra-lightweight personal AI agent
+// AI Business HQ - Ultra-lightweight personal AI agent
 // Inspired by and based on nanobot: https://github.com/HKUDS/nanobot
 // License: MIT
 //
-// Copyright (c) 2026 PicoClaw contributors
+// Copyright (c) 2026 AI Business HQ contributors
 
 package agent
 
 import (
 	"testing"
 
-	"github.com/sipeed/picoclaw/pkg/config"
+	"github.com/raynaythegreat/ai-business-hq/pkg/config"
 )
 
 func boolPtr(b bool) *bool { return &b }

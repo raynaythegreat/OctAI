@@ -14,13 +14,13 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/gorilla/websocket"
 
-	"github.com/sipeed/picoclaw/pkg/bus"
-	"github.com/sipeed/picoclaw/pkg/channels"
-	"github.com/sipeed/picoclaw/pkg/config"
-	"github.com/sipeed/picoclaw/pkg/identity"
-	"github.com/sipeed/picoclaw/pkg/logger"
-	"github.com/sipeed/picoclaw/pkg/media"
-	"github.com/sipeed/picoclaw/pkg/utils"
+	"github.com/raynaythegreat/ai-business-hq/pkg/bus"
+	"github.com/raynaythegreat/ai-business-hq/pkg/channels"
+	"github.com/raynaythegreat/ai-business-hq/pkg/config"
+	"github.com/raynaythegreat/ai-business-hq/pkg/identity"
+	"github.com/raynaythegreat/ai-business-hq/pkg/logger"
+	"github.com/raynaythegreat/ai-business-hq/pkg/media"
+	"github.com/raynaythegreat/ai-business-hq/pkg/utils"
 )
 
 const (

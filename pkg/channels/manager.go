@@ -1,8 +1,8 @@
-// PicoClaw - Ultra-lightweight personal AI agent
+// AI Business HQ - Ultra-lightweight personal AI agent
 // Inspired by and based on nanobot: https://github.com/HKUDS/nanobot
 // License: MIT
 //
-// Copyright (c) 2026 PicoClaw contributors
+// Copyright (c) 2026 AI Business HQ contributors
 
 package channels
 
@@ -17,12 +17,12 @@ import (
 
 	"golang.org/x/time/rate"
 
-	"github.com/sipeed/picoclaw/pkg/bus"
-	"github.com/sipeed/picoclaw/pkg/config"
-	"github.com/sipeed/picoclaw/pkg/constants"
-	"github.com/sipeed/picoclaw/pkg/health"
-	"github.com/sipeed/picoclaw/pkg/logger"
-	"github.com/sipeed/picoclaw/pkg/media"
+	"github.com/raynaythegreat/ai-business-hq/pkg/bus"
+	"github.com/raynaythegreat/ai-business-hq/pkg/config"
+	"github.com/raynaythegreat/ai-business-hq/pkg/constants"
+	"github.com/raynaythegreat/ai-business-hq/pkg/health"
+	"github.com/raynaythegreat/ai-business-hq/pkg/logger"
+	"github.com/raynaythegreat/ai-business-hq/pkg/media"
 )
 
 const (

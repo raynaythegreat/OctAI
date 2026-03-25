@@ -8,9 +8,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/sipeed/picoclaw/pkg/logger"
-	"github.com/sipeed/picoclaw/pkg/providers"
-	"github.com/sipeed/picoclaw/pkg/tools"
+	"github.com/raynaythegreat/ai-business-hq/pkg/logger"
+	"github.com/raynaythegreat/ai-business-hq/pkg/providers"
+	"github.com/raynaythegreat/ai-business-hq/pkg/tools"
 )
 
 const (

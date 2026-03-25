@@ -10,9 +10,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/sipeed/picoclaw/pkg/bus"
-	"github.com/sipeed/picoclaw/pkg/config"
-	"github.com/sipeed/picoclaw/pkg/media"
+	"github.com/raynaythegreat/ai-business-hq/pkg/bus"
+	"github.com/raynaythegreat/ai-business-hq/pkg/config"
+	"github.com/raynaythegreat/ai-business-hq/pkg/media"
 )
 
 func TestDispatchIncoming_UsesActualChatIDAndStoresReqIDRoute(t *testing.T) {

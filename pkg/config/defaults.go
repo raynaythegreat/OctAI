@@ -1,7 +1,7 @@
-// PicoClaw - Ultra-lightweight personal AI agent
+// AI Business HQ - Ultra-lightweight personal AI agent
 // License: MIT
 //
-// Copyright (c) 2026 PicoClaw contributors
+// Copyright (c) 2026 AI Business HQ contributors
 
 package config
 
@@ -9,19 +9,19 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/sipeed/picoclaw/pkg"
+	"github.com/raynaythegreat/ai-business-hq/pkg"
 )
 
-// DefaultConfig returns the default configuration for PicoClaw.
+// DefaultConfig returns the default configuration for AI Business HQ.
 func DefaultConfig() *Config {
 	// Determine the base path for the workspace.
-	// Priority: $PICOCLAW_HOME > ~/.picoclaw
+	// Priority: $PICOCLAW_HOME > ~/.aibhq
 	var homePath string
-	if picoclawHome := os.Getenv(EnvHome); picoclawHome != "" {
-		homePath = picoclawHome
+	if aibhqHome := os.Getenv(EnvHome); aibhqHome != "" {
+		homePath = aibhqHome
 	} else {
 		userHome, _ := os.UserHomeDir()
-		homePath = filepath.Join(userHome, pkg.DefaultPicoClawHome)
+		homePath = filepath.Join(userHome, pkg.DefaultAI Business HQHome)
 	}
 	workspacePath := filepath.Join(homePath, pkg.WorkspaceName)
 

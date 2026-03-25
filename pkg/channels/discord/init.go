@@ -1,9 +1,9 @@
 package discord
 
 import (
-	"github.com/sipeed/picoclaw/pkg/bus"
-	"github.com/sipeed/picoclaw/pkg/channels"
-	"github.com/sipeed/picoclaw/pkg/config"
+	"github.com/raynaythegreat/ai-business-hq/pkg/bus"
+	"github.com/raynaythegreat/ai-business-hq/pkg/channels"
+	"github.com/raynaythegreat/ai-business-hq/pkg/config"
 )
 
 func init() {

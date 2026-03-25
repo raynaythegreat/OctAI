@@ -11,10 +11,10 @@ import (
 	"strings"
 	"time"
 
-	basechannels "github.com/sipeed/picoclaw/pkg/channels"
-	"github.com/sipeed/picoclaw/pkg/config"
-	"github.com/sipeed/picoclaw/pkg/fileutil"
-	"github.com/sipeed/picoclaw/pkg/logger"
+	basechannels "github.com/raynaythegreat/ai-business-hq/pkg/channels"
+	"github.com/raynaythegreat/ai-business-hq/pkg/config"
+	"github.com/raynaythegreat/ai-business-hq/pkg/fileutil"
+	"github.com/raynaythegreat/ai-business-hq/pkg/logger"
 )
 
 const (
@@ -36,12 +36,12 @@ type syncCursorFile struct {
 	GetUpdatesBuf string `json:"get_updates_buf"`
 }
 
-func picoclawHomeDir() string {
+func aibhqHomeDir() string {
 	if home := os.Getenv(config.EnvHome); home != "" {
 		return home
 	}
 	userHome, _ := os.UserHomeDir()
-	return filepath.Join(userHome, ".picoclaw")
+	return filepath.Join(userHome, ".aibhq")
 }
 
 func buildWeixinSyncBufPath(cfg config.WeixinConfig) string {
@@ -51,7 +51,7 @@ func buildWeixinSyncBufPath(cfg config.WeixinConfig) string {
 		sum := sha256.Sum256([]byte(strings.TrimSpace(cfg.BaseURL) + "|" + token))
 		key = hex.EncodeToString(sum[:8])
 	}
-	return filepath.Join(picoclawHomeDir(), "channels", "weixin", "sync", key+".json")
+	return filepath.Join(aibhqHomeDir(), "channels", "weixin", "sync", key+".json")
 }
 
 func loadGetUpdatesBuf(path string) (string, error) {

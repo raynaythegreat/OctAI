@@ -3,7 +3,7 @@ package voice
 import (
 	"testing"
 
-	"github.com/sipeed/picoclaw/pkg/config"
+	"github.com/raynaythegreat/ai-business-hq/pkg/config"
 )
 
 func TestDetectTranscriber(t *testing.T) {

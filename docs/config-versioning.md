@@ -2,7 +2,7 @@
 
 ## Overview
 
-PicoClaw uses a schema versioning system for `config.json` to ensure smooth upgrades as the configuration format evolves.
+AI Business HQ uses a schema versioning system for `config.json` to ensure smooth upgrades as the configuration format evolves.
 
 ## Version History
 

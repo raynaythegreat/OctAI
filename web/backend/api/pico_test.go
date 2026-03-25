@@ -11,7 +11,7 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/sipeed/picoclaw/pkg/config"
+	"github.com/raynaythegreat/ai-business-hq/pkg/config"
 )
 
 func TestEnsurePicoChannel_FreshConfig(t *testing.T) {

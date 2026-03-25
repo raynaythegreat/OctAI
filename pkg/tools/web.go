@@ -16,14 +16,14 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/sipeed/picoclaw/pkg/config"
-	"github.com/sipeed/picoclaw/pkg/logger"
-	"github.com/sipeed/picoclaw/pkg/utils"
+	"github.com/raynaythegreat/ai-business-hq/pkg/config"
+	"github.com/raynaythegreat/ai-business-hq/pkg/logger"
+	"github.com/raynaythegreat/ai-business-hq/pkg/utils"
 )
 
 const (
 	userAgent       = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-	userAgentHonest = "picoclaw/%s (+https://github.com/sipeed/picoclaw; AI assistant bot)"
+	userAgentHonest = "aibhq/%s (+https://github.com/raynaythegreat/ai-business-hq; AI assistant bot)"
 
 	// HTTP client timeouts for web tool providers.
 	searchTimeout     = 10 * time.Second // Brave, Tavily, DuckDuckGo
@@ -517,7 +517,7 @@ func (p *SearXNGSearchProvider) Search(ctx context.Context, query string, count 
 		result.Results = result.Results[:count]
 	}
 
-	// Format results in standard PicoClaw format
+	// Format results in standard AI Business HQ format
 	var b strings.Builder
 	b.WriteString(fmt.Sprintf("Results for: %s (via SearXNG)\n", query))
 	for i, r := range result.Results {
@@ -1044,7 +1044,7 @@ func (t *WebFetchTool) Execute(ctx context.Context, args map[string]any) *ToolRe
 	}
 
 	// Cloudflare (and similar WAFs) signal bot challenges with 403 + cf-mitigated: challenge.
-	// Retry once with an honest User-Agent that identifies picoclaw, which some
+	// Retry once with an honest User-Agent that identifies aibhq, which some
 	// operators explicitly allow-list for AI assistants.
 	if resp.StatusCode == http.StatusForbidden && resp.Header.Get("Cf-Mitigated") == "challenge" {
 		logger.DebugCF("tool", "Cloudflare challenge detected, retrying with honest User-Agent",

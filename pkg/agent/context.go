@@ -12,12 +12,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/sipeed/picoclaw/pkg"
-	"github.com/sipeed/picoclaw/pkg/config"
-	"github.com/sipeed/picoclaw/pkg/logger"
-	"github.com/sipeed/picoclaw/pkg/providers"
-	"github.com/sipeed/picoclaw/pkg/skills"
-	"github.com/sipeed/picoclaw/pkg/utils"
+	"github.com/raynaythegreat/ai-business-hq/pkg"
+	"github.com/raynaythegreat/ai-business-hq/pkg/config"
+	"github.com/raynaythegreat/ai-business-hq/pkg/logger"
+	"github.com/raynaythegreat/ai-business-hq/pkg/providers"
+	"github.com/raynaythegreat/ai-business-hq/pkg/skills"
+	"github.com/raynaythegreat/ai-business-hq/pkg/utils"
 )
 
 type ContextBuilder struct {
@@ -60,7 +60,7 @@ func getGlobalConfigDir() string {
 	if err != nil {
 		return ""
 	}
-	return filepath.Join(home, pkg.DefaultPicoClawHome)
+	return filepath.Join(home, pkg.DefaultAI Business HQHome)
 }
 
 func NewContextBuilder(workspace string) *ContextBuilder {
@@ -86,9 +86,9 @@ func (cb *ContextBuilder) getIdentity() string {
 	version := config.FormatVersion()
 
 	return fmt.Sprintf(
-		`# picoclaw 🦞 (%s)
+		`# aibhq 🦞 (%s)
 
-You are picoclaw, a helpful AI assistant.
+You are aibhq, a helpful AI assistant.
 
 ## Workspace
 Your workspace is at: %s

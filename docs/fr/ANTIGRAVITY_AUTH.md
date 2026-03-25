@@ -4,7 +4,7 @@
 
 ## Aperçu
 
-**Antigravity** (Google Cloud Code Assist) est un fournisseur de modèles IA soutenu par Google qui offre l'accès à des modèles tels que Claude Opus 4.6 et Gemini via l'infrastructure cloud de Google. Ce document fournit un guide complet sur le fonctionnement de l'authentification, la récupération des modèles et l'implémentation d'un nouveau fournisseur dans PicoClaw.
+**Antigravity** (Google Cloud Code Assist) est un fournisseur de modèles IA soutenu par Google qui offre l'accès à des modèles tels que Claude Opus 4.6 et Gemini via l'infrastructure cloud de Google. Ce document fournit un guide complet sur le fonctionnement de l'authentification, la récupération des modèles et l'implémentation d'un nouveau fournisseur dans AI Business HQ.
 
 ---
 
@@ -19,7 +19,7 @@
 7. [Exigences d'intégration](#exigences-dintégration)
 8. [Points de terminaison API](#points-de-terminaison-api)
 9. [Configuration](#configuration)
-10. [Créer un nouveau fournisseur dans PicoClaw](#créer-un-nouveau-fournisseur-dans-picoclaw)
+10. [Créer un nouveau fournisseur dans AI Business HQ](#créer-un-nouveau-fournisseur-dans-aibhq)
 
 ---
 
@@ -376,7 +376,7 @@ const antigravityPlugin = {
   description: "OAuth flow for Google Antigravity (Cloud Code Assist)",
   configSchema: emptyPluginConfigSchema(),
   
-  register(api: PicoClawPluginApi) {
+  register(api: AI Business HQPluginApi) {
     api.registerProvider({
       id: "google-antigravity",
       label: "Google Antigravity",
@@ -403,7 +403,7 @@ const antigravityPlugin = {
 
 ```typescript
 type ProviderAuthContext = {
-  config: PicoClawConfig;
+  config: AI Business HQConfig;
   agentDir?: string;
   workspaceDir?: string;
   prompter: WizardPrompter;      // Invites/notifications UI
@@ -424,7 +424,7 @@ type ProviderAuthResult = {
     profileId: string;
     credential: AuthProfileCredential;
   }>;
-  configPatch?: Partial<PicoClawConfig>;
+  configPatch?: Partial<AI Business HQConfig>;
   defaultModel?: string;
   notes?: string[];
 };
@@ -437,7 +437,7 @@ type ProviderAuthResult = {
 ### 1. Environnement/dépendances requis
 
 - Go ≥ 1.25
-- Base de code PicoClaw (`pkg/providers/` et `pkg/auth/`)
+- Base de code AI Business HQ (`pkg/providers/` et `pkg/auth/`)
 - Packages de la bibliothèque standard `crypto` et `net/http`
 
 ### 2. En-têtes requis pour les appels API
@@ -590,7 +590,7 @@ Chaque message SSE (`data: {...}`) est encapsulé dans un champ `response` :
 
 ### Stockage du profil d'authentification
 
-Les profils d'authentification sont stockés dans `~/.picoclaw/auth.json` :
+Les profils d'authentification sont stockés dans `~/.aibhq/auth.json` :
 
 ```json
 {
@@ -610,9 +610,9 @@ Les profils d'authentification sont stockés dans `~/.picoclaw/auth.json` :
 
 ---
 
-## Créer un nouveau fournisseur dans PicoClaw
+## Créer un nouveau fournisseur dans AI Business HQ
 
-Les fournisseurs PicoClaw sont implémentés en tant que packages Go sous `pkg/providers/`. Pour ajouter un nouveau fournisseur :
+Les fournisseurs AI Business HQ sont implémentés en tant que packages Go sous `pkg/providers/`. Pour ajouter un nouveau fournisseur :
 
 ### Implémentation étape par étape
 
@@ -672,7 +672,7 @@ Ajoutez une entrée par défaut dans `pkg/config/defaults.go` :
 
 #### 5. Ajouter le support d'authentification (optionnel)
 
-Si votre fournisseur nécessite OAuth ou une authentification spéciale, ajoutez un cas dans `cmd/picoclaw/internal/auth/helpers.go` :
+Si votre fournisseur nécessite OAuth ou une authentification spéciale, ajoutez un cas dans `cmd/aibhq/internal/auth/helpers.go` :
 
 ```go
 case "your-provider":
@@ -702,16 +702,16 @@ case "your-provider":
 
 ```bash
 # S'authentifier avec un fournisseur
-picoclaw auth login --provider your-provider
+aibhq auth login --provider your-provider
 
 # Lister les modèles (pour Antigravity)
-picoclaw auth models
+aibhq auth models
 
 # Démarrer la passerelle
-picoclaw gateway
+aibhq gateway
 
 # Exécuter un agent avec un modèle spécifique
-picoclaw agent -m "Hello" --model your-model
+aibhq agent -m "Hello" --model your-model
 ```
 
 ### Variables d'environnement pour les tests
@@ -731,10 +731,10 @@ export PICOCLAW_MODEL_LIST='[{"model_name":"your-model","model":"your-provider/m
 - **Fichiers source :**
   - `pkg/providers/antigravity_provider.go` - Implémentation du fournisseur Antigravity
   - `pkg/auth/oauth.go` - Implémentation du flux OAuth
-  - `pkg/auth/store.go` - Stockage des identifiants d'authentification (`~/.picoclaw/auth.json`)
+  - `pkg/auth/store.go` - Stockage des identifiants d'authentification (`~/.aibhq/auth.json`)
   - `pkg/providers/factory.go` - Factory des fournisseurs et routage de protocole
   - `pkg/providers/types.go` - Définitions de l'interface fournisseur
-  - `cmd/picoclaw/internal/auth/helpers.go` - Commandes CLI d'authentification
+  - `cmd/aibhq/internal/auth/helpers.go` - Commandes CLI d'authentification
 
 - **Documentation :**
   - `docs/ANTIGRAVITY_USAGE.md` - Guide d'utilisation d'Antigravity
@@ -790,7 +790,7 @@ Certains modèles peuvent apparaître dans la liste des modèles disponibles mai
 ## Dépannage
 
 ### "Token expired" (jeton expiré)
-- Rafraîchir les jetons OAuth : `picoclaw auth login --provider antigravity`
+- Rafraîchir les jetons OAuth : `aibhq auth login --provider antigravity`
 
 ### "Gemini for Google Cloud is not enabled" (Gemini for Google Cloud n'est pas activé)
 - Activer l'API dans votre Google Cloud Console
@@ -801,5 +801,5 @@ Certains modèles peuvent apparaître dans la liste des modèles disponibles mai
 
 ### Les modèles n'apparaissent pas dans la liste
 - Vérifier que l'authentification OAuth s'est terminée avec succès
-- Vérifier le stockage du profil d'authentification : `~/.picoclaw/auth.json`
-- Relancer `picoclaw auth login --provider antigravity`
+- Vérifier le stockage du profil d'authentification : `~/.aibhq/auth.json`
+- Relancer `aibhq auth login --provider antigravity`

@@ -4,39 +4,39 @@
 
 ## ⚙️ Configurazione
 
-File di configurazione: `~/.picoclaw/config.json`
+File di configurazione: `~/.aibhq/config.json`
 
 ### Variabili d'Ambiente
 
-Puoi sovrascrivere i percorsi predefiniti usando variabili d'ambiente. Questo è utile per installazioni portatili, distribuzioni containerizzate, o per eseguire picoclaw come servizio di sistema. Queste variabili sono indipendenti e controllano percorsi diversi.
+Puoi sovrascrivere i percorsi predefiniti usando variabili d'ambiente. Questo è utile per installazioni portatili, distribuzioni containerizzate, o per eseguire aibhq come servizio di sistema. Queste variabili sono indipendenti e controllano percorsi diversi.
 
 | Variabile         | Descrizione                                                                                                                             | Percorso Predefinito      |
 |-------------------|-----------------------------------------------------------------------------------------------------------------------------------------|---------------------------|
-| `PICOCLAW_CONFIG` | Sovrascrive il percorso al file di configurazione. Indica direttamente a picoclaw quale `config.json` caricare, ignorando tutte le altre posizioni. | `~/.picoclaw/config.json` |
-| `PICOCLAW_HOME`   | Sovrascrive la directory radice per i dati di picoclaw. Modifica la posizione predefinita del `workspace` e delle altre directory dati.  | `~/.picoclaw`             |
+| `PICOCLAW_CONFIG` | Sovrascrive il percorso al file di configurazione. Indica direttamente a aibhq quale `config.json` caricare, ignorando tutte le altre posizioni. | `~/.aibhq/config.json` |
+| `PICOCLAW_HOME`   | Sovrascrive la directory radice per i dati di aibhq. Modifica la posizione predefinita del `workspace` e delle altre directory dati.  | `~/.aibhq`             |
 
 **Esempi:**
 
 ```bash
-# Esegui picoclaw usando un file di configurazione specifico
+# Esegui aibhq usando un file di configurazione specifico
 # Il percorso del workspace verrà letto da quel file di configurazione
-PICOCLAW_CONFIG=/etc/picoclaw/production.json picoclaw gateway
+PICOCLAW_CONFIG=/etc/aibhq/production.json aibhq gateway
 
-# Esegui picoclaw con tutti i dati salvati in /opt/picoclaw
-# La configurazione verrà caricata dal percorso predefinito ~/.picoclaw/config.json
-# Il workspace verrà creato in /opt/picoclaw/workspace
-PICOCLAW_HOME=/opt/picoclaw picoclaw agent
+# Esegui aibhq con tutti i dati salvati in /opt/aibhq
+# La configurazione verrà caricata dal percorso predefinito ~/.aibhq/config.json
+# Il workspace verrà creato in /opt/aibhq/workspace
+PICOCLAW_HOME=/opt/aibhq aibhq agent
 
 # Usa entrambi per un setup completamente personalizzato
-PICOCLAW_HOME=/srv/picoclaw PICOCLAW_CONFIG=/srv/picoclaw/main.json picoclaw gateway
+PICOCLAW_HOME=/srv/aibhq PICOCLAW_CONFIG=/srv/aibhq/main.json aibhq gateway
 ```
 
 ### Struttura del Workspace
 
-PicoClaw salva i dati nel workspace configurato (predefinito: `~/.picoclaw/workspace`):
+AI Business HQ salva i dati nel workspace configurato (predefinito: `~/.aibhq/workspace`):
 
 ```
-~/.picoclaw/workspace/
+~/.aibhq/workspace/
 ├── sessions/          # Sessioni di conversazione e cronologia
 ├── memory/           # Memoria a lungo termine (MEMORY.md)
 ├── state/            # Stato persistente (ultimo canale, ecc.)
@@ -55,8 +55,8 @@ PicoClaw salva i dati nel workspace configurato (predefinito: `~/.picoclaw/works
 
 Per impostazione predefinita, le skill vengono caricate da:
 
-1. `~/.picoclaw/workspace/skills` (workspace)
-2. `~/.picoclaw/skills` (globale)
+1. `~/.aibhq/workspace/skills` (workspace)
+2. `~/.aibhq/skills` (globale)
 3. `<current-working-directory>/skills` (builtin)
 
 Per configurazioni avanzate/di test, puoi sovrascrivere la directory radice delle skill builtin con:
@@ -74,7 +74,7 @@ export PICOCLAW_BUILTIN_SKILLS=/path/to/skills
 
 ### 🔒 Sandbox di Sicurezza
 
-PicoClaw esegue in un ambiente sandboxed per impostazione predefinita. L'agent può accedere solo ai file ed eseguire comandi all'interno del workspace configurato.
+AI Business HQ esegue in un ambiente sandboxed per impostazione predefinita. L'agent può accedere solo ai file ed eseguire comandi all'interno del workspace configurato.
 
 #### Configurazione Predefinita
 
@@ -82,7 +82,7 @@ PicoClaw esegue in un ambiente sandboxed per impostazione predefinita. L'agent p
 {
   "agents": {
     "defaults": {
-      "workspace": "~/.picoclaw/workspace",
+      "workspace": "~/.aibhq/workspace",
       "restrict_to_workspace": true
     }
   }
@@ -91,7 +91,7 @@ PicoClaw esegue in un ambiente sandboxed per impostazione predefinita. L'agent p
 
 | Opzione                 | Predefinito             | Descrizione                                          |
 | ----------------------- | ----------------------- | ---------------------------------------------------- |
-| `workspace`             | `~/.picoclaw/workspace` | Directory di lavoro dell'agent                       |
+| `workspace`             | `~/.aibhq/workspace` | Directory di lavoro dell'agent                       |
 | `restrict_to_workspace` | `true`                  | Limita l'accesso a file/comandi al workspace         |
 
 #### Strumenti Protetti
@@ -138,7 +138,7 @@ Anche con `restrict_to_workspace: false`, lo strumento `exec` blocca questi coma
 
 #### Limitazione Nota: Processi Figlio degli Strumenti di Build
 
-Il controllo di sicurezza exec ispeziona solo la riga di comando avviata direttamente da PicoClaw. Non ispeziona ricorsivamente i processi figlio generati da strumenti di sviluppo consentiti come `make`, `go run`, `cargo`, `npm run` o script di build personalizzati.
+Il controllo di sicurezza exec ispeziona solo la riga di comando avviata direttamente da AI Business HQ. Non ispeziona ricorsivamente i processi figlio generati da strumenti di sviluppo consentiti come `make`, `go run`, `cargo`, `npm run` o script di build personalizzati.
 
 Ciò significa che un comando di primo livello può comunque compilare o avviare altri binari dopo aver superato il controllo iniziale. In pratica, tratta gli script di build, i Makefile, gli script di pacchetti e i binari generati come codice eseguibile che richiede lo stesso livello di revisione di un comando shell diretto.
 
@@ -146,7 +146,7 @@ Per ambienti ad alto rischio:
 
 * Esamina gli script di build prima dell'esecuzione.
 * Preferisci l'approvazione/revisione manuale per i workflow di compilazione ed esecuzione.
-* Esegui PicoClaw in un container o VM se hai bisogno di un isolamento più forte di quello fornito dal controllo integrato.
+* Esegui AI Business HQ in un container o VM se hai bisogno di un isolamento più forte di quello fornito dal controllo integrato.
 
 #### Esempi di Errore
 
@@ -198,7 +198,7 @@ Tutti i percorsi condividono la stessa restrizione del workspace — non è poss
 
 ### Heartbeat (Task Periodici)
 
-PicoClaw può eseguire task periodici automaticamente. Crea un file `HEARTBEAT.md` nel tuo workspace:
+AI Business HQ può eseguire task periodici automaticamente. Crea un file `HEARTBEAT.md` nel tuo workspace:
 
 ```markdown
 # Periodic Tasks

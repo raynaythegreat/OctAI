@@ -82,7 +82,7 @@ Example:
           "approve_tool"
         ],
         "env": {
-          "PICOCLAW_HOOK_LOG_FILE": "/tmp/picoclaw-hook-review-gate.log"
+          "PICOCLAW_HOOK_LOG_FILE": "/tmp/aibhq-hook-review-gate.log"
         }
       }
     }
@@ -93,17 +93,17 @@ Example:
 Watch it with:
 
 ```bash
-tail -f /tmp/picoclaw-hook-review-gate.log
+tail -f /tmp/aibhq-hook-review-gate.log
 ```
 
-If you are developing PicoClaw itself rather than only validating the protocol, continue with the Go in-process example as well.
+If you are developing AI Business HQ itself rather than only validating the protocol, continue with the Go in-process example as well.
 
 ## What The Two Examples Are For
 
 - Go in-process example
   Best for validating the host-side hook chain and understanding `MountHook()` plus the synchronous stages
 - Python process example
-  Best for understanding the `JSON-RPC over stdio` protocol and verifying the message flow between PicoClaw and an external process
+  Best for understanding the `JSON-RPC over stdio` protocol and verifying the message flow between AI Business HQ and an external process
 
 Both examples are intentionally safe: they only log, never rewrite, and never deny.
 
@@ -132,8 +132,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/sipeed/picoclaw/pkg/agent"
-	"github.com/sipeed/picoclaw/pkg/logger"
+	"github.com/raynaythegreat/ai-business-hq/pkg/agent"
+	"github.com/raynaythegreat/ai-business-hq/pkg/logger"
 )
 
 type ExampleLoggerHookOptions struct {
@@ -278,7 +278,7 @@ If code mounting is enough, call this after `AgentLoop` is initialized:
 
 ```go
 hook := myhooks.NewExampleLoggerHook(myhooks.ExampleLoggerHookOptions{
-    LogFile:   "/tmp/picoclaw-hook-example-logger.log",
+    LogFile:   "/tmp/aibhq-hook-example-logger.log",
     LogEvents: true,
 })
 
@@ -299,8 +299,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/sipeed/picoclaw/pkg/agent"
-	"github.com/sipeed/picoclaw/pkg/config"
+	"github.com/raynaythegreat/ai-business-hq/pkg/agent"
+	"github.com/raynaythegreat/ai-business-hq/pkg/config"
 )
 
 func init() {
@@ -334,7 +334,7 @@ Only after you register that builtin will the following config work:
         "enabled": true,
         "priority": 10,
         "config": {
-          "log_file": "/tmp/picoclaw-hook-example-logger.log",
+          "log_file": "/tmp/aibhq-hook-example-logger.log",
           "log_events": true
         }
       }
@@ -552,7 +552,7 @@ if __name__ == "__main__":
           "approve_tool"
         ],
         "env": {
-          "PICOCLAW_HOOK_LOG_FILE": "/tmp/picoclaw-hook-review-gate.log"
+          "PICOCLAW_HOOK_LOG_FILE": "/tmp/aibhq-hook-review-gate.log"
         }
       }
     }
@@ -616,12 +616,12 @@ Additional notes:
 
 Current process hooks use `JSON-RPC over stdio`:
 
-- PicoClaw starts the external process
+- AI Business HQ starts the external process
 - Requests and responses are exchanged as one JSON message per line
 - `hook.event` is a notification and does not need a response
 - `hook.before_llm`, `hook.after_llm`, `hook.before_tool`, `hook.after_tool`, and `hook.approve_tool` are request/response calls
 
-The host does not currently accept new RPCs initiated by the process hook. In practice, that means an external hook can only respond to PicoClaw calls; it cannot call back into the host to send channel messages.
+The host does not currently accept new RPCs initiated by the process hook. In practice, that means an external hook can only respond to AI Business HQ calls; it cannot call back into the host to send channel messages.
 
 ## Configuration Fields
 

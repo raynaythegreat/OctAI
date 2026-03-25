@@ -1,7 +1,7 @@
-// PicoClaw - Ultra-lightweight personal AI agent
+// AI Business HQ - Ultra-lightweight personal AI agent
 // License: MIT
 //
-// Copyright (c) 2026 PicoClaw contributors
+// Copyright (c) 2026 AI Business HQ contributors
 
 package anthropicmessages
 
@@ -16,7 +16,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/sipeed/picoclaw/pkg/providers/protocoltypes"
+	"github.com/raynaythegreat/ai-business-hq/pkg/providers/protocoltypes"
 )
 
 type (

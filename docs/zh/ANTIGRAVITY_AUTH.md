@@ -4,7 +4,7 @@
 
 ## 概述
 
-**Antigravity**（Google Cloud Code Assist）是由 Google 支持的 AI 模型提供商，通过 Google 的云基础设施提供对 Claude Opus 4.6 和 Gemini 等模型的访问。本文档提供了关于认证工作原理、如何获取模型以及如何在 PicoClaw 中实现新提供商的完整指南。
+**Antigravity**（Google Cloud Code Assist）是由 Google 支持的 AI 模型提供商，通过 Google 的云基础设施提供对 Claude Opus 4.6 和 Gemini 等模型的访问。本文档提供了关于认证工作原理、如何获取模型以及如何在 AI Business HQ 中实现新提供商的完整指南。
 
 ---
 
@@ -19,7 +19,7 @@
 7. [集成要求](#集成要求)
 8. [API 端点](#api-端点)
 9. [配置](#配置)
-10. [在 PicoClaw 中创建新提供商](#在-picoclaw-中创建新提供商)
+10. [在 AI Business HQ 中创建新提供商](#在-aibhq-中创建新提供商)
 
 ---
 
@@ -376,7 +376,7 @@ const antigravityPlugin = {
   description: "OAuth flow for Google Antigravity (Cloud Code Assist)",
   configSchema: emptyPluginConfigSchema(),
   
-  register(api: PicoClawPluginApi) {
+  register(api: AI Business HQPluginApi) {
     api.registerProvider({
       id: "google-antigravity",
       label: "Google Antigravity",
@@ -403,7 +403,7 @@ const antigravityPlugin = {
 
 ```typescript
 type ProviderAuthContext = {
-  config: PicoClawConfig;
+  config: AI Business HQConfig;
   agentDir?: string;
   workspaceDir?: string;
   prompter: WizardPrompter;      // UI 提示/通知
@@ -424,7 +424,7 @@ type ProviderAuthResult = {
     profileId: string;
     credential: AuthProfileCredential;
   }>;
-  configPatch?: Partial<PicoClawConfig>;
+  configPatch?: Partial<AI Business HQConfig>;
   defaultModel?: string;
   notes?: string[];
 };
@@ -437,7 +437,7 @@ type ProviderAuthResult = {
 ### 1. 所需环境/依赖
 
 - Go ≥ 1.25
-- PicoClaw 代码库（`pkg/providers/` 和 `pkg/auth/`）
+- AI Business HQ 代码库（`pkg/providers/` 和 `pkg/auth/`）
 - `crypto` 和 `net/http` 标准库包
 
 ### 2. API 调用所需的请求头
@@ -590,7 +590,7 @@ export function sanitizeAntigravityThinkingBlocks(
 
 ### 认证配置文件存储
 
-认证配置文件存储在 `~/.picoclaw/auth.json` 中：
+认证配置文件存储在 `~/.aibhq/auth.json` 中：
 
 ```json
 {
@@ -610,9 +610,9 @@ export function sanitizeAntigravityThinkingBlocks(
 
 ---
 
-## 在 PicoClaw 中创建新提供商
+## 在 AI Business HQ 中创建新提供商
 
-PicoClaw 提供商以 Go 包的形式实现，位于 `pkg/providers/` 下。要添加新提供商：
+AI Business HQ 提供商以 Go 包的形式实现，位于 `pkg/providers/` 下。要添加新提供商：
 
 ### 分步实现
 
@@ -672,7 +672,7 @@ case "your-provider":
 
 #### 5. 添加认证支持（可选）
 
-如果你的提供商需要 OAuth 或特殊认证，在 `cmd/picoclaw/internal/auth/helpers.go` 中添加分支：
+如果你的提供商需要 OAuth 或特殊认证，在 `cmd/aibhq/internal/auth/helpers.go` 中添加分支：
 
 ```go
 case "your-provider":
@@ -702,16 +702,16 @@ case "your-provider":
 
 ```bash
 # 使用提供商进行认证
-picoclaw auth login --provider your-provider
+aibhq auth login --provider your-provider
 
 # 列出模型（用于 Antigravity）
-picoclaw auth models
+aibhq auth models
 
 # 启动网关
-picoclaw gateway
+aibhq gateway
 
 # 使用指定模型运行代理
-picoclaw agent -m "Hello" --model your-model
+aibhq agent -m "Hello" --model your-model
 ```
 
 ### 测试用环境变量
@@ -731,10 +731,10 @@ export PICOCLAW_MODEL_LIST='[{"model_name":"your-model","model":"your-provider/m
 - **源文件：**
   - `pkg/providers/antigravity_provider.go` - Antigravity 提供商实现
   - `pkg/auth/oauth.go` - OAuth 流程实现
-  - `pkg/auth/store.go` - 认证凭据存储（`~/.picoclaw/auth.json`）
+  - `pkg/auth/store.go` - 认证凭据存储（`~/.aibhq/auth.json`）
   - `pkg/providers/factory.go` - 提供商工厂和协议路由
   - `pkg/providers/types.go` - 提供商接口定义
-  - `cmd/picoclaw/internal/auth/helpers.go` - 认证 CLI 命令
+  - `cmd/aibhq/internal/auth/helpers.go` - 认证 CLI 命令
 
 - **文档：**
   - `docs/ANTIGRAVITY_USAGE.md` - Antigravity 使用指南
@@ -790,7 +790,7 @@ export PICOCLAW_MODEL_LIST='[{"model_name":"your-model","model":"your-provider/m
 ## 故障排除
 
 ### "Token expired"（令牌已过期）
-- 刷新 OAuth 令牌：`picoclaw auth login --provider antigravity`
+- 刷新 OAuth 令牌：`aibhq auth login --provider antigravity`
 
 ### "Gemini for Google Cloud is not enabled"（Gemini for Google Cloud 未启用）
 - 在 Google Cloud Console 中启用该 API
@@ -801,5 +801,5 @@ export PICOCLAW_MODEL_LIST='[{"model_name":"your-model","model":"your-provider/m
 
 ### 模型未出现在列表中
 - 验证 OAuth 认证是否成功完成
-- 检查认证配置文件存储：`~/.picoclaw/auth.json`
-- 重新运行 `picoclaw auth login --provider antigravity`
+- 检查认证配置文件存储：`~/.aibhq/auth.json`
+- 重新运行 `aibhq auth login --provider antigravity`

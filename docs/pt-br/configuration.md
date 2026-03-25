@@ -4,39 +4,39 @@
 
 ## ⚙️ Configuração
 
-Arquivo de configuração: `~/.picoclaw/config.json`
+Arquivo de configuração: `~/.aibhq/config.json`
 
 ### Variáveis de Ambiente
 
-Você pode substituir os caminhos padrão usando variáveis de ambiente. Isso é útil para instalações portáteis, implantações em contêineres ou execução do picoclaw como serviço do sistema. Essas variáveis são independentes e controlam caminhos diferentes.
+Você pode substituir os caminhos padrão usando variáveis de ambiente. Isso é útil para instalações portáteis, implantações em contêineres ou execução do aibhq como serviço do sistema. Essas variáveis são independentes e controlam caminhos diferentes.
 
 | Variável          | Descrição                                                                                                                             | Caminho Padrão              |
 |-------------------|-----------------------------------------------------------------------------------------------------------------------------------------|---------------------------|
-| `PICOCLAW_CONFIG` | Substitui o caminho para o arquivo de configuração. Isso indica diretamente ao picoclaw qual `config.json` carregar, ignorando todos os outros locais. | `~/.picoclaw/config.json` |
-| `PICOCLAW_HOME`   | Substitui o diretório raiz para dados do picoclaw. Isso altera o local padrão do `workspace` e outros diretórios de dados.          | `~/.picoclaw`             |
+| `PICOCLAW_CONFIG` | Substitui o caminho para o arquivo de configuração. Isso indica diretamente ao aibhq qual `config.json` carregar, ignorando todos os outros locais. | `~/.aibhq/config.json` |
+| `PICOCLAW_HOME`   | Substitui o diretório raiz para dados do aibhq. Isso altera o local padrão do `workspace` e outros diretórios de dados.          | `~/.aibhq`             |
 
 **Exemplos:**
 
 ```bash
-# Executar picoclaw usando um arquivo de configuração específico
+# Executar aibhq usando um arquivo de configuração específico
 # O caminho do workspace será lido de dentro desse arquivo de configuração
-PICOCLAW_CONFIG=/etc/picoclaw/production.json picoclaw gateway
+PICOCLAW_CONFIG=/etc/aibhq/production.json aibhq gateway
 
-# Executar picoclaw com todos os dados armazenados em /opt/picoclaw
-# A configuração será carregada do padrão ~/.picoclaw/config.json
-# O workspace será criado em /opt/picoclaw/workspace
-PICOCLAW_HOME=/opt/picoclaw picoclaw agent
+# Executar aibhq com todos os dados armazenados em /opt/aibhq
+# A configuração será carregada do padrão ~/.aibhq/config.json
+# O workspace será criado em /opt/aibhq/workspace
+PICOCLAW_HOME=/opt/aibhq aibhq agent
 
 # Usar ambos para uma configuração totalmente personalizada
-PICOCLAW_HOME=/srv/picoclaw PICOCLAW_CONFIG=/srv/picoclaw/main.json picoclaw gateway
+PICOCLAW_HOME=/srv/aibhq PICOCLAW_CONFIG=/srv/aibhq/main.json aibhq gateway
 ```
 
 ### Layout do Workspace
 
-O PicoClaw armazena dados no seu workspace configurado (padrão: `~/.picoclaw/workspace`):
+O AI Business HQ armazena dados no seu workspace configurado (padrão: `~/.aibhq/workspace`):
 
 ```
-~/.picoclaw/workspace/
+~/.aibhq/workspace/
 ├── sessions/          # Sessões de conversa e histórico
 ├── memory/           # Memória de longo prazo (MEMORY.md)
 ├── state/            # Estado persistente (último canal, etc.)
@@ -55,8 +55,8 @@ O PicoClaw armazena dados no seu workspace configurado (padrão: `~/.picoclaw/wo
 
 Por padrão, as skills são carregadas de:
 
-1. `~/.picoclaw/workspace/skills` (workspace)
-2. `~/.picoclaw/skills` (global)
+1. `~/.aibhq/workspace/skills` (workspace)
+2. `~/.aibhq/skills` (global)
 3. `<caminho-embutido-na-compilação>/skills` (embutido)
 
 Para configurações avançadas/de teste, você pode substituir o diretório raiz de skills builtin com:
@@ -74,7 +74,7 @@ export PICOCLAW_BUILTIN_SKILLS=/path/to/skills
 
 ### 🔒 Sandbox de Segurança
 
-O PicoClaw é executado em um ambiente sandbox por padrão. O agente só pode acessar arquivos e executar comandos dentro do workspace configurado.
+O AI Business HQ é executado em um ambiente sandbox por padrão. O agente só pode acessar arquivos e executar comandos dentro do workspace configurado.
 
 #### Configuração Padrão
 
@@ -82,7 +82,7 @@ O PicoClaw é executado em um ambiente sandbox por padrão. O agente só pode ac
 {
   "agents": {
     "defaults": {
-      "workspace": "~/.picoclaw/workspace",
+      "workspace": "~/.aibhq/workspace",
       "restrict_to_workspace": true
     }
   }
@@ -91,7 +91,7 @@ O PicoClaw é executado em um ambiente sandbox por padrão. O agente só pode ac
 
 | Opção                   | Padrão                  | Descrição                                 |
 | ----------------------- | ----------------------- | ----------------------------------------- |
-| `workspace`             | `~/.picoclaw/workspace` | Diretório de trabalho do agente           |
+| `workspace`             | `~/.aibhq/workspace` | Diretório de trabalho do agente           |
 | `restrict_to_workspace` | `true`                  | Restringir acesso a arquivos/comandos ao workspace |
 
 #### Ferramentas Protegidas
@@ -138,7 +138,7 @@ Mesmo com `restrict_to_workspace: false`, a ferramenta `exec` bloqueia estes com
 
 #### Limitação Conhecida: Processos Filhos de Ferramentas de Build
 
-O guard de segurança do exec inspeciona apenas a linha de comando que o PicoClaw executa diretamente. Ele não inspeciona recursivamente processos filhos gerados por ferramentas de desenvolvimento permitidas como `make`, `go run`, `cargo`, `npm run` ou scripts de build personalizados.
+O guard de segurança do exec inspeciona apenas a linha de comando que o AI Business HQ executa diretamente. Ele não inspeciona recursivamente processos filhos gerados por ferramentas de desenvolvimento permitidas como `make`, `go run`, `cargo`, `npm run` ou scripts de build personalizados.
 
 Isso significa que um comando de nível superior ainda pode compilar ou executar outros binários após passar pela verificação inicial do guard. Na prática, trate scripts de build, Makefiles, scripts de pacotes e binários gerados como código executável que precisa do mesmo nível de revisão que um comando shell direto.
 
@@ -146,7 +146,7 @@ Para ambientes de maior risco:
 
 * Revise scripts de build antes da execução.
 * Prefira aprovação/revisão manual para fluxos de trabalho de compilação e execução.
-* Execute o PicoClaw dentro de um contêiner ou VM se precisar de isolamento mais forte do que o guard integrado oferece.
+* Execute o AI Business HQ dentro de um contêiner ou VM se precisar de isolamento mais forte do que o guard integrado oferece.
 
 #### Exemplos de Erro
 
@@ -198,7 +198,7 @@ Todos os caminhos compartilham a mesma restrição de workspace — não há com
 
 ### Heartbeat (Tarefas Periódicas)
 
-O PicoClaw pode executar tarefas periódicas automaticamente. Crie um arquivo `HEARTBEAT.md` no seu workspace:
+O AI Business HQ pode executar tarefas periódicas automaticamente. Crie um arquivo `HEARTBEAT.md` no seu workspace:
 
 ```markdown
 # Tarefas Periódicas
@@ -282,7 +282,7 @@ Responde HEARTBEAT_OK      Usuário recebe resultado diretamente
 | ------------ | --------------------------------------- | ------------------------------------------------------------ |
 | `gemini`     | LLM (Gemini direto)                     | [aistudio.google.com](https://aistudio.google.com)           |
 | `zhipu`      | LLM (Zhipu direto)                      | [bigmodel.cn](https://bigmodel.cn)                           |
-| `volcengine` | LLM (Volcengine direto)                 | [volcengine.com](https://www.volcengine.com/activity/codingplan?utm_campaign=PicoClaw&utm_content=PicoClaw&utm_medium=devrel&utm_source=OWO&utm_term=PicoClaw) |
+| `volcengine` | LLM (Volcengine direto)                 | [volcengine.com](https://www.volcengine.com/activity/codingplan?utm_campaign=AI Business HQ&utm_content=AI Business HQ&utm_medium=devrel&utm_source=OWO&utm_term=AI Business HQ) |
 | `openrouter` | LLM (recomendado, acesso a todos modelos) | [openrouter.ai](https://openrouter.ai)                     |
 | `anthropic`  | LLM (Claude direto)                     | [console.anthropic.com](https://console.anthropic.com)       |
 | `openai`     | LLM (GPT direto)                        | [platform.openai.com](https://platform.openai.com)           |
@@ -294,7 +294,7 @@ Responde HEARTBEAT_OK      Usuário recebe resultado diretamente
 
 ### Configuração de Modelos (model_list)
 
-> **Novidade:** PicoClaw agora usa uma abordagem **centrada no modelo**. Basta especificar o formato `vendor/model` (ex.: `zhipu/glm-4.7`) para adicionar novos providers — **sem alterações de código!**
+> **Novidade:** AI Business HQ agora usa uma abordagem **centrada no modelo**. Basta especificar o formato `vendor/model` (ex.: `zhipu/glm-4.7`) para adicionar novos providers — **sem alterações de código!**
 
 #### Todos os Vendors Suportados
 
@@ -309,12 +309,12 @@ Responde HEARTBEAT_OK      Usuário recebe resultado diretamente
 | **通义千问 (Qwen)**     | `qwen/`         | `https://dashscope.aliyuncs.com/compatible-mode/v1` | OpenAI    | [Obter](https://dashscope.console.aliyun.com)                    |
 | **Ollama**              | `ollama/`       | `http://localhost:11434/v1`                         | OpenAI    | Local (sem chave)                                                |
 | **OpenRouter**          | `openrouter/`   | `https://openrouter.ai/api/v1`                      | OpenAI    | [Obter](https://openrouter.ai/keys)                              |
-| **VolcEngine (Doubao)** | `volcengine/`   | `https://ark.cn-beijing.volces.com/api/v3`          | OpenAI    | [Obter](https://www.volcengine.com/activity/codingplan?utm_campaign=PicoClaw&utm_content=PicoClaw&utm_medium=devrel&utm_source=OWO&utm_term=PicoClaw) |
+| **VolcEngine (Doubao)** | `volcengine/`   | `https://ark.cn-beijing.volces.com/api/v3`          | OpenAI    | [Obter](https://www.volcengine.com/activity/codingplan?utm_campaign=AI Business HQ&utm_content=AI Business HQ&utm_medium=devrel&utm_source=OWO&utm_term=AI Business HQ) |
 | **Antigravity**         | `antigravity/`  | Google Cloud                                        | Custom    | Somente OAuth                                                    |
 
 #### Balanceamento de Carga
 
-Configure múltiplos endpoints para o mesmo nome de modelo — PicoClaw fará round-robin automaticamente:
+Configure múltiplos endpoints para o mesmo nome de modelo — AI Business HQ fará round-robin automaticamente:
 
 ```json
 {
@@ -331,7 +331,7 @@ A configuração antiga `providers` está **depreciada** mas ainda é suportada.
 
 ### Arquitetura de Providers
 
-PicoClaw roteia providers por família de protocolo:
+AI Business HQ roteia providers por família de protocolo:
 
 - **Compatível com OpenAI**: OpenRouter, Groq, Zhipu, endpoints vLLM e a maioria dos outros.
 - **Anthropic**: Comportamento nativo da API Claude.
@@ -339,7 +339,7 @@ PicoClaw roteia providers por família de protocolo:
 
 ### Tarefas Agendadas / Lembretes
 
-PicoClaw suporta tarefas agendadas via ferramenta `cron`.
+AI Business HQ suporta tarefas agendadas via ferramenta `cron`.
 
 ```json
 {
@@ -352,7 +352,7 @@ PicoClaw suporta tarefas agendadas via ferramenta `cron`.
 }
 ```
 
-As tarefas agendadas persistem após reinicializações em `~/.picoclaw/workspace/cron/`.
+As tarefas agendadas persistem após reinicializações em `~/.aibhq/workspace/cron/`.
 
 ### Tópicos Avançados
 

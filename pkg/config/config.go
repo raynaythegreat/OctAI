@@ -10,10 +10,10 @@ import (
 
 	"github.com/caarlos0/env/v11"
 
-	"github.com/sipeed/picoclaw/pkg"
-	"github.com/sipeed/picoclaw/pkg/credential"
-	"github.com/sipeed/picoclaw/pkg/fileutil"
-	"github.com/sipeed/picoclaw/pkg/logger"
+	"github.com/raynaythegreat/ai-business-hq/pkg"
+	"github.com/raynaythegreat/ai-business-hq/pkg/credential"
+	"github.com/raynaythegreat/ai-business-hq/pkg/fileutil"
+	"github.com/raynaythegreat/ai-business-hq/pkg/logger"
 )
 
 // rrCounter is a global counter for round-robin load balancing across models.
@@ -1347,7 +1347,7 @@ func LoadConfig(path string) (*Config, error) {
 			for _, k := range m.apiKeys {
 				if k != "" && !strings.HasPrefix(k, "enc://") && !strings.HasPrefix(k, "file://") {
 					fmt.Fprintf(os.Stderr,
-						"picoclaw: warning: model %q has a plaintext api_key; call SaveConfig to encrypt it\n",
+						"aibhq: warning: model %q has a plaintext api_key; call SaveConfig to encrypt it\n",
 						m.ModelName)
 					break // Only warn once per model
 				}
@@ -1382,10 +1382,10 @@ func LoadConfig(path string) (*Config, error) {
 	// Ensure Workspace has a default if not set
 	if cfg.Agents.Defaults.Workspace == "" {
 		homePath, _ := os.UserHomeDir()
-		if picoclawHome := os.Getenv(EnvHome); picoclawHome != "" {
-			homePath = picoclawHome
+		if aibhqHome := os.Getenv(EnvHome); aibhqHome != "" {
+			homePath = aibhqHome
 		} else if homePath != "" {
-			homePath = filepath.Join(homePath, pkg.DefaultPicoClawHome)
+			homePath = filepath.Join(homePath, pkg.DefaultAI Business HQHome)
 		}
 		cfg.Agents.Defaults.Workspace = filepath.Join(homePath, pkg.WorkspaceName)
 	}

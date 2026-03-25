@@ -21,7 +21,7 @@
 //
 //  1. sshKeyPath argument to Encrypt (explicit)
 //  2. PICOCLAW_SSH_KEY_PATH env var
-//  3. ~/.ssh/picoclaw_ed25519.key (os.UserHomeDir is cross-platform)
+//  3. ~/.ssh/aibhq_ed25519.key (os.UserHomeDir is cross-platform)
 package credential
 
 import (
@@ -70,14 +70,14 @@ var ErrDecryptionFailed = errors.New("credential: enc:// decryption failed (wron
 // SSH private key used for enc:// credential encryption and decryption.
 const SSHKeyPathEnvVar = "PICOCLAW_SSH_KEY_PATH"
 
-// picoclawHome is a package-local copy of config.EnvHome. It is kept here to
+// aibhqHome is a package-local copy of config.EnvHome. It is kept here to
 // avoid a circular import between pkg/credential and pkg/config.
-const picoclawHome = "PICOCLAW_HOME"
+const aibhqHome = "PICOCLAW_HOME"
 
 const (
 	fileScheme = "file://"
 	encScheme  = "enc://"
-	hkdfInfo   = "picoclaw-credential-v1"
+	hkdfInfo   = "aibhq-credential-v1"
 	saltLen    = 16
 	nonceLen   = 12
 	keyLen     = 32
@@ -198,7 +198,7 @@ func resolveEncrypted(raw string) (string, error) {
 //
 // passphrase is required (PICOCLAW_KEY_PASSPHRASE value).
 // sshKeyPath is the SSH private key file to use; pass "" to auto-detect via
-// PICOCLAW_SSH_KEY_PATH env var or ~/.ssh/picoclaw_ed25519.key.
+// PICOCLAW_SSH_KEY_PATH env var or ~/.ssh/aibhq_ed25519.key.
 // An SSH private key must be resolvable or Encrypt returns an error.
 func Encrypt(passphrase, sshKeyPath, plaintext string) (string, error) {
 	if passphrase == "" {
@@ -262,7 +262,7 @@ func allowedSSHKeyPath(path string) bool {
 	}
 
 	// Within PICOCLAW_HOME.
-	if picoHome := os.Getenv(picoclawHome); picoHome != "" {
+	if picoHome := os.Getenv(aibhqHome); picoHome != "" {
 		if isWithinDir(clean, picoHome) {
 			return true
 		}
@@ -281,13 +281,13 @@ func allowedSSHKeyPath(path string) bool {
 // deriveKey derives a 32-byte AES-256 key from passphrase and SSH private key.
 //
 // ikm = HMAC-SHA256(key=SHA256(sshKeyBytes), msg=passphrase)
-// Final key: HKDF-SHA256(ikm, salt, info="picoclaw-credential-v1", 32 bytes)
+// Final key: HKDF-SHA256(ikm, salt, info="aibhq-credential-v1", 32 bytes)
 // sshKeyPath must be non-empty; returns an error otherwise.
 func deriveKey(passphrase, sshKeyPath string, salt []byte) ([]byte, error) {
 	if sshKeyPath == "" {
 		return nil, fmt.Errorf(
 			"credential: SSH private key is required but not found" +
-				" (set PICOCLAW_SSH_KEY_PATH or place key at ~/.ssh/picoclaw_ed25519.key)")
+				" (set PICOCLAW_SSH_KEY_PATH or place key at ~/.ssh/aibhq_ed25519.key)")
 	}
 	if !allowedSSHKeyPath(sshKeyPath) {
 		return nil, fmt.Errorf(
@@ -316,7 +316,7 @@ func deriveKey(passphrase, sshKeyPath string, salt []byte) ([]byte, error) {
 // Priority:
 //  1. override (non-empty explicit argument)
 //  2. PICOCLAW_SSH_KEY_PATH env var
-//  3. ~/.ssh/picoclaw_ed25519.key (auto-detection)
+//  3. ~/.ssh/aibhq_ed25519.key (auto-detection)
 //
 // Returns "" when no key is found; deriveKey will return an error in that case.
 func pickSSHKeyPath(override string) string {
@@ -329,7 +329,7 @@ func pickSSHKeyPath(override string) string {
 	return findDefaultSSHKey()
 }
 
-// findDefaultSSHKey returns the picoclaw-specific SSH key path if it exists.
+// findDefaultSSHKey returns the aibhq-specific SSH key path if it exists.
 func findDefaultSSHKey() string {
 	p, err := DefaultSSHKeyPath()
 	if err != nil {

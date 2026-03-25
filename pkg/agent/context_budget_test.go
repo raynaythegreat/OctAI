@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/sipeed/picoclaw/pkg/providers"
+	"github.com/raynaythegreat/ai-business-hq/pkg/providers"
 )
 
 // msgUser creates a user message.
@@ -437,7 +437,7 @@ func TestEstimateMessageTokens_ToolCallsContribute(t *testing.T) {
 				Name: "web_search",
 				Function: &providers.FunctionCall{
 					Name:      "web_search",
-					Arguments: `{"query":"picoclaw agent framework","max_results":5}`,
+					Arguments: `{"query":"aibhq agent framework","max_results":5}`,
 				},
 			},
 		},

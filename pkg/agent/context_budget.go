@@ -1,7 +1,7 @@
-// PicoClaw - Ultra-lightweight personal AI agent
+// AI Business HQ - Ultra-lightweight personal AI agent
 // License: MIT
 //
-// Copyright (c) 2026 PicoClaw contributors
+// Copyright (c) 2026 AI Business HQ contributors
 
 package agent
 
@@ -9,7 +9,7 @@ import (
 	"encoding/json"
 	"unicode/utf8"
 
-	"github.com/sipeed/picoclaw/pkg/providers"
+	"github.com/raynaythegreat/ai-business-hq/pkg/providers"
 )
 
 // parseTurnBoundaries returns the starting index of each Turn in the history.

@@ -1,7 +1,7 @@
-// PicoClaw - Ultra-lightweight personal AI agent
+// AI Business HQ - Ultra-lightweight personal AI agent
 // License: MIT
 //
-// Copyright (c) 2026 PicoClaw contributors
+// Copyright (c) 2026 AI Business HQ contributors
 
 package config
 
@@ -18,7 +18,7 @@ import (
 	"github.com/tencent-connect/botgo/log"
 	"gopkg.in/yaml.v3"
 
-	"github.com/sipeed/picoclaw/pkg/fileutil"
+	"github.com/raynaythegreat/ai-business-hq/pkg/fileutil"
 )
 
 const (

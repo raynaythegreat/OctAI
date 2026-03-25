@@ -2,7 +2,7 @@
 
 ## Overview
 
-**Antigravity** (Google Cloud Code Assist) is a Google-backed AI model provider that offers access to models like Claude Opus 4.6 and Gemini through Google's Cloud infrastructure. This document provides a complete guide on how authentication works, how to fetch models, and how to implement a new provider in PicoClaw.
+**Antigravity** (Google Cloud Code Assist) is a Google-backed AI model provider that offers access to models like Claude Opus 4.6 and Gemini through Google's Cloud infrastructure. This document provides a complete guide on how authentication works, how to fetch models, and how to implement a new provider in AI Business HQ.
 
 ---
 
@@ -17,7 +17,7 @@
 7. [Integration Requirements](#integration-requirements)
 8. [API Endpoints](#api-endpoints)
 9. [Configuration](#configuration)
-10. [Creating a New Provider in PicoClaw](#creating-a-new-provider-in-picoclaw)
+10. [Creating a New Provider in AI Business HQ](#creating-a-new-provider-in-aibhq)
 
 ---
 
@@ -374,7 +374,7 @@ const antigravityPlugin = {
   description: "OAuth flow for Google Antigravity (Cloud Code Assist)",
   configSchema: emptyPluginConfigSchema(),
   
-  register(api: PicoClawPluginApi) {
+  register(api: AI Business HQPluginApi) {
     api.registerProvider({
       id: "google-antigravity",
       label: "Google Antigravity",
@@ -401,7 +401,7 @@ const antigravityPlugin = {
 
 ```typescript
 type ProviderAuthContext = {
-  config: PicoClawConfig;
+  config: AI Business HQConfig;
   agentDir?: string;
   workspaceDir?: string;
   prompter: WizardPrompter;      // UI prompts/notifications
@@ -422,7 +422,7 @@ type ProviderAuthResult = {
     profileId: string;
     credential: AuthProfileCredential;
   }>;
-  configPatch?: Partial<PicoClawConfig>;
+  configPatch?: Partial<AI Business HQConfig>;
   defaultModel?: string;
   notes?: string[];
 };
@@ -435,7 +435,7 @@ type ProviderAuthResult = {
 ### 1. Required Environment/Dependencies
 
 - Go ≥ 1.25
-- PicoClaw codebase (`pkg/providers/` and `pkg/auth/`)
+- AI Business HQ codebase (`pkg/providers/` and `pkg/auth/`)
 - `crypto` and `net/http` standard library packages
 
 ### 2. Required Headers for API Calls
@@ -588,7 +588,7 @@ Each SSE message (`data: {...}`) is wrapped in a `response` field:
 
 ### Auth Profile Storage
 
-Auth profiles are stored in `~/.picoclaw/auth.json`:
+Auth profiles are stored in `~/.aibhq/auth.json`:
 
 ```json
 {
@@ -608,9 +608,9 @@ Auth profiles are stored in `~/.picoclaw/auth.json`:
 
 ---
 
-## Creating a New Provider in PicoClaw
+## Creating a New Provider in AI Business HQ
 
-PicoClaw providers are implemented as Go packages under `pkg/providers/`. To add a new provider:
+AI Business HQ providers are implemented as Go packages under `pkg/providers/`. To add a new provider:
 
 ### Step-by-Step Implementation
 
@@ -670,7 +670,7 @@ Add a default entry in `pkg/config/defaults.go`:
 
 #### 5. Add Auth Support (Optional)
 
-If your provider requires OAuth or special authentication, add a case to `cmd/picoclaw/internal/auth/helpers.go`:
+If your provider requires OAuth or special authentication, add a case to `cmd/aibhq/internal/auth/helpers.go`:
 
 ```go
 case "your-provider":
@@ -700,16 +700,16 @@ case "your-provider":
 
 ```bash
 # Authenticate with a provider
-picoclaw auth login --provider your-provider
+aibhq auth login --provider your-provider
 
 # List models (for Antigravity)
-picoclaw auth models
+aibhq auth models
 
 # Start the gateway
-picoclaw gateway
+aibhq gateway
 
 # Run an agent with a specific model
-picoclaw agent -m "Hello" --model your-model
+aibhq agent -m "Hello" --model your-model
 ```
 
 ### Environment Variables for Testing
@@ -729,10 +729,10 @@ export PICOCLAW_MODEL_LIST='[{"model_name":"your-model","model":"your-provider/m
 - **Source Files:**
   - `pkg/providers/antigravity_provider.go` - Antigravity provider implementation
   - `pkg/auth/oauth.go` - OAuth flow implementation
-  - `pkg/auth/store.go` - Auth credential storage (`~/.picoclaw/auth.json`)
+  - `pkg/auth/store.go` - Auth credential storage (`~/.aibhq/auth.json`)
   - `pkg/providers/factory.go` - Provider factory and protocol routing
   - `pkg/providers/types.go` - Provider interface definitions
-  - `cmd/picoclaw/internal/auth/helpers.go` - Auth CLI commands
+  - `cmd/aibhq/internal/auth/helpers.go` - Auth CLI commands
 
 - **Documentation:**
   - `docs/ANTIGRAVITY_USAGE.md` - Antigravity usage guide
@@ -788,7 +788,7 @@ Some models might show up in the available models list but return an empty respo
 ## Troubleshooting
 
 ### "Token expired"
-- Refresh OAuth tokens: `picoclaw auth login --provider antigravity`
+- Refresh OAuth tokens: `aibhq auth login --provider antigravity`
 
 ### "Gemini for Google Cloud is not enabled"
 - Enable the API in your Google Cloud Console
@@ -799,5 +799,5 @@ Some models might show up in the available models list but return an empty respo
 
 ### Models not appearing in list
 - Verify OAuth authentication completed successfully
-- Check auth profile storage: `~/.picoclaw/auth.json`
-- Re-run `picoclaw auth login --provider antigravity`
+- Check auth profile storage: `~/.aibhq/auth.json`
+- Re-run `aibhq auth login --provider antigravity`

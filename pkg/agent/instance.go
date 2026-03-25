@@ -8,14 +8,14 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/sipeed/picoclaw/pkg/config"
-	"github.com/sipeed/picoclaw/pkg/logger"
-	"github.com/sipeed/picoclaw/pkg/media"
-	"github.com/sipeed/picoclaw/pkg/memory"
-	"github.com/sipeed/picoclaw/pkg/providers"
-	"github.com/sipeed/picoclaw/pkg/routing"
-	"github.com/sipeed/picoclaw/pkg/session"
-	"github.com/sipeed/picoclaw/pkg/tools"
+	"github.com/raynaythegreat/ai-business-hq/pkg/config"
+	"github.com/raynaythegreat/ai-business-hq/pkg/logger"
+	"github.com/raynaythegreat/ai-business-hq/pkg/media"
+	"github.com/raynaythegreat/ai-business-hq/pkg/memory"
+	"github.com/raynaythegreat/ai-business-hq/pkg/providers"
+	"github.com/raynaythegreat/ai-business-hq/pkg/routing"
+	"github.com/raynaythegreat/ai-business-hq/pkg/session"
+	"github.com/raynaythegreat/ai-business-hq/pkg/tools"
 )
 
 // AgentInstance represents a fully configured agent with its own workspace,

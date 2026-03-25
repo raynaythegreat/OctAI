@@ -11,8 +11,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/sipeed/picoclaw/pkg/auth"
-	"github.com/sipeed/picoclaw/pkg/config"
+	"github.com/raynaythegreat/ai-business-hq/pkg/auth"
+	"github.com/raynaythegreat/ai-business-hq/pkg/config"
 )
 
 func TestOAuthLoginRejectsUnsupportedMethod(t *testing.T) {
@@ -224,7 +224,7 @@ func setupOAuthTestEnv(t *testing.T) (string, func()) {
 	if err := os.Setenv("HOME", tmp); err != nil {
 		t.Fatalf("set HOME: %v", err)
 	}
-	if err := os.Setenv("PICOCLAW_HOME", filepath.Join(tmp, ".picoclaw")); err != nil {
+	if err := os.Setenv("PICOCLAW_HOME", filepath.Join(tmp, ".aibhq")); err != nil {
 		t.Fatalf("set PICOCLAW_HOME: %v", err)
 	}
 

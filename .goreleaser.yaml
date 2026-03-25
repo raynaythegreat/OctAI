@@ -16,7 +16,7 @@ before:
     - go-winres make --in web/backend/winres/winres.json --out web/backend/rsrc --product-version={{ .Version }} --file-version={{ .Version }}
 
 builds:
-  - id: picoclaw
+  - id: aibhq
     env:
       - CGO_ENABLED=0
     tags:
@@ -24,10 +24,10 @@ builds:
       - stdjson
     ldflags:
       - -s -w
-      - -X github.com/sipeed/picoclaw/pkg/config.Version={{ .Version }}
-      - -X github.com/sipeed/picoclaw/pkg/config.GitCommit={{ .ShortCommit }}
-      - -X github.com/sipeed/picoclaw/pkg/config.BuildTime={{ .Date }}
-      - -X github.com/sipeed/picoclaw/pkg/config.GoVersion={{ .Env.GOVERSION }}
+      - -X github.com/raynaythegreat/ai-business-hq/pkg/config.Version={{ .Version }}
+      - -X github.com/raynaythegreat/ai-business-hq/pkg/config.GitCommit={{ .ShortCommit }}
+      - -X github.com/raynaythegreat/ai-business-hq/pkg/config.BuildTime={{ .Date }}
+      - -X github.com/raynaythegreat/ai-business-hq/pkg/config.GoVersion={{ .Env.GOVERSION }}
     goos:
       - linux
       - windows
@@ -58,7 +58,7 @@ builds:
       - goos: netbsd
         goarch: arm
 
-  - id: picoclaw-launcher
+  - id: aibhq-launcher
     binary: picoclaw-launcher
     env:
       - CGO_ENABLED=0
@@ -97,7 +97,7 @@ builds:
       - goos: netbsd
         goarch: arm
 
-  - id: picoclaw-launcher-tui
+  - id: aibhq-launcher-tui
     binary: picoclaw-launcher-tui
     env:
       - CGO_ENABLED=0
@@ -137,12 +137,12 @@ builds:
         goarch: arm
 
 dockers_v2:
-  - id: picoclaw
+  - id: aibhq
     dockerfile: docker/Dockerfile.goreleaser
     extra_files:
       - docker/entrypoint.sh
     ids:
-      - picoclaw
+      - aibhq
     images:
       - "ghcr.io/{{ .Env.GITHUB_REPOSITORY_OWNER }}/picoclaw"
       - 'docker.io/{{ .Env.DOCKERHUB_IMAGE_NAME }}'
@@ -154,12 +154,12 @@ dockers_v2:
       - linux/arm64
       - linux/riscv64
 
-  - id: picoclaw-launcher
+  - id: aibhq-launcher
     dockerfile: docker/Dockerfile.goreleaser.launcher
     ids:
-      - picoclaw
-      - picoclaw-launcher
-      - picoclaw-launcher-tui
+      - aibhq
+      - aibhq-launcher
+      - aibhq-launcher-tui
     images:
       - "ghcr.io/{{ .Env.GITHUB_REPOSITORY_OWNER }}/picoclaw"
       - 'docker.io/{{ .Env.DOCKERHUB_IMAGE_NAME }}'
@@ -175,9 +175,9 @@ notarize:
   macos:
     - enabled: '{{ isEnvSet "MACOS_SIGN_P12" }}'
       ids:
-        - picoclaw
-        - picoclaw-launcher
-        - picoclaw-launcher-tui
+        - aibhq
+        - aibhq-launcher
+        - aibhq-launcher-tui
       sign:
         certificate: "{{.Env.MACOS_SIGN_P12}}"
         password: "{{.Env.MACOS_SIGN_PASSWORD}}"
@@ -204,11 +204,11 @@ archives:
         formats: [zip]
 
 nfpms:
-  - id: picoclaw
+  - id: aibhq
     ids:
-      - picoclaw
-      - picoclaw-launcher
-      - picoclaw-launcher-tui
+      - aibhq
+      - aibhq-launcher
+      - aibhq-launcher-tui
     package_name: picoclaw
     file_name_template: >-
       {{ .PackageName }}_

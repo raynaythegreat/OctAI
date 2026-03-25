@@ -1,13 +1,13 @@
-// PicoClaw Web Console - Web-based chat and management interface
+// AI Business HQ Web Console - Web-based chat and management interface
 //
-// Provides a web UI for chatting with PicoClaw via the Pico Channel WebSocket,
+// Provides a web UI for chatting with AI Business HQ via the Pico Channel WebSocket,
 // with configuration management and gateway process control.
 //
 // Usage:
 //
-//	go build -o picoclaw-web ./web/backend/
-//	./picoclaw-web [config.json]
-//	./picoclaw-web -public config.json
+//	go build -o aibhq-web ./web/backend/
+//	./aibhq-web [config.json]
+//	./aibhq-web -public config.json
 
 package main
 
@@ -23,16 +23,16 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/sipeed/picoclaw/pkg/config"
-	"github.com/sipeed/picoclaw/pkg/logger"
-	"github.com/sipeed/picoclaw/web/backend/api"
-	"github.com/sipeed/picoclaw/web/backend/launcherconfig"
-	"github.com/sipeed/picoclaw/web/backend/middleware"
-	"github.com/sipeed/picoclaw/web/backend/utils"
+	"github.com/raynaythegreat/ai-business-hq/pkg/config"
+	"github.com/raynaythegreat/ai-business-hq/pkg/logger"
+	"github.com/raynaythegreat/ai-business-hq/web/backend/api"
+	"github.com/raynaythegreat/ai-business-hq/web/backend/launcherconfig"
+	"github.com/raynaythegreat/ai-business-hq/web/backend/middleware"
+	"github.com/raynaythegreat/ai-business-hq/web/backend/utils"
 )
 
 const (
-	appName = "PicoClaw"
+	appName = "AI Business HQ"
 
 	logPath   = "logs"
 	panicFile = "launcher_panic.log"
@@ -57,10 +57,10 @@ func main() {
 	console := flag.Bool("console", false, "Console mode, no GUI")
 
 	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, "PicoClaw Launcher - A web-based configuration editor\n\n")
+		fmt.Fprintf(os.Stderr, "AI Business HQ Launcher - A web-based configuration editor\n\n")
 		fmt.Fprintf(os.Stderr, "Usage: %s [options] [config.json]\n\n", os.Args[0])
 		fmt.Fprintf(os.Stderr, "Arguments:\n")
-		fmt.Fprintf(os.Stderr, "  config.json    Path to the configuration file (default: ~/.picoclaw/config.json)\n\n")
+		fmt.Fprintf(os.Stderr, "  config.json    Path to the configuration file (default: ~/.aibhq/config.json)\n\n")
 		fmt.Fprintf(os.Stderr, "Options:\n")
 		flag.PrintDefaults()
 		fmt.Fprintf(os.Stderr, "\nExamples:\n")
@@ -99,7 +99,7 @@ func main() {
 	}
 
 	logger.InfoC("web", fmt.Sprintf("%s Launcher %s starting...", appName, appVersion))
-	logger.InfoC("web", fmt.Sprintf("PicoClaw Home: %s", picoHome))
+	logger.InfoC("web", fmt.Sprintf("AI Business HQ Home: %s", picoHome))
 
 	// Set language from command line or auto-detect
 	if *lang != "" {
@@ -118,7 +118,7 @@ func main() {
 	}
 	err = utils.EnsureOnboarded(absPath)
 	if err != nil {
-		logger.Errorf("Warning: Failed to initialize PicoClaw config automatically: %v", err)
+		logger.Errorf("Warning: Failed to initialize AI Business HQ config automatically: %v", err)
 	}
 
 	var explicitPort bool
