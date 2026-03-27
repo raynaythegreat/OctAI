@@ -4,7 +4,7 @@
 
 ## 🐳 Docker Compose
 
-您也可以使用 Docker Compose 运行 AI Business HQ，无需在本地安装任何环境。
+您也可以使用 Docker Compose 运行 OctAi，无需在本地安装任何环境。
 
 ```bash
 # 1. 克隆仓库
@@ -24,7 +24,7 @@ docker compose -f docker/docker-compose.yml --profile gateway up -d
 ```
 
 > [!TIP]
-> **Docker 用户**: 默认情况下, Gateway 监听 `127.0.0.1`，该端口不会暴露到容器外。如果需要通过端口映射访问健康检查接口，请在环境变量中设置 `PICOCLAW_GATEWAY_HOST=0.0.0.0` 或修改 `config.json`。
+> **Docker 用户**: 默认情况下, Gateway 监听 `127.0.0.1`，该端口不会暴露到容器外。如果需要通过端口映射访问健康检查接口，请在环境变量中设置 `OCTAI_GATEWAY_HOST=0.0.0.0` 或修改 `config.json`。
 
 ```bash
 # 5. 查看日志
@@ -69,7 +69,7 @@ docker compose -f docker/docker-compose.yml --profile gateway up -d
 ## 🚀 快速开始
 
 > [!TIP]
-> 在 `~/.aibhq/config.json` 中设置您的 API Key。获取 API Key: [火山引擎 (CodingPlan)](https://www.volcengine.com/activity/codingplan?utm_campaign=AI Business HQ&utm_content=AI Business HQ&utm_medium=devrel&utm_source=OWO&utm_term=AI Business HQ) (LLM) · [OpenRouter](https://openrouter.ai/keys) (LLM) · [Zhipu (智谱)](https://open.bigmodel.cn/usercenter/proj-mgmt/apikeys) (LLM)。网络搜索是 **可选的** — 获取免费的 [Tavily API](https://tavily.com) (每月 1000 次免费查询) 或 [Brave Search API](https://brave.com/search/api) (每月 2000 次免费查询)。
+> 在 `~/.aibhq/config.json` 中设置您的 API Key。获取 API Key: [火山引擎 (CodingPlan)](https://www.volcengine.com/activity/codingplan?utm_campaign=OctAi&utm_content=OctAi&utm_medium=devrel&utm_source=OWO&utm_term=OctAi) (LLM) · [OpenRouter](https://openrouter.ai/keys) (LLM) · [Zhipu (智谱)](https://open.bigmodel.cn/usercenter/proj-mgmt/apikeys) (LLM)。网络搜索是 **可选的** — 获取免费的 [Tavily API](https://tavily.com) (每月 1000 次免费查询) 或 [Brave Search API](https://brave.com/search/api) (每月 2000 次免费查询)。
 
 **1. 初始化 (Initialize)**
 
@@ -144,7 +144,7 @@ aibhq onboard
 ```
 
 > **新功能**: `model_list` 配置格式支持零代码添加 provider。详见[模型配置](providers.md#模型配置-model_list)章节。
-> `request_timeout` 为可选项，单位为秒。若省略或设置为 `<= 0`，AI Business HQ 使用默认超时（120 秒）。
+> `request_timeout` 为可选项，单位为秒。若省略或设置为 `<= 0`，OctAi 使用默认超时（120 秒）。
 
 **3. 获取 API Key**
 

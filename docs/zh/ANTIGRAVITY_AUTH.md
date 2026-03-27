@@ -4,7 +4,7 @@
 
 ## 概述
 
-**Antigravity**（Google Cloud Code Assist）是由 Google 支持的 AI 模型提供商，通过 Google 的云基础设施提供对 Claude Opus 4.6 和 Gemini 等模型的访问。本文档提供了关于认证工作原理、如何获取模型以及如何在 AI Business HQ 中实现新提供商的完整指南。
+**Antigravity**（Google Cloud Code Assist）是由 Google 支持的 AI 模型提供商，通过 Google 的云基础设施提供对 Claude Opus 4.6 和 Gemini 等模型的访问。本文档提供了关于认证工作原理、如何获取模型以及如何在 OctAi 中实现新提供商的完整指南。
 
 ---
 
@@ -19,7 +19,7 @@
 7. [集成要求](#集成要求)
 8. [API 端点](#api-端点)
 9. [配置](#配置)
-10. [在 AI Business HQ 中创建新提供商](#在-aibhq-中创建新提供商)
+10. [在 OctAi 中创建新提供商](#在-aibhq-中创建新提供商)
 
 ---
 
@@ -376,7 +376,7 @@ const antigravityPlugin = {
   description: "OAuth flow for Google Antigravity (Cloud Code Assist)",
   configSchema: emptyPluginConfigSchema(),
   
-  register(api: AI Business HQPluginApi) {
+  register(api: OctAiPluginApi) {
     api.registerProvider({
       id: "google-antigravity",
       label: "Google Antigravity",
@@ -403,7 +403,7 @@ const antigravityPlugin = {
 
 ```typescript
 type ProviderAuthContext = {
-  config: AI Business HQConfig;
+  config: OctAiConfig;
   agentDir?: string;
   workspaceDir?: string;
   prompter: WizardPrompter;      // UI 提示/通知
@@ -424,7 +424,7 @@ type ProviderAuthResult = {
     profileId: string;
     credential: AuthProfileCredential;
   }>;
-  configPatch?: Partial<AI Business HQConfig>;
+  configPatch?: Partial<OctAiConfig>;
   defaultModel?: string;
   notes?: string[];
 };
@@ -437,7 +437,7 @@ type ProviderAuthResult = {
 ### 1. 所需环境/依赖
 
 - Go ≥ 1.25
-- AI Business HQ 代码库（`pkg/providers/` 和 `pkg/auth/`）
+- OctAi 代码库（`pkg/providers/` 和 `pkg/auth/`）
 - `crypto` 和 `net/http` 标准库包
 
 ### 2. API 调用所需的请求头
@@ -610,9 +610,9 @@ export function sanitizeAntigravityThinkingBlocks(
 
 ---
 
-## 在 AI Business HQ 中创建新提供商
+## 在 OctAi 中创建新提供商
 
-AI Business HQ 提供商以 Go 包的形式实现，位于 `pkg/providers/` 下。要添加新提供商：
+OctAi 提供商以 Go 包的形式实现，位于 `pkg/providers/` 下。要添加新提供商：
 
 ### 分步实现
 
@@ -718,10 +718,10 @@ aibhq agent -m "Hello" --model your-model
 
 ```bash
 # 覆盖默认模型
-export PICOCLAW_AGENTS_DEFAULTS_MODEL=your-model
+export OCTAI_AGENTS_DEFAULTS_MODEL=your-model
 
 # 覆盖提供商设置
-export PICOCLAW_MODEL_LIST='[{"model_name":"your-model","model":"your-provider/model-name","api_key":"..."}]'
+export OCTAI_MODEL_LIST='[{"model_name":"your-model","model":"your-provider/model-name","api_key":"..."}]'
 ```
 
 ---

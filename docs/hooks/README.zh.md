@@ -53,7 +53,7 @@ HookManager 的排序规则是：
 
 1. 打开 `hooks.enabled`
 2. 把下面文档里的 Python 示例保存到本地文件，例如 `/tmp/review_gate.py`
-3. 给它配置 `PICOCLAW_HOOK_LOG_FILE`
+3. 给它配置 `OCTAI_HOOK_LOG_FILE`
 4. 重启 gateway
 5. 用 `tail -f` 观察日志文件
 
@@ -82,7 +82,7 @@ HookManager 的排序规则是：
           "approve_tool"
         ],
         "env": {
-          "PICOCLAW_HOOK_LOG_FILE": "/tmp/aibhq-hook-review-gate.log"
+          "OCTAI_HOOK_LOG_FILE": "/tmp/aibhq-hook-review-gate.log"
         }
       }
     }
@@ -96,7 +96,7 @@ HookManager 的排序规则是：
 tail -f /tmp/aibhq-hook-review-gate.log
 ```
 
-如果你是在开发 AI Business HQ 本体，而不是只想验证协议，那么再看后面的 Go in-process 示例。
+如果你是在开发 OctAi 本体，而不是只想验证协议，那么再看后面的 Go in-process 示例。
 
 ## 两个示例的定位
 
@@ -384,8 +384,8 @@ import sys
 from datetime import datetime, timezone
 from typing import Any
 
-LOG_EVENTS = os.getenv("PICOCLAW_HOOK_LOG_EVENTS", "1").lower() not in {"0", "false", "no"}
-LOG_FILE = os.getenv("PICOCLAW_HOOK_LOG_FILE", "").strip()
+LOG_EVENTS = os.getenv("OCTAI_HOOK_LOG_EVENTS", "1").lower() not in {"0", "false", "no"}
+LOG_FILE = os.getenv("OCTAI_HOOK_LOG_FILE", "").strip()
 
 
 def append_log(entry: dict[str, Any]) -> None:
@@ -552,7 +552,7 @@ if __name__ == "__main__":
           "approve_tool"
         ],
         "env": {
-          "PICOCLAW_HOOK_LOG_FILE": "/tmp/aibhq-hook-review-gate.log"
+          "OCTAI_HOOK_LOG_FILE": "/tmp/aibhq-hook-review-gate.log"
         }
       }
     }
@@ -562,12 +562,12 @@ if __name__ == "__main__":
 
 ### 环境变量
 
-- `PICOCLAW_HOOK_LOG_EVENTS`
+- `OCTAI_HOOK_LOG_EVENTS`
   是否把 `hook.event` 写到 `stderr`，默认开启
-- `PICOCLAW_HOOK_LOG_FILE`
+- `OCTAI_HOOK_LOG_FILE`
   外部日志文件路径。设置后，脚本会把收到的 hook 请求、notification 和返回结果按 JSON Lines 追加到该文件
 
-注意：`PICOCLAW_HOOK_LOG_FILE` 没有默认值。不设置时，脚本不会自动落盘日志。
+注意：`OCTAI_HOOK_LOG_FILE` 没有默认值。不设置时，脚本不会自动落盘日志。
 
 ### 如何确认它收到了 hook
 
@@ -575,7 +575,7 @@ if __name__ == "__main__":
 
 - gateway 日志
   用来观察宿主是否成功启动了外部进程，以及脚本写到 `stderr` 的事件摘要
-- `PICOCLAW_HOOK_LOG_FILE`
+- `OCTAI_HOOK_LOG_FILE`
   用来观察脚本实际收到了什么请求、返回了什么响应
 
 典型判断方式：
@@ -616,12 +616,12 @@ if __name__ == "__main__":
 
 当前 process hook 使用 `JSON-RPC over stdio`：
 
-- AI Business HQ 启动外部进程
+- OctAi 启动外部进程
 - 请求和响应都按“一行一个 JSON 消息”传输
 - `hook.event` 是 notification，不需要响应
 - `hook.before_llm` / `hook.after_llm` / `hook.before_tool` / `hook.after_tool` / `hook.approve_tool` 是 request/response
 
-当前宿主不会接受 process hook 主动发起的新 RPC。也就是说，外部 hook 现在只能“响应 AI Business HQ 的调用”，不能反向调用宿主去发送 channel 消息。
+当前宿主不会接受 process hook 主动发起的新 RPC。也就是说，外部 hook 现在只能“响应 OctAi 的调用”，不能反向调用宿主去发送 channel 消息。
 
 ## 配置字段
 

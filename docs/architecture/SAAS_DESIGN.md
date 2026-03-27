@@ -1,4 +1,4 @@
-# AI Business HQ - Multi-Tenant SaaS Architecture Design
+# OctAi - Multi-Tenant SaaS Architecture Design
 
 > **Version**: 1.0  
 > **Status**: Draft for MVP  
@@ -22,7 +22,7 @@
 
 ### 1.1 Goals
 
-- Transform AI Business HQ from single-tenant CLI tool to multi-tenant SaaS platform
+- Transform OctAi from single-tenant CLI tool to multi-tenant SaaS platform
 - Enable organization-based workspaces with team collaboration
 - Implement usage-based billing with Stripe integration
 - Maintain backward compatibility with existing CLI/single-user deployments

@@ -1,9 +1,9 @@
-# Debugging AI Business HQ
+# Debugging OctAi
 
-AI Business HQ performs multiple complex interactions under the hood for every single request it receives—from routing messages and evaluating complexity, to executing tools and adapting to model failures. Being able to see exactly what is happening is crucial, not just for troubleshooting potential issues, but also for truly understanding how the agent operates.
-## Starting AI Business HQ in Debug Mode
+OctAi performs multiple complex interactions under the hood for every single request it receives—from routing messages and evaluating complexity, to executing tools and adapting to model failures. Being able to see exactly what is happening is crucial, not just for troubleshooting potential issues, but also for truly understanding how the agent operates.
+## Starting OctAi in Debug Mode
 
-To get detailed information about what the agent is doing (LLM requests, tool calls, message routing), you can start the AI Business HQ gateway with the debug flag:
+To get detailed information about what the agent is doing (LLM requests, tool calls, message routing), you can start the OctAi gateway with the debug flag:
 
 ```bash
 aibhq gateway --debug
@@ -15,7 +15,7 @@ In this mode, the system will format the logs extensively and display previews o
 
 ## Disabling Log Truncation (Full Logs)
 
-By default, AI Business HQ truncates very long strings (such as the *System Prompt* or large JSON output results) in the debug logs to keep the console readable.
+By default, OctAi truncates very long strings (such as the *System Prompt* or large JSON output results) in the debug logs to keep the console readable.
 
 If you need to inspect the complete output of a command or the exact payload sent to the LLM model, you can use the `--no-truncate` flag.
 
@@ -92,8 +92,8 @@ When `enabled` is `true`, every tool call sends a short message to the chat befo
 Both fields can also be set via environment variables:
 
 ```bash
-PICOCLAW_AGENTS_DEFAULTS_TOOL_FEEDBACK_ENABLED=true
-PICOCLAW_AGENTS_DEFAULTS_TOOL_FEEDBACK_MAX_ARGS_LENGTH=300
+OCTAI_AGENTS_DEFAULTS_TOOL_FEEDBACK_ENABLED=true
+OCTAI_AGENTS_DEFAULTS_TOOL_FEEDBACK_MAX_ARGS_LENGTH=300
 ```
 
 > **Note:** `tool_feedback` is independent of `--debug` mode. It works in production and does not require the gateway to be started with any special flag.

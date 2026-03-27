@@ -2,7 +2,7 @@
 
 ## Overview
 
-**Antigravity** (Google Cloud Code Assist) is a Google-backed AI model provider that offers access to models like Claude Opus 4.6 and Gemini through Google's Cloud infrastructure. This document provides a complete guide on how authentication works, how to fetch models, and how to implement a new provider in AI Business HQ.
+**Antigravity** (Google Cloud Code Assist) is a Google-backed AI model provider that offers access to models like Claude Opus 4.6 and Gemini through Google's Cloud infrastructure. This document provides a complete guide on how authentication works, how to fetch models, and how to implement a new provider in OctAi.
 
 ---
 
@@ -17,7 +17,7 @@
 7. [Integration Requirements](#integration-requirements)
 8. [API Endpoints](#api-endpoints)
 9. [Configuration](#configuration)
-10. [Creating a New Provider in AI Business HQ](#creating-a-new-provider-in-aibhq)
+10. [Creating a New Provider in OctAi](#creating-a-new-provider-in-aibhq)
 
 ---
 
@@ -374,7 +374,7 @@ const antigravityPlugin = {
   description: "OAuth flow for Google Antigravity (Cloud Code Assist)",
   configSchema: emptyPluginConfigSchema(),
   
-  register(api: AI Business HQPluginApi) {
+  register(api: OctAiPluginApi) {
     api.registerProvider({
       id: "google-antigravity",
       label: "Google Antigravity",
@@ -401,7 +401,7 @@ const antigravityPlugin = {
 
 ```typescript
 type ProviderAuthContext = {
-  config: AI Business HQConfig;
+  config: OctAiConfig;
   agentDir?: string;
   workspaceDir?: string;
   prompter: WizardPrompter;      // UI prompts/notifications
@@ -422,7 +422,7 @@ type ProviderAuthResult = {
     profileId: string;
     credential: AuthProfileCredential;
   }>;
-  configPatch?: Partial<AI Business HQConfig>;
+  configPatch?: Partial<OctAiConfig>;
   defaultModel?: string;
   notes?: string[];
 };
@@ -435,7 +435,7 @@ type ProviderAuthResult = {
 ### 1. Required Environment/Dependencies
 
 - Go ≥ 1.25
-- AI Business HQ codebase (`pkg/providers/` and `pkg/auth/`)
+- OctAi codebase (`pkg/providers/` and `pkg/auth/`)
 - `crypto` and `net/http` standard library packages
 
 ### 2. Required Headers for API Calls
@@ -608,9 +608,9 @@ Auth profiles are stored in `~/.aibhq/auth.json`:
 
 ---
 
-## Creating a New Provider in AI Business HQ
+## Creating a New Provider in OctAi
 
-AI Business HQ providers are implemented as Go packages under `pkg/providers/`. To add a new provider:
+OctAi providers are implemented as Go packages under `pkg/providers/`. To add a new provider:
 
 ### Step-by-Step Implementation
 
@@ -716,10 +716,10 @@ aibhq agent -m "Hello" --model your-model
 
 ```bash
 # Override default model
-export PICOCLAW_AGENTS_DEFAULTS_MODEL=your-model
+export OCTAI_AGENTS_DEFAULTS_MODEL=your-model
 
 # Override provider settings
-export PICOCLAW_MODEL_LIST='[{"model_name":"your-model","model":"your-provider/model-name","api_key":"..."}]'
+export OCTAI_MODEL_LIST='[{"model_name":"your-model","model":"your-provider/model-name","api_key":"..."}]'
 ```
 
 ---

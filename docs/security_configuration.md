@@ -2,7 +2,7 @@
 
 ## Overview
 
-AI Business HQ supports separating sensitive data (API keys, tokens, secrets, passwords) from the main configuration by storing them in a `.security.yml` file. This improves security by:
+OctAi supports separating sensitive data (API keys, tokens, secrets, passwords) from the main configuration by storing them in a `.security.yml` file. This improves security by:
 
 1. **Separation of concerns**: Configuration settings and secrets are in separate files
 2. **Easier sharing**: The main config can be shared without exposing sensitive data
@@ -179,7 +179,7 @@ You can now remove sensitive fields from `config.json` since they're loaded from
 
 ### Step 5: Verify
 
-Restart AI Business HQ and verify it loads correctly:
+Restart OctAi and verify it loads correctly:
 ```bash
 aibhq --version
 ```
@@ -375,24 +375,24 @@ You can override any security value using environment variables:
 
 **For models:**
 ```bash
-export PICOCLAW_CHANNELS_TELEGRAM_TOKEN="token-from-env"
+export OCTAI_CHANNELS_TELEGRAM_TOKEN="token-from-env"
 ```
 
 **For channels:**
 ```bash
-export PICOCLAW_CHANNELS_TELEGRAM_TOKEN="token-from-env"
-export PICOCLAW_CHANNELS_FEISHU_APP_SECRET="secret-from-env"
+export OCTAI_CHANNELS_TELEGRAM_TOKEN="token-from-env"
+export OCTAI_CHANNELS_FEISHU_APP_SECRET="secret-from-env"
 ```
 
 **For web tools:**
 ```bash
-export PICOCLAW_TOOLS_WEB_BRAVE_API_KEY="key-from-env"
-export PICOCLAW_TOOLS_WEB_BAIDU_API_KEY="baidu-key-from-env"
+export OCTAI_TOOLS_WEB_BRAVE_API_KEY="key-from-env"
+export OCTAI_TOOLS_WEB_BAIDU_API_KEY="baidu-key-from-env"
 ```
 
 Environment variables have the highest priority and will override both `config.json` and `.security.yml` values.
 
-The pattern is: `PICOCLAW_<SECTION>_<KEY>_<FIELD>` with underscores separating path segments and converted to uppercase.
+The pattern is: `OCTAI_<SECTION>_<KEY>_<FIELD>` with underscores separating path segments and converted to uppercase.
 
 ## Security Best Practices
 
@@ -604,13 +604,13 @@ rm ~/.aibhq/config.json.backup
 
 ## Advanced: Encrypted API Keys
 
-AI Business HQ supports encrypting API keys in the security file for additional protection.
+OctAi supports encrypting API keys in the security file for additional protection.
 
 ### Setup
 
 1. Set a passphrase via environment variable:
 ```bash
-export PICOCLAW_CREDENTIAL_PASSPHRASE="your-secure-passphrase"
+export OCTAI_CREDENTIAL_PASSPHRASE="your-secure-passphrase"
 ```
 
 2. When saving config, API keys will be encrypted automatically:

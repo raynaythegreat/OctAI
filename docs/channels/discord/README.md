@@ -2,7 +2,7 @@
 
 # Discord
 
-Discord is a free voice, video, and text chat application designed for communities. AI Business HQ connects to Discord servers via the Discord Bot API, supporting both receiving and sending messages.
+Discord is a free voice, video, and text chat application designed for communities. OctAi connects to Discord servers via the Discord Bot API, supporting both receiving and sending messages.
 
 ## Configuration
 

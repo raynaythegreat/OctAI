@@ -1,6 +1,6 @@
-# Using Antigravity Provider in AI Business HQ
+# Using Antigravity Provider in OctAi
 
-This guide explains how to set up and use the **Antigravity** (Google Cloud Code Assist) provider in AI Business HQ.
+This guide explains how to set up and use the **Antigravity** (Google Cloud Code Assist) provider in OctAi.
 
 ## Prerequisites
 
@@ -22,9 +22,9 @@ If you are running on a server (Coolify/Docker) and cannot reach `localhost`, fo
 3.  Complete the login.
 4.  Your browser will redirect to a `localhost:51121` URL (which will fail to load).
 5.  **Copy that final URL** from your browser's address bar.
-6.  **Paste it back into the terminal** where AI Business HQ is waiting.
+6.  **Paste it back into the terminal** where OctAi is waiting.
 
-AI Business HQ will extract the authorization code and complete the process automatically.
+OctAi will extract the authorization code and complete the process automatically.
 
 ## 2. Managing Models
 
@@ -48,7 +48,7 @@ aibhq agent -m "Hello" --model claude-opus-4-6-thinking
 If you are deploying via Coolify or Docker, follow these steps to test:
 
 1.  **Environment Variables**:
-    *   `PICOCLAW_AGENTS_DEFAULTS_MODEL=gemini-flash`
+    *   `OCTAI_AGENTS_DEFAULTS_MODEL=gemini-flash`
 2.  **Authentication persistence**: 
     If you've logged in locally, you can copy your credentials to the server:
     ```bash
@@ -59,7 +59,7 @@ If you are deploying via Coolify or Docker, follow these steps to test:
 ## 4. Troubleshooting
 
 *   **Empty Response**: If a model returns an empty reply, it may be restricted for your project. Try `gemini-3-flash` or `claude-opus-4-6-thinking`.
-*   **429 Rate Limit**: Antigravity has strict quotas. AI Business HQ will display the "reset time" in the error message if you hit a limit.
+*   **429 Rate Limit**: Antigravity has strict quotas. OctAi will display the "reset time" in the error message if you hit a limit.
 *   **404 Not Found**: Ensure you are using a model ID from the `aibhq auth models` list. Use the short ID (e.g., `gemini-3-flash`) not the full path.
 
 ## 5. Summary of Working Models

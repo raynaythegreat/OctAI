@@ -1,4 +1,4 @@
-# Picoclaw Web
+# OctAi Web
 
 This directory contains the standalone web service for `aibhq`.
 It provides a complete unified web interface, acting as a dashboard, configuration center, and interactive console (channel client) for the core `aibhq` engine.

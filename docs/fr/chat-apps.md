@@ -4,7 +4,7 @@
 
 ## 💬 Applications de Chat
 
-Communiquez avec votre AI Business HQ via Telegram, Discord, WhatsApp, Matrix, QQ, DingTalk, LINE, WeCom, Feishu, Slack, IRC, OneBot ou MaixCam.
+Communiquez avec votre OctAi via Telegram, Discord, WhatsApp, Matrix, QQ, DingTalk, LINE, WeCom, Feishu, Slack, IRC, OneBot ou MaixCam.
 
 > **Note** : Tous les canaux basés sur les webhooks (LINE, WeCom, etc.) sont servis sur un seul serveur HTTP Gateway partagé (`gateway.host`:`gateway.port`, par défaut `127.0.0.1:18790`). Il n'y a pas de ports par canal à configurer. Note : Feishu utilise le mode WebSocket/SDK et n'utilise pas le serveur HTTP webhook partagé.
 
@@ -24,7 +24,7 @@ Communiquez avec votre AI Business HQ via Telegram, Discord, WhatsApp, Matrix, Q
 | **IRC**              | ⭐⭐ Moyen         | Serveur + configuration TLS                           | [Documentation](#irc) |
 | **OneBot**           | ⭐⭐ Moyen         | Compatible NapCat/Go-CQHTTP, écosystème communautaire | [Documentation](../channels/onebot/README.fr.md)                                                                |
 | **MaixCam**          | ⭐ Facile          | Canal d'intégration matérielle pour caméras AI Sipeed | [Documentation](../channels/maixcam/README.fr.md)                                                               |
-| **Pico**             | ⭐ Facile          | Canal protocole natif AI Business HQ                        |                                                                                                                  |
+| **Pico**             | ⭐ Facile          | Canal protocole natif OctAi                        |                                                                                                                  |
 
 <a id="telegram"></a>
 <details>
@@ -60,10 +60,10 @@ aibhq gateway
 
 **4. Menu de commandes Telegram (enregistré automatiquement au démarrage)**
 
-AI Business HQ conserve les définitions de commandes dans un registre partagé unique. Au démarrage, Telegram enregistre automatiquement les commandes bot prises en charge (par exemple `/start`, `/help`, `/show`, `/list`) afin que le menu de commandes et le comportement à l'exécution restent synchronisés.
+OctAi conserve les définitions de commandes dans un registre partagé unique. Au démarrage, Telegram enregistre automatiquement les commandes bot prises en charge (par exemple `/start`, `/help`, `/show`, `/list`) afin que le menu de commandes et le comportement à l'exécution restent synchronisés.
 L'enregistrement du menu de commandes Telegram reste une découverte UX locale au canal ; l'exécution générique des commandes est gérée de manière centralisée dans la boucle agent via l'exécuteur de commandes.
 
-Si l'enregistrement des commandes échoue (erreurs transitoires réseau/API), le canal démarre quand même et AI Business HQ réessaie l'enregistrement en arrière-plan.
+Si l'enregistrement des commandes échoue (erreurs transitoires réseau/API), le canal démarre quand même et OctAi réessaie l'enregistrement en arrière-plan.
 
 </details>
 
@@ -145,7 +145,7 @@ aibhq gateway
 <details>
 <summary><b>WhatsApp</b> (natif via whatsmeow)</summary>
 
-AI Business HQ peut se connecter à WhatsApp de deux manières :
+OctAi peut se connecter à WhatsApp de deux manières :
 
 - **Natif (recommandé) :** En processus via [whatsmeow](https://github.com/tulir/whatsmeow). Pas de bridge séparé. Définissez `"use_native": true` et laissez `bridge_url` vide. Au premier lancement, scannez le code QR avec WhatsApp (Appareils liés). La session est stockée dans votre workspace (par ex. `workspace/whatsapp/`). Le canal natif est **optionnel** pour garder le binaire par défaut léger ; compilez avec `-tags whatsapp_native` (par ex. `make build-whatsapp-native` ou `go build -tags whatsapp_native ./cmd/...`).
 - **Bridge :** Connectez-vous à un bridge WebSocket externe. Définissez `bridge_url` (par ex. `ws://localhost:3001`) et gardez `use_native` à false.
@@ -173,7 +173,7 @@ Si `session_store_path` est vide, la session est stockée dans `<workspace>/what
 <details>
 <summary><b>Weixin</b> (WeChat Personnel)</summary>
 
-AI Business HQ prend en charge la connexion à votre compte WeChat personnel via l'API officielle Tencent iLink.
+OctAi prend en charge la connexion à votre compte WeChat personnel via l'API officielle Tencent iLink.
 
 **1. Connexion**
 
@@ -215,7 +215,7 @@ QQ Open Platform propose une page de configuration en un clic pour les bots comp
 
 1. Ouvrez [QQ Bot Quick Start](https://q.qq.com/qqbot/openclaw/index.html) et scannez le QR code pour vous connecter
 2. Un bot est créé automatiquement — copiez l'**App ID** et l'**App Secret**
-3. Configurez AI Business HQ :
+3. Configurez OctAi :
 
 ```json
 {
@@ -369,7 +369,7 @@ aibhq gateway
 <details>
 <summary><b>WeCom (企业微信)</b></summary>
 
-AI Business HQ prend en charge trois types d'intégration WeCom :
+OctAi prend en charge trois types d'intégration WeCom :
 
 **Option 1 : WeCom Bot (Bot)** - Configuration plus facile, prend en charge les discussions de groupe
 **Option 2 : WeCom App (Application personnalisée)** - Plus de fonctionnalités, messagerie proactive, chat privé uniquement
@@ -484,7 +484,7 @@ aibhq gateway
 <details>
 <summary><b>Feishu (飞书)</b></summary>
 
-AI Business HQ se connecte à Feishu via le mode WebSocket/SDK — aucune URL webhook publique ni serveur de callback nécessaire.
+OctAi se connecte à Feishu via le mode WebSocket/SDK — aucune URL webhook publique ni serveur de callback nécessaire.
 
 **1. Créer une application**
 
@@ -594,7 +594,7 @@ Le bot se connectera au serveur IRC et rejoindra les canaux spécifiés.
 <details>
 <summary><b>OneBot (QQ via protocole OneBot)</b></summary>
 
-OneBot est un protocole ouvert pour les bots QQ. AI Business HQ se connecte à toute implémentation compatible OneBot v11 (par ex. [Lagrange](https://github.com/LagrangeDev/Lagrange.Core), [NapCat](https://github.com/NapNeko/NapCatQQ)) via WebSocket.
+OneBot est un protocole ouvert pour les bots QQ. OctAi se connecte à toute implémentation compatible OneBot v11 (par ex. [Lagrange](https://github.com/LagrangeDev/Lagrange.Core), [NapCat](https://github.com/NapNeko/NapCatQQ)) via WebSocket.
 
 **1. Configurer une implémentation OneBot**
 

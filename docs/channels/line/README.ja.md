@@ -2,7 +2,7 @@
 
 # Line
 
-AI Business HQ は LINE Messaging API と Webhook コールバックを通じて LINE をサポートします。
+OctAi は LINE Messaging API と Webhook コールバックを通じて LINE をサポートします。
 
 ## 設定
 
@@ -34,7 +34,7 @@ AI Business HQ は LINE Messaging API と Webhook コールバックを通じて
 2. Channel Secret と Channel Access Token を取得する
 3. Webhook を設定する:
    - LINE は Webhook に HTTPS が必要なため、HTTPS 対応サーバーをデプロイするか、ngrok などのリバースプロキシツールを使用してローカルサーバーをインターネットに公開する必要があります
-   - AI Business HQ は共有の Gateway HTTP サーバーを使用してすべてのチャンネルの Webhook コールバックを受信します。デフォルトのリッスンアドレスは 127.0.0.1:18790 です
+   - OctAi は共有の Gateway HTTP サーバーを使用してすべてのチャンネルの Webhook コールバックを受信します。デフォルトのリッスンアドレスは 127.0.0.1:18790 です
    - Webhook URL を `https://your-domain.com/webhook/line` に設定し、外部ドメインをローカルの Gateway（デフォルトポート 18790）にリバースプロキシする
    - Webhook を有効にして URL を検証する
 4. Channel Secret と Channel Access Token を設定ファイルに入力する

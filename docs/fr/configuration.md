@@ -8,32 +8,32 @@ Fichier de configuration : `~/.aibhq/config.json`
 
 ### Variables d'Environnement
 
-Vous pouvez remplacer les chemins par défaut à l'aide de variables d'environnement. Ceci est utile pour les installations portables, les déploiements conteneurisés ou l'exécution de AI Business HQ en tant que service système. Ces variables sont indépendantes et contrôlent des chemins différents.
+Vous pouvez remplacer les chemins par défaut à l'aide de variables d'environnement. Ceci est utile pour les installations portables, les déploiements conteneurisés ou l'exécution de OctAi en tant que service système. Ces variables sont indépendantes et contrôlent des chemins différents.
 
 | Variable          | Description                                                                                                                             | Chemin par défaut         |
 |-------------------|-----------------------------------------------------------------------------------------------------------------------------------------|---------------------------|
-| `PICOCLAW_CONFIG` | Remplace le chemin vers le fichier de configuration. Indique directement à AI Business HQ quel `config.json` charger, en ignorant tous les autres emplacements. | `~/.aibhq/config.json` |
-| `PICOCLAW_HOME`   | Remplace le répertoire racine des données AI Business HQ. Change l'emplacement par défaut du `workspace` et des autres répertoires de données. | `~/.aibhq`             |
+| `OCTAI_CONFIG` | Remplace le chemin vers le fichier de configuration. Indique directement à OctAi quel `config.json` charger, en ignorant tous les autres emplacements. | `~/.aibhq/config.json` |
+| `OCTAI_HOME`   | Remplace le répertoire racine des données OctAi. Change l'emplacement par défaut du `workspace` et des autres répertoires de données. | `~/.aibhq`             |
 
 **Exemples :**
 
 ```bash
 # Run aibhq using a specific config file
 # The workspace path will be read from within that config file
-PICOCLAW_CONFIG=/etc/aibhq/production.json aibhq gateway
+OCTAI_CONFIG=/etc/aibhq/production.json aibhq gateway
 
 # Run aibhq with all its data stored in /opt/aibhq
 # Config will be loaded from the default ~/.aibhq/config.json
 # Workspace will be created at /opt/aibhq/workspace
-PICOCLAW_HOME=/opt/aibhq aibhq agent
+OCTAI_HOME=/opt/aibhq aibhq agent
 
 # Use both for a fully customized setup
-PICOCLAW_HOME=/srv/aibhq PICOCLAW_CONFIG=/srv/aibhq/main.json aibhq gateway
+OCTAI_HOME=/srv/aibhq OCTAI_CONFIG=/srv/aibhq/main.json aibhq gateway
 ```
 
 ### Structure du Workspace
 
-AI Business HQ stocke les données dans votre workspace configuré (par défaut : `~/.aibhq/workspace`) :
+OctAi stocke les données dans votre workspace configuré (par défaut : `~/.aibhq/workspace`) :
 
 ```
 ~/.aibhq/workspace/
@@ -61,7 +61,7 @@ Par défaut, les compétences sont chargées depuis :
 Pour les configurations avancées/de test, vous pouvez remplacer la racine des compétences builtin avec :
 
 ```bash
-export PICOCLAW_BUILTIN_SKILLS=/path/to/skills
+export OCTAI_BUILTIN_SKILLS=/path/to/skills
 ```
 
 ### Politique Unifiée d'Exécution des Commandes
@@ -73,7 +73,7 @@ export PICOCLAW_BUILTIN_SKILLS=/path/to/skills
 
 ### 🔒 Sandbox de Sécurité
 
-AI Business HQ s'exécute dans un environnement sandboxé par défaut. L'agent ne peut accéder aux fichiers et exécuter des commandes que dans le workspace configuré.
+OctAi s'exécute dans un environnement sandboxé par défaut. L'agent ne peut accéder aux fichiers et exécuter des commandes que dans le workspace configuré.
 
 #### Configuration par Défaut
 
@@ -137,7 +137,7 @@ Même avec `restrict_to_workspace: false`, l'outil `exec` bloque ces commandes d
 
 #### Limitation Connue : Processus Enfants des Outils de Build
 
-Le garde de sécurité exec n'inspecte que la ligne de commande lancée directement par AI Business HQ. Il n'inspecte pas récursivement les processus enfants générés par les outils de développement autorisés tels que `make`, `go run`, `cargo`, `npm run` ou les scripts de build personnalisés.
+Le garde de sécurité exec n'inspecte que la ligne de commande lancée directement par OctAi. Il n'inspecte pas récursivement les processus enfants générés par les outils de développement autorisés tels que `make`, `go run`, `cargo`, `npm run` ou les scripts de build personnalisés.
 
 Cela signifie qu'une commande de niveau supérieur peut toujours compiler ou lancer d'autres binaires après avoir passé la vérification initiale du garde. En pratique, traitez les scripts de build, les Makefiles, les scripts de packages et les binaires générés comme du code exécutable nécessitant le même niveau de revue qu'une commande shell directe.
 
@@ -145,7 +145,7 @@ Pour les environnements à haut risque :
 
 * Examinez les scripts de build avant l'exécution.
 * Préférez l'approbation/revue manuelle pour les workflows de compilation et d'exécution.
-* Exécutez AI Business HQ dans un conteneur ou une VM si vous avez besoin d'une isolation plus forte que celle fournie par le garde intégré.
+* Exécutez OctAi dans un conteneur ou une VM si vous avez besoin d'une isolation plus forte que celle fournie par le garde intégré.
 
 #### Exemples d'Erreurs
 
@@ -178,7 +178,7 @@ Si vous avez besoin que l'agent accède à des chemins en dehors du workspace :
 **Méthode 2 : Variable d'environnement**
 
 ```bash
-export PICOCLAW_AGENTS_DEFAULTS_RESTRICT_TO_WORKSPACE=false
+export OCTAI_AGENTS_DEFAULTS_RESTRICT_TO_WORKSPACE=false
 ```
 
 > ⚠️ **Avertissement** : Désactiver cette restriction permet à l'agent d'accéder à n'importe quel chemin sur votre système. À utiliser avec précaution dans des environnements contrôlés uniquement.
@@ -197,7 +197,7 @@ Tous les chemins partagent la même restriction de workspace — il n'y a aucun 
 
 ### Heartbeat (Tâches Périodiques)
 
-AI Business HQ peut effectuer des tâches périodiques automatiquement. Créez un fichier `HEARTBEAT.md` dans votre workspace :
+OctAi peut effectuer des tâches périodiques automatiquement. Créez un fichier `HEARTBEAT.md` dans votre workspace :
 
 ```markdown
 # Periodic Tasks
@@ -269,8 +269,8 @@ Répond HEARTBEAT_OK        Utilisateur reçoit le résultat
 
 **Variables d'environnement :**
 
-* `PICOCLAW_HEARTBEAT_ENABLED=false` pour désactiver
-* `PICOCLAW_HEARTBEAT_INTERVAL=60` pour changer l'intervalle
+* `OCTAI_HEARTBEAT_ENABLED=false` pour désactiver
+* `OCTAI_HEARTBEAT_INTERVAL=60` pour changer l'intervalle
 
 ### Providers
 
@@ -281,7 +281,7 @@ Répond HEARTBEAT_OK        Utilisateur reçoit le résultat
 | ------------ | --------------------------------------- | ------------------------------------------------------------ |
 | `gemini`     | LLM (Gemini direct)                     | [aistudio.google.com](https://aistudio.google.com)           |
 | `zhipu`      | LLM (Zhipu direct)                      | [bigmodel.cn](https://bigmodel.cn)                           |
-| `volcengine` | LLM (Volcengine direct)                 | [volcengine.com](https://www.volcengine.com/activity/codingplan?utm_campaign=AI Business HQ&utm_content=AI Business HQ&utm_medium=devrel&utm_source=OWO&utm_term=AI Business HQ) |
+| `volcengine` | LLM (Volcengine direct)                 | [volcengine.com](https://www.volcengine.com/activity/codingplan?utm_campaign=OctAi&utm_content=OctAi&utm_medium=devrel&utm_source=OWO&utm_term=OctAi) |
 | `openrouter` | LLM (recommandé, accès à tous modèles)  | [openrouter.ai](https://openrouter.ai)                       |
 | `anthropic`  | LLM (Claude direct)                     | [console.anthropic.com](https://console.anthropic.com)       |
 | `openai`     | LLM (GPT direct)                        | [platform.openai.com](https://platform.openai.com)           |
@@ -293,7 +293,7 @@ Répond HEARTBEAT_OK        Utilisateur reçoit le résultat
 
 ### Configuration des Modèles (model_list)
 
-> **Nouveauté :** AI Business HQ utilise désormais une approche **centrée sur le modèle**. Spécifiez simplement le format `vendor/model` (ex. `zhipu/glm-4.7`) pour ajouter de nouveaux providers — **aucune modification de code requise !**
+> **Nouveauté :** OctAi utilise désormais une approche **centrée sur le modèle**. Spécifiez simplement le format `vendor/model` (ex. `zhipu/glm-4.7`) pour ajouter de nouveaux providers — **aucune modification de code requise !**
 
 #### Tous les Vendors Supportés
 
@@ -308,12 +308,12 @@ Répond HEARTBEAT_OK        Utilisateur reçoit le résultat
 | **通义千问 (Qwen)**     | `qwen/`         | `https://dashscope.aliyuncs.com/compatible-mode/v1` | OpenAI    | [Obtenir](https://dashscope.console.aliyun.com)                  |
 | **Ollama**              | `ollama/`       | `http://localhost:11434/v1`                         | OpenAI    | Local (pas de clé)                                               |
 | **OpenRouter**          | `openrouter/`   | `https://openrouter.ai/api/v1`                      | OpenAI    | [Obtenir](https://openrouter.ai/keys)                            |
-| **VolcEngine (Doubao)** | `volcengine/`   | `https://ark.cn-beijing.volces.com/api/v3`          | OpenAI    | [Obtenir](https://www.volcengine.com/activity/codingplan?utm_campaign=AI Business HQ&utm_content=AI Business HQ&utm_medium=devrel&utm_source=OWO&utm_term=AI Business HQ) |
+| **VolcEngine (Doubao)** | `volcengine/`   | `https://ark.cn-beijing.volces.com/api/v3`          | OpenAI    | [Obtenir](https://www.volcengine.com/activity/codingplan?utm_campaign=OctAi&utm_content=OctAi&utm_medium=devrel&utm_source=OWO&utm_term=OctAi) |
 | **Antigravity**         | `antigravity/`  | Google Cloud                                        | Custom    | OAuth uniquement                                                 |
 
 #### Équilibrage de Charge
 
-Configurez plusieurs endpoints pour le même nom de modèle — AI Business HQ effectuera automatiquement un round-robin :
+Configurez plusieurs endpoints pour le même nom de modèle — OctAi effectuera automatiquement un round-robin :
 
 ```json
 {
@@ -330,7 +330,7 @@ L'ancienne configuration `providers` est **dépréciée** mais toujours support�
 
 ### Architecture des Providers
 
-AI Business HQ route les providers par famille de protocole :
+OctAi route les providers par famille de protocole :
 
 - **Compatible OpenAI** : OpenRouter, Groq, Zhipu, endpoints vLLM et la plupart des autres.
 - **Anthropic** : Comportement natif de l'API Claude.
@@ -338,7 +338,7 @@ AI Business HQ route les providers par famille de protocole :
 
 ### Tâches Planifiées / Rappels
 
-AI Business HQ supporte les tâches planifiées via l'outil `cron`. L'agent peut définir, lister et annuler des rappels ou tâches récurrentes.
+OctAi supporte les tâches planifiées via l'outil `cron`. L'agent peut définir, lister et annuler des rappels ou tâches récurrentes.
 
 ```json
 {

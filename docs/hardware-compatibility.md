@@ -1,6 +1,6 @@
-# 🖥️ AI Business HQ Hardware Compatibility List
+# 🖥️ OctAi Hardware Compatibility List
 
-AI Business HQ runs on virtually any Linux device. This page tracks verified chips, products, and development boards.
+OctAi runs on virtually any Linux device. This page tracks verified chips, products, and development boards.
 
 **Your hardware not listed?** Submit a PR to add it! Hardware vendors are welcome to contribute and co-promote.
 
@@ -57,7 +57,7 @@ AI Business HQ runs on virtually any Linux device. This page tracks verified chi
 
 ## 2. Verified Products (by release date)
 
-Consumer products, routers, and industrial devices that have been tested with AI Business HQ.
+Consumer products, routers, and industrial devices that have been tested with OctAi.
 
 | Year | Product | Arch | SoC | RAM | Category |
 |------|---------|------|-----|-----|----------|
@@ -95,7 +95,7 @@ Consumer products, routers, and industrial devices that have been tested with AI
 
 ### Android Phones (via Termux)
 
-Any ARM64 Android phone (2015+) with 1GB+ RAM. Install [Termux](https://github.com/termux/termux-app), use `proot` to run AI Business HQ.
+Any ARM64 Android phone (2015+) with 1GB+ RAM. Install [Termux](https://github.com/termux/termux-app), use `proot` to run OctAi.
 
 > See [README: Run on old Android Phones](../README.md#-run-on-old-android-phones) for setup instructions.
 

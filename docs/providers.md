@@ -11,7 +11,7 @@
 | ------------ | --------------------------------------- | ------------------------------------------------------------ |
 | `gemini`     | LLM (Gemini direct)                     | [aistudio.google.com](https://aistudio.google.com)           |
 | `zhipu`      | LLM (Zhipu direct)                      | [bigmodel.cn](https://bigmodel.cn)                           |
-| `volcengine` | LLM(Volcengine direct)                  | [volcengine.com](https://www.volcengine.com/activity/codingplan?utm_campaign=AI Business HQ&utm_content=AI Business HQ&utm_medium=devrel&utm_source=OWO&utm_term=AI Business HQ)                 |
+| `volcengine` | LLM(Volcengine direct)                  | [volcengine.com](https://www.volcengine.com/activity/codingplan?utm_campaign=OctAi&utm_content=OctAi&utm_medium=devrel&utm_source=OWO&utm_term=OctAi)                 |
 | `openrouter` | LLM (recommended, access to all models) | [openrouter.ai](https://openrouter.ai)                       |
 | `anthropic`  | LLM (Claude direct)                     | [console.anthropic.com](https://console.anthropic.com)       |
 | `openai`     | LLM (GPT direct)                        | [platform.openai.com](https://platform.openai.com)           |
@@ -31,7 +31,7 @@
 
 ### Model Configuration (model_list)
 
-> **What's New?** AI Business HQ now uses a **model-centric** configuration approach. Simply specify `vendor/model` format (e.g., `zhipu/glm-4.7`) to add new providers—**zero code changes required!**
+> **What's New?** OctAi now uses a **model-centric** configuration approach. Simply specify `vendor/model` format (e.g., `zhipu/glm-4.7`) to add new providers—**zero code changes required!**
 
 This design also enables **multi-agent support** with flexible provider selection:
 
@@ -58,7 +58,7 @@ This design also enables **multi-agent support** with flexible provider selectio
 | **LiteLLM Proxy**   | `litellm/`        | `http://localhost:4000/v1`                          | OpenAI    | Your LiteLLM proxy key                                            |
 | **VLLM**            | `vllm/`           | `http://localhost:8000/v1`                          | OpenAI    | Local                                                            |
 | **Cerebras**        | `cerebras/`       | `https://api.cerebras.ai/v1`                        | OpenAI    | [Get Key](https://cerebras.ai)                                   |
-| **VolcEngine (Doubao)** | `volcengine/`     | `https://ark.cn-beijing.volces.com/api/v3`          | OpenAI    | [Get Key](https://www.volcengine.com/activity/codingplan?utm_campaign=AI Business HQ&utm_content=AI Business HQ&utm_medium=devrel&utm_source=OWO&utm_term=AI Business HQ)                        |
+| **VolcEngine (Doubao)** | `volcengine/`     | `https://ark.cn-beijing.volces.com/api/v3`          | OpenAI    | [Get Key](https://www.volcengine.com/activity/codingplan?utm_campaign=OctAi&utm_content=OctAi&utm_medium=devrel&utm_source=OWO&utm_term=OctAi)                        |
 | **神算云**          | `shengsuanyun/`   | `https://router.shengsuanyun.com/api/v1`            | OpenAI    | -                                                                |
 | **BytePlus**        | `byteplus/`       | `https://ark.ap-southeast.bytepluses.com/api/v3`    | OpenAI    | [Get Key](https://www.byteplus.com)                        |
 | **Vivgrid**         | `vivgrid/`        | `https://api.vivgrid.com/v1`                        | OpenAI    | [Get Key](https://vivgrid.com)                                   |
@@ -111,7 +111,7 @@ This design also enables **multi-agent support** with flexible provider selectio
 
 You can configure a dedicated model for audio transcription with `voice.model_name`. This lets you reuse existing multimodal providers that support audio input instead of relying only on Groq.
 
-If `voice.model_name` is not configured, AI Business HQ will continue to fall back to Groq transcription when a Groq API key is available.
+If `voice.model_name` is not configured, OctAi will continue to fall back to Groq transcription when a Groq API key is available.
 
 ```json
 {
@@ -240,11 +240,11 @@ For direct Anthropic API access or custom endpoints that only support Anthropic'
 }
 ```
 
-AI Business HQ strips only the outer `litellm/` prefix before sending the request, so proxy aliases like `litellm/lite-gpt4` send `lite-gpt4`, while `litellm/openai/gpt-4o` sends `openai/gpt-4o`.
+OctAi strips only the outer `litellm/` prefix before sending the request, so proxy aliases like `litellm/lite-gpt4` send `lite-gpt4`, while `litellm/openai/gpt-4o` sends `openai/gpt-4o`.
 
 #### Load Balancing
 
-Configure multiple endpoints for the same model name—AI Business HQ will automatically round-robin between them:
+Configure multiple endpoints for the same model name—OctAi will automatically round-robin between them:
 
 ```json
 {
@@ -311,7 +311,7 @@ For detailed migration guide, see [migration/model-list-migration.md](migration/
 
 ### Provider Architecture
 
-AI Business HQ routes providers by protocol family:
+OctAi routes providers by protocol family:
 
 - OpenAI-compatible protocol: OpenRouter, OpenAI-compatible gateways, Groq, Zhipu, and vLLM-style endpoints.
 - Anthropic protocol: Claude-native API behavior.
@@ -468,5 +468,5 @@ aibhq agent -m "Hello"
 ---
 
 <div align="center">
-  <img src="assets/logo.jpg" alt="AI Business HQ Meme" width="512">
+  <img src="assets/logo.jpg" alt="OctAi Meme" width="512">
 </div>

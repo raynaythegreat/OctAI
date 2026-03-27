@@ -4,7 +4,7 @@
 
 ## 🐳 Docker Compose
 
-Você também pode executar o AI Business HQ usando Docker Compose sem instalar nada localmente.
+Você também pode executar o OctAi usando Docker Compose sem instalar nada localmente.
 
 ```bash
 # 1. Clone este repositório
@@ -24,7 +24,7 @@ docker compose -f docker/docker-compose.yml --profile gateway up -d
 ```
 
 > [!TIP]
-> **Usuários Docker**: Por padrão, o Gateway escuta em `127.0.0.1`, que não é acessível a partir do host. Se você precisar acessar os endpoints de saúde ou expor portas, defina `PICOCLAW_GATEWAY_HOST=0.0.0.0` no seu ambiente ou atualize o `config.json`.
+> **Usuários Docker**: Por padrão, o Gateway escuta em `127.0.0.1`, que não é acessível a partir do host. Se você precisar acessar os endpoints de saúde ou expor portas, defina `OCTAI_GATEWAY_HOST=0.0.0.0` no seu ambiente ou atualize o `config.json`.
 
 ```bash
 # 5. Verificar logs
@@ -67,7 +67,7 @@ docker compose -f docker/docker-compose.yml --profile gateway up -d
 ### 🚀 Início Rápido
 
 > [!TIP]
-> Configure sua chave de API em `~/.aibhq/config.json`. Obtenha chaves de API: [Volcengine (CodingPlan)](https://www.volcengine.com/activity/codingplan?utm_campaign=AI Business HQ&utm_content=AI Business HQ&utm_medium=devrel&utm_source=OWO&utm_term=AI Business HQ) (LLM) · [OpenRouter](https://openrouter.ai/keys) (LLM) · [Zhipu](https://open.bigmodel.cn/usercenter/proj-mgmt/apikeys) (LLM). A busca na web é opcional — obtenha gratuitamente uma [API Tavily](https://tavily.com) (1000 consultas gratuitas/mês) ou [API Brave Search](https://brave.com/search/api) (2000 consultas gratuitas/mês).
+> Configure sua chave de API em `~/.aibhq/config.json`. Obtenha chaves de API: [Volcengine (CodingPlan)](https://www.volcengine.com/activity/codingplan?utm_campaign=OctAi&utm_content=OctAi&utm_medium=devrel&utm_source=OWO&utm_term=OctAi) (LLM) · [OpenRouter](https://openrouter.ai/keys) (LLM) · [Zhipu](https://open.bigmodel.cn/usercenter/proj-mgmt/apikeys) (LLM). A busca na web é opcional — obtenha gratuitamente uma [API Tavily](https://tavily.com) (1000 consultas gratuitas/mês) ou [API Brave Search](https://brave.com/search/api) (2000 consultas gratuitas/mês).
 
 **1. Inicializar**
 
@@ -142,7 +142,7 @@ aibhq onboard
 ```
 
 > **Novo**: O formato de configuração `model_list` permite adicionar provedores sem alteração de código. Veja [Configuração de Modelos](#configuração-de-modelos-model_list) para detalhes.
-> `request_timeout` é opcional e usa segundos. Se omitido ou definido como `<= 0`, o AI Business HQ usa o timeout padrão (120s).
+> `request_timeout` é opcional e usa segundos. Se omitido ou definido como `<= 0`, o OctAi usa o timeout padrão (120s).
 
 **3. Obter chaves de API**
 

@@ -1,12 +1,12 @@
-# Depuração do AI Business HQ
+# Depuração do OctAi
 
 > Voltar ao [README](../../README.pt-br.md)
 
-O AI Business HQ realiza múltiplas interações complexas nos bastidores para cada requisição que recebe — desde o roteamento de mensagens e avaliação de complexidade, até a execução de ferramentas e adaptação a falhas de modelo. Poder ver exatamente o que está acontecendo é crucial, não apenas para solucionar problemas potenciais, mas também para realmente entender como o agente opera.
+O OctAi realiza múltiplas interações complexas nos bastidores para cada requisição que recebe — desde o roteamento de mensagens e avaliação de complexidade, até a execução de ferramentas e adaptação a falhas de modelo. Poder ver exatamente o que está acontecendo é crucial, não apenas para solucionar problemas potenciais, mas também para realmente entender como o agente opera.
 
-## Iniciando o AI Business HQ em modo de depuração
+## Iniciando o OctAi em modo de depuração
 
-Para obter informações detalhadas sobre o que o agente está fazendo (requisições LLM, chamadas de ferramentas, roteamento de mensagens), você pode iniciar o gateway do AI Business HQ com a flag de depuração:
+Para obter informações detalhadas sobre o que o agente está fazendo (requisições LLM, chamadas de ferramentas, roteamento de mensagens), você pode iniciar o gateway do OctAi com a flag de depuração:
 
 ```bash
 aibhq gateway --debug
@@ -18,7 +18,7 @@ Neste modo, o sistema formata os logs de forma detalhada e exibe prévias dos pr
 
 ## Desabilitando a truncagem de logs (logs completos)
 
-Por padrão, o AI Business HQ trunca strings muito longas (como o *Prompt do Sistema* ou resultados JSON grandes) nos logs de depuração para manter o console legível.
+Por padrão, o OctAi trunca strings muito longas (como o *Prompt do Sistema* ou resultados JSON grandes) nos logs de depuração para manter o console legível.
 
 Se você precisar inspecionar a saída completa de um comando ou o payload exato enviado ao modelo LLM, pode usar a flag `--no-truncate`.
 

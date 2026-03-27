@@ -1,8 +1,8 @@
 > Retour au [README](../../README.fr.md)
 
-# 🖥️ AI Business HQ Liste de compatibilité matérielle
+# 🖥️ OctAi Liste de compatibilité matérielle
 
-AI Business HQ fonctionne sur pratiquement n'importe quel appareil Linux. Cette page répertorie les puces, produits et cartes de développement vérifiés.
+OctAi fonctionne sur pratiquement n'importe quel appareil Linux. Cette page répertorie les puces, produits et cartes de développement vérifiés.
 
 **Votre matériel n'est pas listé ?** Soumettez une PR pour l'ajouter ! Les fabricants de matériel sont invités à contribuer et à co-promouvoir.
 
@@ -59,7 +59,7 @@ AI Business HQ fonctionne sur pratiquement n'importe quel appareil Linux. Cette 
 
 ## 2. Produits vérifiés (par date de sortie)
 
-Produits grand public, routeurs et appareils industriels testés avec AI Business HQ.
+Produits grand public, routeurs et appareils industriels testés avec OctAi.
 
 | Année | Produit | Arch | SoC | RAM | Catégorie |
 |-------|---------|------|-----|-----|-----------|
@@ -97,7 +97,7 @@ Produits grand public, routeurs et appareils industriels testés avec AI Busines
 
 ### Téléphones Android (via Termux)
 
-Tout téléphone Android ARM64 (2015+) avec 1 Go+ de RAM. Installez [Termux](https://github.com/termux/termux-app), utilisez `proot` pour exécuter AI Business HQ.
+Tout téléphone Android ARM64 (2015+) avec 1 Go+ de RAM. Installez [Termux](https://github.com/termux/termux-app), utilisez `proot` pour exécuter OctAi.
 
 > Voir [README : Exécuter sur d'anciens téléphones Android](../../README.fr.md#-run-on-old-android-phones) pour les instructions de configuration.
 

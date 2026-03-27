@@ -4,7 +4,7 @@
 
 ## Tổng quan
 
-**Antigravity** (Google Cloud Code Assist) là nhà cung cấp mô hình AI được Google hỗ trợ, cung cấp quyền truy cập vào các mô hình như Claude Opus 4.6 và Gemini thông qua hạ tầng đám mây của Google. Tài liệu này cung cấp hướng dẫn đầy đủ về cách xác thực hoạt động, cách lấy danh sách mô hình và cách triển khai nhà cung cấp mới trong AI Business HQ.
+**Antigravity** (Google Cloud Code Assist) là nhà cung cấp mô hình AI được Google hỗ trợ, cung cấp quyền truy cập vào các mô hình như Claude Opus 4.6 và Gemini thông qua hạ tầng đám mây của Google. Tài liệu này cung cấp hướng dẫn đầy đủ về cách xác thực hoạt động, cách lấy danh sách mô hình và cách triển khai nhà cung cấp mới trong OctAi.
 
 ---
 
@@ -19,7 +19,7 @@
 7. [Yêu cầu tích hợp](#yêu-cầu-tích-hợp)
 8. [Các endpoint API](#các-endpoint-api)
 9. [Cấu hình](#cấu-hình)
-10. [Tạo nhà cung cấp mới trong AI Business HQ](#tạo-nhà-cung-cấp-mới-trong-aibhq)
+10. [Tạo nhà cung cấp mới trong OctAi](#tạo-nhà-cung-cấp-mới-trong-aibhq)
 
 ---
 
@@ -376,7 +376,7 @@ const antigravityPlugin = {
   description: "OAuth flow for Google Antigravity (Cloud Code Assist)",
   configSchema: emptyPluginConfigSchema(),
   
-  register(api: AI Business HQPluginApi) {
+  register(api: OctAiPluginApi) {
     api.registerProvider({
       id: "google-antigravity",
       label: "Google Antigravity",
@@ -403,7 +403,7 @@ const antigravityPlugin = {
 
 ```typescript
 type ProviderAuthContext = {
-  config: AI Business HQConfig;
+  config: OctAiConfig;
   agentDir?: string;
   workspaceDir?: string;
   prompter: WizardPrompter;      // Lời nhắc/thông báo UI
@@ -424,7 +424,7 @@ type ProviderAuthResult = {
     profileId: string;
     credential: AuthProfileCredential;
   }>;
-  configPatch?: Partial<AI Business HQConfig>;
+  configPatch?: Partial<OctAiConfig>;
   defaultModel?: string;
   notes?: string[];
 };
@@ -437,7 +437,7 @@ type ProviderAuthResult = {
 ### 1. Môi trường/Phụ thuộc cần thiết
 
 - Go ≥ 1.25
-- Mã nguồn AI Business HQ (`pkg/providers/` và `pkg/auth/`)
+- Mã nguồn OctAi (`pkg/providers/` và `pkg/auth/`)
 - Các gói thư viện chuẩn `crypto` và `net/http`
 
 ### 2. Các header bắt buộc cho lệnh gọi API
@@ -610,9 +610,9 @@ Hồ sơ xác thực được lưu trữ trong `~/.aibhq/auth.json`:
 
 ---
 
-## Tạo nhà cung cấp mới trong AI Business HQ
+## Tạo nhà cung cấp mới trong OctAi
 
-Các nhà cung cấp AI Business HQ được triển khai dưới dạng gói Go trong `pkg/providers/`. Để thêm nhà cung cấp mới:
+Các nhà cung cấp OctAi được triển khai dưới dạng gói Go trong `pkg/providers/`. Để thêm nhà cung cấp mới:
 
 ### Triển khai từng bước
 
@@ -718,10 +718,10 @@ aibhq agent -m "Hello" --model your-model
 
 ```bash
 # Ghi đè mô hình mặc định
-export PICOCLAW_AGENTS_DEFAULTS_MODEL=your-model
+export OCTAI_AGENTS_DEFAULTS_MODEL=your-model
 
 # Ghi đè cài đặt nhà cung cấp
-export PICOCLAW_MODEL_LIST='[{"model_name":"your-model","model":"your-provider/model-name","api_key":"..."}]'
+export OCTAI_MODEL_LIST='[{"model_name":"your-model","model":"your-provider/model-name","api_key":"..."}]'
 ```
 
 ---

@@ -28,8 +28,8 @@ MaixCam là kênh chuyên dụng để kết nối với các thiết bị camer
 
 ## Trường hợp sử dụng
 
-Kênh MaixCam cho phép AI Business HQ hoạt động như backend AI cho các thiết bị biên:
+Kênh MaixCam cho phép OctAi hoạt động như backend AI cho các thiết bị biên:
 
-- **Giám sát thông minh**: MaixCAM gửi khung hình ảnh; AI Business HQ phân tích bằng mô hình thị giác
-- **Điều khiển IoT**: Thiết bị gửi dữ liệu cảm biến; AI Business HQ điều phối phản hồi
-- **AI ngoại tuyến**: Triển khai AI Business HQ trên mạng nội bộ để suy luận độ trễ thấp
+- **Giám sát thông minh**: MaixCAM gửi khung hình ảnh; OctAi phân tích bằng mô hình thị giác
+- **Điều khiển IoT**: Thiết bị gửi dữ liệu cảm biến; OctAi điều phối phản hồi
+- **AI ngoại tuyến**: Triển khai OctAi trên mạng nội bộ để suy luận độ trễ thấp

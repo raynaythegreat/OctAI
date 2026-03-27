@@ -4,7 +4,7 @@
 
 ## 🐳 Docker Compose
 
-Bạn cũng có thể chạy AI Business HQ bằng Docker Compose mà không cần cài đặt gì trên máy.
+Bạn cũng có thể chạy OctAi bằng Docker Compose mà không cần cài đặt gì trên máy.
 
 ```bash
 # 1. Clone repo này
@@ -24,7 +24,7 @@ docker compose -f docker/docker-compose.yml --profile gateway up -d
 ```
 
 > [!TIP]
-> **Người dùng Docker**: Mặc định, Gateway lắng nghe trên `127.0.0.1`, không thể truy cập từ host. Nếu bạn cần truy cập các health endpoint hoặc mở port, hãy đặt `PICOCLAW_GATEWAY_HOST=0.0.0.0` trong môi trường hoặc cập nhật `config.json`.
+> **Người dùng Docker**: Mặc định, Gateway lắng nghe trên `127.0.0.1`, không thể truy cập từ host. Nếu bạn cần truy cập các health endpoint hoặc mở port, hãy đặt `OCTAI_GATEWAY_HOST=0.0.0.0` trong môi trường hoặc cập nhật `config.json`.
 
 ```bash
 # 5. Kiểm tra log
@@ -67,7 +67,7 @@ docker compose -f docker/docker-compose.yml --profile gateway up -d
 ### 🚀 Bắt Đầu Nhanh
 
 > [!TIP]
-> Cấu hình API Key trong `~/.aibhq/config.json`. Lấy API Key: [Volcengine (CodingPlan)](https://www.volcengine.com/activity/codingplan?utm_campaign=AI Business HQ&utm_content=AI Business HQ&utm_medium=devrel&utm_source=OWO&utm_term=AI Business HQ) (LLM) · [OpenRouter](https://openrouter.ai/keys) (LLM) · [Zhipu](https://open.bigmodel.cn/usercenter/proj-mgmt/apikeys) (LLM). Tìm kiếm web là tùy chọn — lấy miễn phí [Tavily API](https://tavily.com) (1000 truy vấn miễn phí/tháng) hoặc [Brave Search API](https://brave.com/search/api) (2000 truy vấn miễn phí/tháng).
+> Cấu hình API Key trong `~/.aibhq/config.json`. Lấy API Key: [Volcengine (CodingPlan)](https://www.volcengine.com/activity/codingplan?utm_campaign=OctAi&utm_content=OctAi&utm_medium=devrel&utm_source=OWO&utm_term=OctAi) (LLM) · [OpenRouter](https://openrouter.ai/keys) (LLM) · [Zhipu](https://open.bigmodel.cn/usercenter/proj-mgmt/apikeys) (LLM). Tìm kiếm web là tùy chọn — lấy miễn phí [Tavily API](https://tavily.com) (1000 truy vấn miễn phí/tháng) hoặc [Brave Search API](https://brave.com/search/api) (2000 truy vấn miễn phí/tháng).
 
 **1. Khởi tạo**
 
@@ -142,7 +142,7 @@ aibhq onboard
 ```
 
 > **Mới**: Định dạng cấu hình `model_list` cho phép thêm provider mà không cần thay đổi code. Xem [Cấu Hình Mô Hình](#cấu-hình-mô-hình-model_list) để biết chi tiết.
-> `request_timeout` là tùy chọn và tính bằng giây. Nếu bỏ qua hoặc đặt `<= 0`, AI Business HQ sử dụng timeout mặc định (120s).
+> `request_timeout` là tùy chọn và tính bằng giây. Nếu bỏ qua hoặc đặt `<= 0`, OctAi sử dụng timeout mặc định (120s).
 
 **3. Lấy API Key**
 

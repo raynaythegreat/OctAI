@@ -2,7 +2,7 @@
 
 # QQ
 
-AI Business HQ 通过 QQ 开放平台的官方机器人 API 提供对 QQ 的支持。
+OctAi 通过 QQ 开放平台的官方机器人 API 提供对 QQ 的支持。
 
 ## 配置
 
@@ -36,7 +36,7 @@ QQ 开放平台提供了一键创建入口：
 
 1. 打开 [QQ 机器人快速创建](https://q.qq.com/qqbot/openclaw/index.html)，扫码登录
 2. 系统自动创建机器人，复制 **App ID** 和 **App Secret**
-3. 将凭证填入 AI Business HQ 配置文件
+3. 将凭证填入 OctAi 配置文件
 4. 运行 `aibhq gateway` 启动服务
 5. 打开 QQ，与机器人开始对话
 
@@ -49,7 +49,7 @@ QQ 开放平台提供了一键创建入口：
 1. 使用 QQ 账号登录 [QQ 开放平台](https://q.qq.com/)，注册开发者账号
 2. 创建 QQ 机器人，自定义头像和名称
 3. 在机器人设置中获取 **App ID** 和 **App Secret**
-4. 将凭证填入 AI Business HQ 配置文件
+4. 将凭证填入 OctAi 配置文件
 5. 运行 `aibhq gateway` 启动服务
 6. 在 QQ 中搜索你的机器人，开始对话
 

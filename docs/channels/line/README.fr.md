@@ -2,7 +2,7 @@
 
 # Line
 
-AI Business HQ prend en charge LINE via l'API LINE Messaging avec des callbacks webhook.
+OctAi prend en charge LINE via l'API LINE Messaging avec des callbacks webhook.
 
 ## Configuration
 
@@ -34,7 +34,7 @@ AI Business HQ prend en charge LINE via l'API LINE Messaging avec des callbacks 
 2. Obtenez le Channel Secret et le Channel Access Token
 3. Configurez le webhook :
    - LINE exige que les webhooks utilisent HTTPS. Vous devez donc déployer un serveur compatible HTTPS ou utiliser un outil de proxy inverse comme ngrok pour exposer votre serveur local sur Internet
-   - AI Business HQ utilise un serveur HTTP Gateway partagé pour recevoir les callbacks webhook de tous les canaux, écoutant par défaut sur 127.0.0.1:18790
+   - OctAi utilise un serveur HTTP Gateway partagé pour recevoir les callbacks webhook de tous les canaux, écoutant par défaut sur 127.0.0.1:18790
    - Définissez l'URL du webhook sur `https://your-domain.com/webhook/line`, puis configurez un proxy inverse de votre domaine externe vers le Gateway local (port par défaut 18790)
    - Activez le webhook et vérifiez l'URL
 4. Renseignez le Channel Secret et le Channel Access Token dans le fichier de configuration

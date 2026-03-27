@@ -4,7 +4,7 @@
 
 ## 概要
 
-**Antigravity**（Google Cloud Code Assist）は、Google が提供する AI モデルプロバイダーで、Google のクラウドインフラストラクチャを通じて Claude Opus 4.6 や Gemini などのモデルへのアクセスを提供します。本ドキュメントでは、認証の仕組み、モデルの取得方法、AI Business HQ での新しいプロバイダーの実装方法について完全なガイドを提供します。
+**Antigravity**（Google Cloud Code Assist）は、Google が提供する AI モデルプロバイダーで、Google のクラウドインフラストラクチャを通じて Claude Opus 4.6 や Gemini などのモデルへのアクセスを提供します。本ドキュメントでは、認証の仕組み、モデルの取得方法、OctAi での新しいプロバイダーの実装方法について完全なガイドを提供します。
 
 ---
 
@@ -19,7 +19,7 @@
 7. [統合要件](#統合要件)
 8. [API エンドポイント](#api-エンドポイント)
 9. [設定](#設定)
-10. [AI Business HQ での新しいプロバイダーの作成](#aibhq-での新しいプロバイダーの作成)
+10. [OctAi での新しいプロバイダーの作成](#aibhq-での新しいプロバイダーの作成)
 
 ---
 
@@ -376,7 +376,7 @@ const antigravityPlugin = {
   description: "OAuth flow for Google Antigravity (Cloud Code Assist)",
   configSchema: emptyPluginConfigSchema(),
   
-  register(api: AI Business HQPluginApi) {
+  register(api: OctAiPluginApi) {
     api.registerProvider({
       id: "google-antigravity",
       label: "Google Antigravity",
@@ -403,7 +403,7 @@ const antigravityPlugin = {
 
 ```typescript
 type ProviderAuthContext = {
-  config: AI Business HQConfig;
+  config: OctAiConfig;
   agentDir?: string;
   workspaceDir?: string;
   prompter: WizardPrompter;      // UI プロンプト/通知
@@ -424,7 +424,7 @@ type ProviderAuthResult = {
     profileId: string;
     credential: AuthProfileCredential;
   }>;
-  configPatch?: Partial<AI Business HQConfig>;
+  configPatch?: Partial<OctAiConfig>;
   defaultModel?: string;
   notes?: string[];
 };
@@ -437,7 +437,7 @@ type ProviderAuthResult = {
 ### 1. 必要な環境/依存関係
 
 - Go ≥ 1.25
-- AI Business HQ コードベース（`pkg/providers/` および `pkg/auth/`）
+- OctAi コードベース（`pkg/providers/` および `pkg/auth/`）
 - `crypto` および `net/http` 標準ライブラリパッケージ
 
 ### 2. API 呼び出しに必要なヘッダー
@@ -610,9 +610,9 @@ export function sanitizeAntigravityThinkingBlocks(
 
 ---
 
-## AI Business HQ での新しいプロバイダーの作成
+## OctAi での新しいプロバイダーの作成
 
-AI Business HQ のプロバイダーは `pkg/providers/` 配下の Go パッケージとして実装されます。新しいプロバイダーを追加するには：
+OctAi のプロバイダーは `pkg/providers/` 配下の Go パッケージとして実装されます。新しいプロバイダーを追加するには：
 
 ### ステップバイステップの実装
 
@@ -718,10 +718,10 @@ aibhq agent -m "Hello" --model your-model
 
 ```bash
 # デフォルトモデルの上書き
-export PICOCLAW_AGENTS_DEFAULTS_MODEL=your-model
+export OCTAI_AGENTS_DEFAULTS_MODEL=your-model
 
 # プロバイダー設定の上書き
-export PICOCLAW_MODEL_LIST='[{"model_name":"your-model","model":"your-provider/model-name","api_key":"..."}]'
+export OCTAI_MODEL_LIST='[{"model_name":"your-model","model":"your-provider/model-name","api_key":"..."}]'
 ```
 
 ---

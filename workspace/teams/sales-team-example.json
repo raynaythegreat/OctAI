@@ -1,0 +1,61 @@
+{
+  "comment": "Example Sales Team configuration. Copy relevant sections into your config.json.",
+  "agents": {
+    "list": [
+      {
+        "id": "sales-orchestrator",
+        "name": "Sales Orchestrator",
+        "role": "orchestrator",
+        "team_id": "sales-team",
+        "workspace": "workspace/teams/sales",
+        "subagents": {
+          "allow_agents": ["*"]
+        }
+      },
+      {
+        "id": "sales-agent",
+        "name": "Sales Specialist",
+        "role": "sales",
+        "team_id": "sales-team",
+        "workspace": "workspace/teams/sales"
+      },
+      {
+        "id": "research-agent",
+        "name": "Research Specialist",
+        "role": "research",
+        "team_id": "sales-team",
+        "workspace": "workspace/teams/research"
+      },
+      {
+        "id": "content-agent",
+        "name": "Content Specialist",
+        "role": "content",
+        "team_id": "sales-team",
+        "workspace": "workspace/teams/content"
+      }
+    ],
+    "teams": [
+      {
+        "id": "sales-team",
+        "name": "Sales Team",
+        "orchestrator_id": "sales-orchestrator",
+        "member_ids": ["sales-agent", "research-agent", "content-agent"],
+        "shared_kb_path": "workspace/teams/sales/knowledge",
+        "token_budget": 100000,
+        "max_concurrent": 3
+      }
+    ]
+  },
+  "tools": {
+    "enabled": ["web", "web_fetch", "subagent", "spawn", "team", "knowledge_search", "knowledge_add"]
+  },
+  "usage_example": {
+    "user_message": "Find 5 leads in the SaaS space with 50-200 employees and draft personalized outreach emails for each.",
+    "orchestrator_flow": [
+      "1. Delegate to research-agent: Find 5 SaaS companies with 50-200 employees using web_search",
+      "2. Delegate to sales-agent: Qualify each company and identify decision-makers",
+      "3. Delegate to content-agent: Draft personalized outreach emails for each contact",
+      "4. Synthesize results and present to user"
+    ]
+  }
+}

@@ -1,8 +1,8 @@
 > Quay lại [README](../../README.vi.md)
 
-# 🖥️ AI Business HQ Danh sách tương thích phần cứng
+# 🖥️ OctAi Danh sách tương thích phần cứng
 
-AI Business HQ chạy được trên hầu hết mọi thiết bị Linux. Trang này ghi nhận các chip, sản phẩm và bo mạch phát triển đã được xác minh.
+OctAi chạy được trên hầu hết mọi thiết bị Linux. Trang này ghi nhận các chip, sản phẩm và bo mạch phát triển đã được xác minh.
 
 **Phần cứng của bạn chưa có trong danh sách?** Gửi PR để thêm vào! Các nhà sản xuất phần cứng được hoan nghênh đóng góp và đồng quảng bá.
 
@@ -59,7 +59,7 @@ AI Business HQ chạy được trên hầu hết mọi thiết bị Linux. Trang
 
 ## 2. Sản phẩm đã xác minh (theo ngày phát hành)
 
-Sản phẩm tiêu dùng, router và thiết bị công nghiệp đã được kiểm thử với AI Business HQ.
+Sản phẩm tiêu dùng, router và thiết bị công nghiệp đã được kiểm thử với OctAi.
 
 | Năm | Sản phẩm | Kiến trúc | SoC | RAM | Danh mục |
 |-----|----------|-----------|-----|-----|----------|
@@ -97,7 +97,7 @@ Sản phẩm tiêu dùng, router và thiết bị công nghiệp đã được k
 
 ### Điện thoại Android (qua Termux)
 
-Bất kỳ điện thoại Android ARM64 nào (2015+) với 1GB+ RAM. Cài đặt [Termux](https://github.com/termux/termux-app), sử dụng `proot` để chạy AI Business HQ.
+Bất kỳ điện thoại Android ARM64 nào (2015+) với 1GB+ RAM. Cài đặt [Termux](https://github.com/termux/termux-app), sử dụng `proot` để chạy OctAi.
 
 > Xem [README: Chạy trên điện thoại Android cũ](../../README.vi.md#-run-on-old-android-phones) để biết hướng dẫn cài đặt.
 

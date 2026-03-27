@@ -1,29 +1,29 @@
 services:
   # ─────────────────────────────────────────────
-  # PicoClaw Agent (one-shot query)
-  #   docker compose -f docker/docker-compose.yml run --rm picoclaw-agent -m "Hello"
+  # OctAi Agent (one-shot query)
+  #   docker compose -f docker/docker-compose.yml run --rm octai-agent -m "Hello"
   # ─────────────────────────────────────────────
-  picoclaw-agent:
-    image: docker.io/sipeed/picoclaw:latest
-    container_name: picoclaw-agent
+  octai-agent:
+    image: docker.io/sipeed/octai:latest
+    container_name: octai-agent
     profiles:
       - agent
     # Uncomment to access host network; leave commented unless needed.
     #extra_hosts:
     #  - "host.docker.internal:host-gateway"
     volumes:
-      - ./data:/root/.picoclaw
-    entrypoint: ["picoclaw", "agent"]
+      - ./data:/root/.octai
+    entrypoint: ["aibhq", "agent"]
     stdin_open: true
     tty: true
 
   # ─────────────────────────────────────────────
-  # PicoClaw Gateway (Long-running Bot)
+  # OctAi Gateway (Long-running Bot)
   #   docker compose -f docker/docker-compose.yml --profile gateway up
   # ─────────────────────────────────────────────
-  picoclaw-gateway:
-    image: docker.io/sipeed/picoclaw:latest
-    container_name: picoclaw-gateway
+  octai-gateway:
+    image: docker.io/sipeed/octai:latest
+    container_name: octai-gateway
     restart: on-failure
     profiles:
       - gateway
@@ -31,22 +31,22 @@ services:
     #extra_hosts:
     #  - "host.docker.internal:host-gateway"
     volumes:
-      - ./data:/root/.picoclaw
+      - ./data:/root/.octai
 
   # ─────────────────────────────────────────────
-  # PicoClaw Launcher (Web Console + Gateway)
+  # OctAi Launcher (Web Console + Gateway)
   #   docker compose -f docker/docker-compose.yml --profile launcher up
   # ─────────────────────────────────────────────
-  picoclaw-launcher:
-    image: docker.io/sipeed/picoclaw:launcher
-    container_name: picoclaw-launcher
+  octai-launcher:
+    image: docker.io/sipeed/octai:launcher
+    container_name: octai-launcher
     restart: on-failure
     profiles:
       - launcher
     environment:
-      - PICOCLAW_GATEWAY_HOST=0.0.0.0
+      - OCTAI_GATEWAY_HOST=0.0.0.0
     ports:
       - "127.0.0.1:18800:18800"
       - "127.0.0.1:18790:18790"
     volumes:
-      - ./data:/root/.picoclaw
+      - ./data:/root/.octai

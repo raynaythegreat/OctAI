@@ -53,7 +53,7 @@ If your first goal is simply to prove that the hook flow works and observe real 
 
 1. Enable `hooks.enabled`
 2. Save the Python example from this document to a local file, for example `/tmp/review_gate.py`
-3. Set `PICOCLAW_HOOK_LOG_FILE`
+3. Set `OCTAI_HOOK_LOG_FILE`
 4. Restart the gateway
 5. Watch the log file with `tail -f`
 
@@ -82,7 +82,7 @@ Example:
           "approve_tool"
         ],
         "env": {
-          "PICOCLAW_HOOK_LOG_FILE": "/tmp/aibhq-hook-review-gate.log"
+          "OCTAI_HOOK_LOG_FILE": "/tmp/aibhq-hook-review-gate.log"
         }
       }
     }
@@ -96,14 +96,14 @@ Watch it with:
 tail -f /tmp/aibhq-hook-review-gate.log
 ```
 
-If you are developing AI Business HQ itself rather than only validating the protocol, continue with the Go in-process example as well.
+If you are developing OctAi itself rather than only validating the protocol, continue with the Go in-process example as well.
 
 ## What The Two Examples Are For
 
 - Go in-process example
   Best for validating the host-side hook chain and understanding `MountHook()` plus the synchronous stages
 - Python process example
-  Best for understanding the `JSON-RPC over stdio` protocol and verifying the message flow between AI Business HQ and an external process
+  Best for understanding the `JSON-RPC over stdio` protocol and verifying the message flow between OctAi and an external process
 
 Both examples are intentionally safe: they only log, never rewrite, and never deny.
 
@@ -384,8 +384,8 @@ import sys
 from datetime import datetime, timezone
 from typing import Any
 
-LOG_EVENTS = os.getenv("PICOCLAW_HOOK_LOG_EVENTS", "1").lower() not in {"0", "false", "no"}
-LOG_FILE = os.getenv("PICOCLAW_HOOK_LOG_FILE", "").strip()
+LOG_EVENTS = os.getenv("OCTAI_HOOK_LOG_EVENTS", "1").lower() not in {"0", "false", "no"}
+LOG_FILE = os.getenv("OCTAI_HOOK_LOG_FILE", "").strip()
 
 
 def append_log(entry: dict[str, Any]) -> None:
@@ -552,7 +552,7 @@ if __name__ == "__main__":
           "approve_tool"
         ],
         "env": {
-          "PICOCLAW_HOOK_LOG_FILE": "/tmp/aibhq-hook-review-gate.log"
+          "OCTAI_HOOK_LOG_FILE": "/tmp/aibhq-hook-review-gate.log"
         }
       }
     }
@@ -562,12 +562,12 @@ if __name__ == "__main__":
 
 ### Environment Variables
 
-- `PICOCLAW_HOOK_LOG_EVENTS`
+- `OCTAI_HOOK_LOG_EVENTS`
   Whether to write `hook.event` summaries to `stderr`, enabled by default
-- `PICOCLAW_HOOK_LOG_FILE`
+- `OCTAI_HOOK_LOG_FILE`
   Path to an external log file. When set, the script appends inbound hook requests, notifications, and outbound responses as JSON Lines
 
-Note: `PICOCLAW_HOOK_LOG_FILE` has no default. If you do not set it, the script does not write any file logs.
+Note: `OCTAI_HOOK_LOG_FILE` has no default. If you do not set it, the script does not write any file logs.
 
 ### How To Confirm It Received Hooks
 
@@ -575,7 +575,7 @@ Watch two places:
 
 - Gateway logs
   Useful for confirming that the host successfully started the process and for seeing event summaries written to `stderr`
-- `PICOCLAW_HOOK_LOG_FILE`
+- `OCTAI_HOOK_LOG_FILE`
   Useful for seeing the exact requests the script received and the exact responses it returned
 
 Typical interpretation:
@@ -616,12 +616,12 @@ Additional notes:
 
 Current process hooks use `JSON-RPC over stdio`:
 
-- AI Business HQ starts the external process
+- OctAi starts the external process
 - Requests and responses are exchanged as one JSON message per line
 - `hook.event` is a notification and does not need a response
 - `hook.before_llm`, `hook.after_llm`, `hook.before_tool`, `hook.after_tool`, and `hook.approve_tool` are request/response calls
 
-The host does not currently accept new RPCs initiated by the process hook. In practice, that means an external hook can only respond to AI Business HQ calls; it cannot call back into the host to send channel messages.
+The host does not currently accept new RPCs initiated by the process hook. In practice, that means an external hook can only respond to OctAi calls; it cannot call back into the host to send channel messages.
 
 ## Configuration Fields
 

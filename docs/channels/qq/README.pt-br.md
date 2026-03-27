@@ -2,7 +2,7 @@
 
 # QQ
 
-O AI Business HQ oferece suporte ao QQ via API Bot oficial da Plataforma Aberta QQ.
+O OctAi oferece suporte ao QQ via API Bot oficial da Plataforma Aberta QQ.
 
 ## Configuração
 
@@ -34,7 +34,7 @@ A Plataforma Aberta QQ oferece uma entrada de criação com um clique:
 
 1. Abra o [QQ Bot Quick Create](https://q.qq.com/qqbot/openclaw/index.html) e faça login escaneando o QR code
 2. O sistema cria o bot automaticamente — copie o **App ID** e o **App Secret**
-3. Preencha as credenciais no arquivo de configuração do AI Business HQ
+3. Preencha as credenciais no arquivo de configuração do OctAi
 4. Execute `aibhq gateway` para iniciar o serviço
 5. Abra o QQ e comece a conversar com o bot
 
@@ -47,7 +47,7 @@ A Plataforma Aberta QQ oferece uma entrada de criação com um clique:
 1. Faça login na [Plataforma Aberta QQ](https://q.qq.com/) com sua conta QQ e registre-se como desenvolvedor
 2. Crie um bot QQ e personalize seu avatar e nome
 3. Obtenha o **App ID** e o **App Secret** nas configurações do bot
-4. Preencha as credenciais no arquivo de configuração do AI Business HQ
+4. Preencha as credenciais no arquivo de configuração do OctAi
 5. Execute `aibhq gateway` para iniciar o serviço
 6. Pesquise seu bot no QQ e comece a conversar
 

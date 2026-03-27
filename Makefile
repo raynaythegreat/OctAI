@@ -64,8 +64,8 @@ INSTALL_MAN_DIR=$(INSTALL_PREFIX)/share/man/man1
 INSTALL_TMP_SUFFIX=.new
 
 # Workspace and Skills
-PICOCLAW_HOME?=$(HOME)/.aibhq
-WORKSPACE_DIR?=$(PICOCLAW_HOME)/workspace
+OCTAI_HOME?=$(HOME)/.aibhq
+WORKSPACE_DIR?=$(OCTAI_HOME)/workspace
 WORKSPACE_SKILLS_DIR=$(WORKSPACE_DIR)/skills
 BUILTIN_SKILLS_DIR=$(CURDIR)/skills
 
@@ -231,8 +231,8 @@ uninstall:
 ## uninstall-all: Remove aibhq and all data
 uninstall-all:
 	@echo "Removing workspace and skills..."
-	@rm -rf $(PICOCLAW_HOME)
-	@echo "Removed workspace: $(PICOCLAW_HOME)"
+	@rm -rf $(OCTAI_HOME)
+	@echo "Removed workspace: $(OCTAI_HOME)"
 	@echo "Complete uninstallation done!"
 
 ## clean: Remove build artifacts
@@ -320,7 +320,7 @@ docker-clean:
 	docker rmi aibhq:latest aibhq:full 2>/dev/null || true
 
 
-## build-macos-app: Build PicoClaw macOS .app bundle (no terminal window)
+## build-macos-app: Build OctAi macOS .app bundle (no terminal window)
 build-macos-app:
 	@echo "Building macOS .app bundle..."
 	@if [ "$(UNAME_S)" != "Darwin" ]; then \
@@ -329,7 +329,7 @@ build-macos-app:
 	fi
 	@cd web && $(MAKE) build && cd ..
 	@./scripts/build-macos-app.sh $(BINARY_NAME)-$(PLATFORM)-$(ARCH)
-	@echo "macOS .app bundle created: $(BUILD_DIR)/PicoClaw.app"
+	@echo "macOS .app bundle created: $(BUILD_DIR)/OctAi.app"
 
 ## help: Show this help message
 help:
@@ -351,7 +351,7 @@ help:
 	@echo ""
 	@echo "Environment Variables:"
 	@echo "  INSTALL_PREFIX          # Installation prefix (default: ~/.local)"
-	@echo "  WORKSPACE_DIR           # Workspace directory (default: ~/.aibhq/workspace)"
+	@echo "  WORKSPACE_DIR           # Workspace directory (default: ~/.octai/workspace)"
 	@echo "  VERSION                 # Version string (default: git describe)"
 	@echo ""
 	@echo "Current Configuration:"

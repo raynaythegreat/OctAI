@@ -1,0 +1,42 @@
+{
+  "comment": "Example Support Team configuration.",
+  "agents": {
+    "list": [
+      {
+        "id": "support-orchestrator",
+        "name": "Support Orchestrator",
+        "role": "orchestrator",
+        "team_id": "support-team",
+        "workspace": "workspace/teams/support",
+        "subagents": {
+          "allow_agents": ["*"]
+        }
+      },
+      {
+        "id": "support-agent",
+        "name": "Support Specialist",
+        "role": "support",
+        "team_id": "support-team",
+        "workspace": "workspace/teams/support"
+      },
+      {
+        "id": "kb-research-agent",
+        "name": "Knowledge Research Agent",
+        "role": "research",
+        "team_id": "support-team",
+        "workspace": "workspace/teams/support"
+      }
+    ],
+    "teams": [
+      {
+        "id": "support-team",
+        "name": "Customer Support Team",
+        "orchestrator_id": "support-orchestrator",
+        "member_ids": ["support-agent", "kb-research-agent"],
+        "shared_kb_path": "workspace/teams/support/knowledge",
+        "token_budget": 50000,
+        "max_concurrent": 2
+      }
+    ]
+  }
+}

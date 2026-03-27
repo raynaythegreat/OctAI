@@ -1,6 +1,6 @@
 # Deployment Guide
 
-> Comprehensive deployment guide for AI Business HQ
+> Comprehensive deployment guide for OctAi
 
 ## Table of Contents
 

@@ -12,28 +12,28 @@ Bạn có thể ghi đè các đường dẫn mặc định bằng biến môi t
 
 | Biến              | Mô tả                                                                                                                             | Đường Dẫn Mặc Định       |
 |-------------------|-----------------------------------------------------------------------------------------------------------------------------------------|---------------------------|
-| `PICOCLAW_CONFIG` | Ghi đè đường dẫn đến file cấu hình. Chỉ định trực tiếp cho aibhq file `config.json` nào cần tải, bỏ qua tất cả vị trí khác. | `~/.aibhq/config.json` |
-| `PICOCLAW_HOME`   | Ghi đè thư mục gốc cho dữ liệu aibhq. Thay đổi vị trí mặc định của `workspace` và các thư mục dữ liệu khác.          | `~/.aibhq`             |
+| `OCTAI_CONFIG` | Ghi đè đường dẫn đến file cấu hình. Chỉ định trực tiếp cho aibhq file `config.json` nào cần tải, bỏ qua tất cả vị trí khác. | `~/.aibhq/config.json` |
+| `OCTAI_HOME`   | Ghi đè thư mục gốc cho dữ liệu aibhq. Thay đổi vị trí mặc định của `workspace` và các thư mục dữ liệu khác.          | `~/.aibhq`             |
 
 **Ví dụ:**
 
 ```bash
 # Chạy aibhq với file cấu hình cụ thể
 # Đường dẫn workspace sẽ được đọc từ trong file cấu hình đó
-PICOCLAW_CONFIG=/etc/aibhq/production.json aibhq gateway
+OCTAI_CONFIG=/etc/aibhq/production.json aibhq gateway
 
 # Chạy aibhq với tất cả dữ liệu lưu tại /opt/aibhq
 # Cấu hình sẽ được tải từ mặc định ~/.aibhq/config.json
 # Workspace sẽ được tạo tại /opt/aibhq/workspace
-PICOCLAW_HOME=/opt/aibhq aibhq agent
+OCTAI_HOME=/opt/aibhq aibhq agent
 
 # Sử dụng cả hai cho thiết lập tùy chỉnh hoàn toàn
-PICOCLAW_HOME=/srv/aibhq PICOCLAW_CONFIG=/srv/aibhq/main.json aibhq gateway
+OCTAI_HOME=/srv/aibhq OCTAI_CONFIG=/srv/aibhq/main.json aibhq gateway
 ```
 
 ### Bố Cục Workspace
 
-AI Business HQ lưu trữ dữ liệu trong workspace đã cấu hình (mặc định: `~/.aibhq/workspace`):
+OctAi lưu trữ dữ liệu trong workspace đã cấu hình (mặc định: `~/.aibhq/workspace`):
 
 ```
 ~/.aibhq/workspace/
@@ -62,7 +62,7 @@ Mặc định, skill được tải từ:
 Cho thiết lập nâng cao/test, bạn có thể ghi đè thư mục gốc skill builtin với:
 
 ```bash
-export PICOCLAW_BUILTIN_SKILLS=/path/to/skills
+export OCTAI_BUILTIN_SKILLS=/path/to/skills
 ```
 
 ### Chính Sách Thực Thi Lệnh Thống Nhất
@@ -74,7 +74,7 @@ export PICOCLAW_BUILTIN_SKILLS=/path/to/skills
 
 ### 🔒 Sandbox Bảo Mật
 
-AI Business HQ chạy trong môi trường sandbox mặc định. Agent chỉ có thể truy cập file và thực thi lệnh trong workspace đã cấu hình.
+OctAi chạy trong môi trường sandbox mặc định. Agent chỉ có thể truy cập file và thực thi lệnh trong workspace đã cấu hình.
 
 #### Cấu Hình Mặc Định
 
@@ -138,7 +138,7 @@ Ngay cả khi `restrict_to_workspace: false`, công cụ `exec` chặn các lệ
 
 #### Hạn Chế Đã Biết: Tiến Trình Con Từ Công Cụ Build
 
-Guard bảo mật exec chỉ kiểm tra dòng lệnh mà AI Business HQ khởi chạy trực tiếp. Nó không kiểm tra đệ quy các tiến trình con được tạo bởi công cụ phát triển được phép như `make`, `go run`, `cargo`, `npm run`, hoặc script build tùy chỉnh.
+Guard bảo mật exec chỉ kiểm tra dòng lệnh mà OctAi khởi chạy trực tiếp. Nó không kiểm tra đệ quy các tiến trình con được tạo bởi công cụ phát triển được phép như `make`, `go run`, `cargo`, `npm run`, hoặc script build tùy chỉnh.
 
 Điều này có nghĩa là lệnh cấp cao nhất vẫn có thể biên dịch hoặc khởi chạy binary khác sau khi vượt qua kiểm tra guard ban đầu. Trong thực tế, hãy coi script build, Makefile, script package, và binary được tạo như mã thực thi cần cùng mức độ review như lệnh shell trực tiếp.
 
@@ -146,7 +146,7 @@ Cho môi trường rủi ro cao hơn:
 
 * Review script build trước khi thực thi.
 * Ưu tiên phê duyệt/review thủ công cho quy trình biên dịch và chạy.
-* Chạy AI Business HQ trong container hoặc VM nếu bạn cần cách ly mạnh hơn guard tích hợp.
+* Chạy OctAi trong container hoặc VM nếu bạn cần cách ly mạnh hơn guard tích hợp.
 
 #### Ví Dụ Lỗi
 
@@ -179,7 +179,7 @@ Nếu bạn cần agent truy cập đường dẫn ngoài workspace:
 **Phương pháp 2: Biến môi trường**
 
 ```bash
-export PICOCLAW_AGENTS_DEFAULTS_RESTRICT_TO_WORKSPACE=false
+export OCTAI_AGENTS_DEFAULTS_RESTRICT_TO_WORKSPACE=false
 ```
 
 > ⚠️ **Cảnh báo**: Tắt giới hạn này cho phép agent truy cập bất kỳ đường dẫn nào trên hệ thống. Chỉ sử dụng cẩn thận trong môi trường được kiểm soát.
@@ -198,7 +198,7 @@ Tất cả đường dẫn chia sẻ cùng giới hạn workspace — không có
 
 ### Heartbeat (Tác Vụ Định Kỳ)
 
-AI Business HQ có thể thực hiện tác vụ định kỳ tự động. Tạo file `HEARTBEAT.md` trong workspace:
+OctAi có thể thực hiện tác vụ định kỳ tự động. Tạo file `HEARTBEAT.md` trong workspace:
 
 ```markdown
 # Tác Vụ Định Kỳ
@@ -270,8 +270,8 @@ Trả lời HEARTBEAT_OK        Người dùng nhận kết quả trực tiếp
 
 **Biến môi trường:**
 
-* `PICOCLAW_HEARTBEAT_ENABLED=false` để tắt
-* `PICOCLAW_HEARTBEAT_INTERVAL=60` để thay đổi khoảng thời gian
+* `OCTAI_HEARTBEAT_ENABLED=false` để tắt
+* `OCTAI_HEARTBEAT_INTERVAL=60` để thay đổi khoảng thời gian
 
 ### Providers
 
@@ -282,7 +282,7 @@ Trả lời HEARTBEAT_OK        Người dùng nhận kết quả trực tiếp
 | ------------ | --------------------------------------- | ------------------------------------------------------------ |
 | `gemini`     | LLM (Gemini trực tiếp)                  | [aistudio.google.com](https://aistudio.google.com)           |
 | `zhipu`      | LLM (Zhipu trực tiếp)                   | [bigmodel.cn](https://bigmodel.cn)                           |
-| `volcengine` | LLM (Volcengine trực tiếp)              | [volcengine.com](https://www.volcengine.com/activity/codingplan?utm_campaign=AI Business HQ&utm_content=AI Business HQ&utm_medium=devrel&utm_source=OWO&utm_term=AI Business HQ) |
+| `volcengine` | LLM (Volcengine trực tiếp)              | [volcengine.com](https://www.volcengine.com/activity/codingplan?utm_campaign=OctAi&utm_content=OctAi&utm_medium=devrel&utm_source=OWO&utm_term=OctAi) |
 | `openrouter` | LLM (khuyến nghị, truy cập tất cả mô hình) | [openrouter.ai](https://openrouter.ai)                   |
 | `anthropic`  | LLM (Claude trực tiếp)                  | [console.anthropic.com](https://console.anthropic.com)       |
 | `openai`     | LLM (GPT trực tiếp)                     | [platform.openai.com](https://platform.openai.com)           |
@@ -294,7 +294,7 @@ Trả lời HEARTBEAT_OK        Người dùng nhận kết quả trực tiếp
 
 ### Cấu Hình Mô Hình (model_list)
 
-> **Tính năng mới:** AI Business HQ hiện sử dụng cách tiếp cận **lấy mô hình làm trung tâm**. Chỉ cần chỉ định định dạng `vendor/model` (ví dụ: `zhipu/glm-4.7`) để thêm provider mới — **không cần thay đổi code!**
+> **Tính năng mới:** OctAi hiện sử dụng cách tiếp cận **lấy mô hình làm trung tâm**. Chỉ cần chỉ định định dạng `vendor/model` (ví dụ: `zhipu/glm-4.7`) để thêm provider mới — **không cần thay đổi code!**
 
 #### Tất Cả Vendor Được Hỗ Trợ
 
@@ -309,12 +309,12 @@ Trả lời HEARTBEAT_OK        Người dùng nhận kết quả trực tiếp
 | **通义千问 (Qwen)**     | `qwen/`         | `https://dashscope.aliyuncs.com/compatible-mode/v1` | OpenAI    | [Lấy](https://dashscope.console.aliyun.com)                      |
 | **Ollama**              | `ollama/`       | `http://localhost:11434/v1`                         | OpenAI    | Cục bộ (không cần key)                                           |
 | **OpenRouter**          | `openrouter/`   | `https://openrouter.ai/api/v1`                      | OpenAI    | [Lấy](https://openrouter.ai/keys)                                |
-| **VolcEngine (Doubao)** | `volcengine/`   | `https://ark.cn-beijing.volces.com/api/v3`          | OpenAI    | [Lấy](https://www.volcengine.com/activity/codingplan?utm_campaign=AI Business HQ&utm_content=AI Business HQ&utm_medium=devrel&utm_source=OWO&utm_term=AI Business HQ) |
+| **VolcEngine (Doubao)** | `volcengine/`   | `https://ark.cn-beijing.volces.com/api/v3`          | OpenAI    | [Lấy](https://www.volcengine.com/activity/codingplan?utm_campaign=OctAi&utm_content=OctAi&utm_medium=devrel&utm_source=OWO&utm_term=OctAi) |
 | **Antigravity**         | `antigravity/`  | Google Cloud                                        | Custom    | Chỉ OAuth                                                        |
 
 #### Cân Bằng Tải
 
-Cấu hình nhiều endpoint cho cùng tên mô hình — AI Business HQ sẽ tự động round-robin:
+Cấu hình nhiều endpoint cho cùng tên mô hình — OctAi sẽ tự động round-robin:
 
 ```json
 {
@@ -331,7 +331,7 @@ Cấu hình `providers` cũ đã **bị deprecated** nhưng vẫn được hỗ 
 
 ### Kiến Trúc Provider
 
-AI Business HQ định tuyến provider theo họ giao thức:
+OctAi định tuyến provider theo họ giao thức:
 
 - **Tương thích OpenAI**: OpenRouter, Groq, Zhipu, endpoint kiểu vLLM và hầu hết các provider khác.
 - **Anthropic**: Hành vi API Claude gốc.
@@ -339,7 +339,7 @@ AI Business HQ định tuyến provider theo họ giao thức:
 
 ### Tác Vụ Đã Lên Lịch / Nhắc Nhở
 
-AI Business HQ hỗ trợ tác vụ theo lịch qua công cụ `cron`.
+OctAi hỗ trợ tác vụ theo lịch qua công cụ `cron`.
 
 ```json
 {

@@ -2,7 +2,7 @@
 
 # Criptografia de Credenciais
 
-O AI Business HQ suporta a criptografia de valores `api_key` nas entradas de configuração `model_list`.
+O OctAi suporta a criptografia de valores `api_key` nas entradas de configuração `model_list`.
 As chaves criptografadas são armazenadas como strings `enc://<base64>` e descriptografadas automaticamente na inicialização.
 
 ---
@@ -12,7 +12,7 @@ As chaves criptografadas são armazenadas como strings `enc://<base64>` e descri
 **1. Defina sua frase secreta**
 
 ```bash
-export PICOCLAW_KEY_PASSPHRASE="your-passphrase"
+export OCTAI_KEY_PASSPHRASE="your-passphrase"
 ```
 
 **2. Criptografe uma chave de API**
@@ -48,7 +48,7 @@ enc://AAAA...base64...
 |---------|---------|---------------|
 | Texto simples | `sk-abc123` | Usado como está |
 | Referência de arquivo | `file://openai.key` | Conteúdo lido do mesmo diretório do arquivo de configuração |
-| Criptografado | `enc://<base64>` | Descriptografado na inicialização usando `PICOCLAW_KEY_PASSPHRASE` |
+| Criptografado | `enc://<base64>` | Descriptografado na inicialização usando `OCTAI_KEY_PASSPHRASE` |
 | Vazio | `""` | Passado sem alteração (usado com `auth_method: oauth`) |
 
 ---
@@ -99,7 +99,7 @@ O tag de autenticação GCM é anexado automaticamente ao texto cifrado. Qualque
 
 Quando uma chave privada SSH é fornecida, quebrar a criptografia requer **ambos**:
 
-1. A **frase secreta** (`PICOCLAW_KEY_PASSPHRASE`)
+1. A **frase secreta** (`OCTAI_KEY_PASSPHRASE`)
 2. O **arquivo de chave privada SSH**
 
 Isso significa que um arquivo de configuração vazado sozinho não é suficiente para recuperar a chave de API, mesmo que a frase secreta seja fraca. A chave SSH contribui com 256 bits de entropia (Ed25519) independentemente da força da frase secreta.
@@ -119,12 +119,12 @@ Isso significa que um arquivo de configuração vazado sozinho não é suficient
 
 | Variável | Obrigatório | Descrição |
 |----------|-------------|-----------|
-| `PICOCLAW_KEY_PASSPHRASE` | Sim (para `enc://`) | Frase secreta usada para derivação de chave |
-| `PICOCLAW_SSH_KEY_PATH` | Não | Caminho para a chave privada SSH. Se não definido, detecta automaticamente em `~/.ssh/aibhq_ed25519.key` |
+| `OCTAI_KEY_PASSPHRASE` | Sim (para `enc://`) | Frase secreta usada para derivação de chave |
+| `OCTAI_SSH_KEY_PATH` | Não | Caminho para a chave privada SSH. Se não definido, detecta automaticamente em `~/.ssh/aibhq_ed25519.key` |
 
 ### Detecção Automática da Chave SSH
 
-Se `PICOCLAW_SSH_KEY_PATH` não estiver definido, o AI Business HQ procura a chave dedicada:
+Se `OCTAI_SSH_KEY_PATH` não estiver definido, o OctAi procura a chave dedicada:
 
 ```
 ~/.ssh/aibhq_ed25519.key
@@ -135,17 +135,17 @@ Execute `aibhq onboard` para gerá-lo automaticamente.
 
 `os.UserHomeDir()` é usado para resolução multiplataforma do diretório home (lê `USERPROFILE` no Windows, `HOME` no Unix/macOS).
 
-> **Nota:** Um arquivo de chave SSH é obrigatório para a criptografia de credenciais. Se nenhuma chave for encontrada e `PICOCLAW_SSH_KEY_PATH` não estiver definido, a criptografia/descriptografia falhará. Execute `aibhq onboard` para gerar a chave automaticamente.
+> **Nota:** Um arquivo de chave SSH é obrigatório para a criptografia de credenciais. Se nenhuma chave for encontrada e `OCTAI_SSH_KEY_PATH` não estiver definido, a criptografia/descriptografia falhará. Execute `aibhq onboard` para gerar a chave automaticamente.
 
 ---
 
 ## Migração
 
-Como os únicos materiais secretos são `PICOCLAW_KEY_PASSPHRASE` e o arquivo de chave privada SSH, a migração é simples:
+Como os únicos materiais secretos são `OCTAI_KEY_PASSPHRASE` e o arquivo de chave privada SSH, a migração é simples:
 
 1. Copie o arquivo de configuração para a nova máquina.
-2. Defina `PICOCLAW_KEY_PASSPHRASE` com o mesmo valor.
-3. Copie o arquivo de chave privada SSH para o mesmo caminho (ou defina `PICOCLAW_SSH_KEY_PATH` para sua nova localização).
+2. Defina `OCTAI_KEY_PASSPHRASE` com o mesmo valor.
+3. Copie o arquivo de chave privada SSH para o mesmo caminho (ou defina `OCTAI_SSH_KEY_PATH` para sua nova localização).
 
 Nenhuma recriptografia é necessária.
 
@@ -154,6 +154,6 @@ Nenhuma recriptografia é necessária.
 ## Considerações de Segurança
 
 - **Tanto a frase secreta quanto a chave SSH são obrigatórias.** A chave SSH atua como um segundo fator — sem ela, a criptografia/descriptografia falhará. Execute `aibhq onboard` para gerar a chave se ela não existir.
-- **A chave SSH é somente leitura em tempo de execução.** O AI Business HQ nunca escreve ou modifica o arquivo de chave SSH.
+- **A chave SSH é somente leitura em tempo de execução.** O OctAi nunca escreve ou modifica o arquivo de chave SSH.
 - **Chaves em texto simples continuam sendo suportadas.** Configurações existentes sem `enc://` não são afetadas.
 - **O formato `enc://` é versionado** através do campo `info` do HKDF (`aibhq-credential-v1`), permitindo futuras atualizações de algoritmo sem quebrar valores criptografados existentes.

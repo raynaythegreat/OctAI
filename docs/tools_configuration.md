@@ -1,6 +1,6 @@
 # Tools Configuration
 
-AI Business HQ's tools configuration is located in the `tools` field of `config.json`.
+OctAi's tools configuration is located in the `tools` field of `config.json`.
 
 ## Directory Structure
 
@@ -28,7 +28,7 @@ AI Business HQ's tools configuration is located in the `tools` field of `config.
 
 ## Sensitive Data Filtering
 
-Before tool results are sent to the LLM, AI Business HQ can filter sensitive values (API keys, tokens, secrets) from the output. This prevents the LLM from seeing its own credentials.
+Before tool results are sent to the LLM, OctAi can filter sensitive values (API keys, tokens, secrets) from the output. This prevents the LLM from seeing its own credentials.
 
 See [Sensitive Data Filtering](../sensitive_data_filtering.md) for full documentation.
 
@@ -161,7 +161,7 @@ To completely disable the `exec` tool, set `enabled` to `false`:
 
 **Via environment variable:**
 ```bash
-PICOCLAW_TOOLS_EXEC_ENABLED=false
+OCTAI_TOOLS_EXEC_ENABLED=false
 ```
 
 > **Note:** When disabled, the agent will not be able to execute shell commands. This also affects the Cron tool's ability to run scheduled shell commands.
@@ -173,7 +173,7 @@ PICOCLAW_TOOLS_EXEC_ENABLED=false
 
 ### Default Blocked Command Patterns
 
-By default, AI Business HQ blocks the following dangerous commands:
+By default, OctAi blocks the following dangerous commands:
 
 - Delete commands: `rm -rf`, `del /f/q`, `rmdir /s`
 - Disk operations: `format`, `mkfs`, `diskpart`, `dd if=`, writing to `/dev/sd*`
@@ -190,7 +190,7 @@ By default, AI Business HQ blocks the following dangerous commands:
 
 ### Known Architectural Limitation
 
-The exec guard only validates the top-level command sent to AI Business HQ. It does **not** recursively inspect child
+The exec guard only validates the top-level command sent to OctAi. It does **not** recursively inspect child
 processes spawned by build tools or scripts after that command starts running.
 
 Examples of workflows that can bypass the direct command guard once the initial command is allowed:
@@ -494,15 +494,15 @@ The skills tool configures skill discovery and installation via registries like 
 
 ## Environment Variables
 
-All configuration options can be overridden via environment variables with the format `PICOCLAW_TOOLS_<SECTION>_<KEY>`:
+All configuration options can be overridden via environment variables with the format `OCTAI_TOOLS_<SECTION>_<KEY>`:
 
 For example:
 
-- `PICOCLAW_TOOLS_WEB_BRAVE_ENABLED=true`
-- `PICOCLAW_TOOLS_EXEC_ENABLED=false`
-- `PICOCLAW_TOOLS_EXEC_ENABLE_DENY_PATTERNS=false`
-- `PICOCLAW_TOOLS_CRON_EXEC_TIMEOUT_MINUTES=10`
-- `PICOCLAW_TOOLS_MCP_ENABLED=true`
+- `OCTAI_TOOLS_WEB_BRAVE_ENABLED=true`
+- `OCTAI_TOOLS_EXEC_ENABLED=false`
+- `OCTAI_TOOLS_EXEC_ENABLE_DENY_PATTERNS=false`
+- `OCTAI_TOOLS_CRON_EXEC_TIMEOUT_MINUTES=10`
+- `OCTAI_TOOLS_MCP_ENABLED=true`
 
 Note: Nested map-style config (for example `tools.mcp.servers.<name>.*`) is configured in `config.json` rather than
 environment variables.

@@ -4,7 +4,7 @@
 
 ## 🐳 Docker Compose
 
-You can also run AI Business HQ using Docker Compose without installing anything locally.
+You can also run OctAi using Docker Compose without installing anything locally.
 
 ```bash
 # 1. Clone this repo
@@ -24,7 +24,7 @@ docker compose -f docker/docker-compose.yml --profile gateway up -d
 ```
 
 > [!TIP]
-> **Docker Users**: By default, the Gateway listens on `127.0.0.1` which is not accessible from the host. If you need to access the health endpoints or expose ports, set `PICOCLAW_GATEWAY_HOST=0.0.0.0` in your environment or update `config.json`.
+> **Docker Users**: By default, the Gateway listens on `127.0.0.1` which is not accessible from the host. If you need to access the health endpoints or expose ports, set `OCTAI_GATEWAY_HOST=0.0.0.0` in your environment or update `config.json`.
 
 ```bash
 # 5. Check logs
@@ -67,7 +67,7 @@ docker compose -f docker/docker-compose.yml --profile gateway up -d
 ### 🚀 Quick Start
 
 > [!TIP]
-> Set your API Key in `~/.aibhq/config.json`. Get API Keys: [Volcengine (CodingPlan)](https://www.volcengine.com/activity/codingplan?utm_campaign=AI Business HQ&utm_content=AI Business HQ&utm_medium=devrel&utm_source=OWO&utm_term=AI Business HQ) (LLM) · [OpenRouter](https://openrouter.ai/keys) (LLM) · [Zhipu](https://open.bigmodel.cn/usercenter/proj-mgmt/apikeys) (LLM). Web search is optional — get a free [Tavily API](https://tavily.com) (1000 free queries/month) or [Brave Search API](https://brave.com/search/api) (2000 free queries/month).
+> Set your API Key in `~/.aibhq/config.json`. Get API Keys: [Volcengine (CodingPlan)](https://www.volcengine.com/activity/codingplan?utm_campaign=OctAi&utm_content=OctAi&utm_medium=devrel&utm_source=OWO&utm_term=OctAi) (LLM) · [OpenRouter](https://openrouter.ai/keys) (LLM) · [Zhipu](https://open.bigmodel.cn/usercenter/proj-mgmt/apikeys) (LLM). Web search is optional — get a free [Tavily API](https://tavily.com) (1000 free queries/month) or [Brave Search API](https://brave.com/search/api) (2000 free queries/month).
 
 **1. Initialize**
 
@@ -142,7 +142,7 @@ aibhq onboard
 ```
 
 > **New**: The `model_list` configuration format allows zero-code provider addition. See [Model Configuration](#model-configuration-model_list) for details.
-> `request_timeout` is optional and uses seconds. If omitted or set to `<= 0`, AI Business HQ uses the default timeout (120s).
+> `request_timeout` is optional and uses seconds. If omitted or set to `<= 0`, OctAi uses the default timeout (120s).
 
 **3. Get API Keys**
 

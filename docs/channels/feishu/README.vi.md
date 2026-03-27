@@ -37,11 +37,11 @@ Feishu (tên quốc tế: Lark) là nền tảng cộng tác doanh nghiệp củ
 2. Bật khả năng **Bot** trong cài đặt ứng dụng
 3. Tạo phiên bản và xuất bản ứng dụng (cấu hình có hiệu lực sau khi xuất bản)
 4. Lấy **App ID** (bắt đầu bằng `cli_`) và **App Secret**
-5. Điền App ID và App Secret vào file cấu hình AI Business HQ
+5. Điền App ID và App Secret vào file cấu hình OctAi
 6. Chạy `aibhq gateway` để khởi động dịch vụ
 7. Tìm kiếm tên bot trong Feishu và bắt đầu trò chuyện
 
-> AI Business HQ kết nối với Feishu bằng chế độ WebSocket/SDK — không cần cấu hình địa chỉ callback công khai hay Webhook URL.
+> OctAi kết nối với Feishu bằng chế độ WebSocket/SDK — không cần cấu hình địa chỉ callback công khai hay Webhook URL.
 >
 > `encrypt_key` và `verification_token` là tùy chọn; nên bật mã hóa sự kiện trong môi trường sản xuất.
 >

@@ -1,6 +1,6 @@
 # 💬 Weixin (WeChat Personal) Channel
 
-AI Business HQ supports connecting to your personal WeChat account using the official Tencent iLink API.
+OctAi supports connecting to your personal WeChat account using the official Tencent iLink API.
 
 ## 🚀 Quick Onboarding
 

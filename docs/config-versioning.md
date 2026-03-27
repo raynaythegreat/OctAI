@@ -2,7 +2,7 @@
 
 ## Overview
 
-AI Business HQ uses a schema versioning system for `config.json` to ensure smooth upgrades as the configuration format evolves.
+OctAi uses a schema versioning system for `config.json` to ensure smooth upgrades as the configuration format evolves.
 
 ## Version History
 

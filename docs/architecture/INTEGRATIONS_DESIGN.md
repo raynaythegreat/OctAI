@@ -3,7 +3,7 @@
 > **Document Status**: Draft  
 > **Version**: 1.0.0  
 > **Last Updated**: March 2026  
-> **Authors**: AI Business HQ Team
+> **Authors**: OctAi Team
 
 ---
 
@@ -24,7 +24,7 @@
 
 ### 1.1 Purpose
 
-This document defines the architecture for AI Business HQ's third-party integrations and API marketplace, enabling seamless connectivity with business-critical tools while providing a public API for developers.
+This document defines the architecture for OctAi's third-party integrations and API marketplace, enabling seamless connectivity with business-critical tools while providing a public API for developers.
 
 ### 1.2 Goals
 
@@ -542,7 +542,7 @@ sync:
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                           AI Business HQ Core                                │
+│                           OctAi Core                                │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                              │
 │  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐  │
@@ -3205,10 +3205,10 @@ func TestAdapterRetry(t *testing.T) {
 ```yaml
 openapi: 3.1.0
 info:
-  title: AI Business HQ API
+  title: OctAi API
   version: 1.0.0
   description: |
-    The AI Business HQ API provides programmatic access to integrations,
+    The OctAi API provides programmatic access to integrations,
     webhooks, and AI-powered business operations.
     
     ## Authentication
@@ -3220,7 +3220,7 @@ info:
     - Enterprise: Custom limits
     
   contact:
-    name: AI Business HQ Support
+    name: OctAi Support
     email: api@aibhq.io
     url: https://aibhq.io/docs/api
     
@@ -4109,4 +4109,4 @@ integrations:
 
 ---
 
-*Document maintained by AI Business HQ Engineering Team*
+*Document maintained by OctAi Engineering Team*

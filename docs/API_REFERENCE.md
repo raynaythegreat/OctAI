@@ -1,10 +1,10 @@
 # API Reference
 
-> REST API documentation for AI Business HQ Web Backend
+> REST API documentation for OctAi Web Backend
 
 ## Overview
 
-The AI Business HQ web backend provides a RESTful API for managing configuration, sessions, models, and gateway lifecycle.
+The OctAi web backend provides a RESTful API for managing configuration, sessions, models, and gateway lifecycle.
 
 **Base URL**: `http://localhost:18800`
 

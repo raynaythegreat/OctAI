@@ -2,7 +2,7 @@
 
 # WeCom
 
-AI Business HQ now exposes WeCom as a single `channels.wecom` channel built on the official WeCom AI Bot WebSocket API.
+OctAi now exposes WeCom as a single `channels.wecom` channel built on the official WeCom AI Bot WebSocket API.
 This replaces the legacy `wecom`, `wecom_app`, and `wecom_aibot` split with one configuration model.
 
 ## What This Channel Supports
@@ -14,7 +14,7 @@ This replaces the legacy `wecom`, `wecom_app`, and `wecom_aibot` split with one 
 - QR-based CLI onboarding with `aibhq auth wecom`
 - Shared allowlist and `reasoning_channel_id` routing
 
-> No public webhook callback URL is required for this channel. AI Business HQ opens an outbound WebSocket connection to WeCom.
+> No public webhook callback URL is required for this channel. OctAi opens an outbound WebSocket connection to WeCom.
 
 ## Quick Start
 
@@ -67,7 +67,7 @@ aibhq auth wecom --timeout 10m
 
 ## Runtime Behavior
 
-- AI Business HQ keeps the active WeCom turn so normal replies can continue the same stream when possible.
+- OctAi keeps the active WeCom turn so normal replies can continue the same stream when possible.
 - If streaming is no longer available, replies fall back to active push delivery to the resolved chat route.
 - Incoming media is downloaded into the media store before being handed to the agent.
 - Outbound media is uploaded to WeCom in temporary chunks and then sent as a regular media message.

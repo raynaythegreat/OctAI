@@ -1,8 +1,8 @@
 > Voltar ao [README](../../README.pt-br.md)
 
-# 🖥️ AI Business HQ Lista de compatibilidade de hardware
+# 🖥️ OctAi Lista de compatibilidade de hardware
 
-O AI Business HQ roda em praticamente qualquer dispositivo Linux. Esta página registra chips, produtos e placas de desenvolvimento verificados.
+O OctAi roda em praticamente qualquer dispositivo Linux. Esta página registra chips, produtos e placas de desenvolvimento verificados.
 
 **Seu hardware não está na lista?** Envie um PR para adicioná-lo! Fabricantes de hardware são bem-vindos para contribuir e co-promover.
 
@@ -59,7 +59,7 @@ O AI Business HQ roda em praticamente qualquer dispositivo Linux. Esta página r
 
 ## 2. Produtos verificados (por data de lançamento)
 
-Produtos de consumo, roteadores e dispositivos industriais testados com o AI Business HQ.
+Produtos de consumo, roteadores e dispositivos industriais testados com o OctAi.
 
 | Ano | Produto | Arq | SoC | RAM | Categoria |
 |-----|---------|-----|-----|-----|-----------|
@@ -97,7 +97,7 @@ Produtos de consumo, roteadores e dispositivos industriais testados com o AI Bus
 
 ### Celulares Android (via Termux)
 
-Qualquer celular Android ARM64 (2015+) com 1GB+ de RAM. Instale o [Termux](https://github.com/termux/termux-app), use `proot` para rodar o AI Business HQ.
+Qualquer celular Android ARM64 (2015+) com 1GB+ de RAM. Instale o [Termux](https://github.com/termux/termux-app), use `proot` para rodar o OctAi.
 
 > Veja [README: Rodar em celulares Android antigos](../../README.pt-br.md#-run-on-old-android-phones) para instruções de configuração.
 

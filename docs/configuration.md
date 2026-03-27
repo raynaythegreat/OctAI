@@ -15,7 +15,7 @@ You can override default paths using environment variables. This is useful for p
 | `AIBHQ_CONFIG` | Overrides the path to the configuration file. This directly tells aibhq which `config.json` to load, ignoring all other locations. | `~/.aibhq/config.json` |
 | `AIBHQ_HOME`   | Overrides the root directory for aibhq data. This changes the default location of the `workspace` and other data directories.          | `~/.aibhq`             |
 
-> **Note**: Legacy environment variables `PICOCLAW_CONFIG` and `PICOCLAW_HOME` are still supported for backward compatibility.
+> **Note**: Legacy environment variables `OCTAI_CONFIG` and `OCTAI_HOME` are still supported for backward compatibility.
 
 **Examples:**
 
@@ -35,7 +35,7 @@ AIBHQ_HOME=/srv/aibhq AIBHQ_CONFIG=/srv/aibhq/main.json aibhq gateway
 
 ### Workspace Layout
 
-AI Business HQ stores data in your configured workspace (default: `~/.aibhq/workspace`):
+OctAi stores data in your configured workspace (default: `~/.aibhq/workspace`):
 
 ```
 ~/.aibhq/workspace/
@@ -143,7 +143,7 @@ Use `bindings` in `config.json` to route incoming messages to different agents b
 
 #### Matching priority
 
-When multiple bindings exist, AI Business HQ resolves in this order:
+When multiple bindings exist, OctAi resolves in this order:
 
 1. `peer`
 2. `parent_peer` (for thread/topic parent contexts)
@@ -153,11 +153,11 @@ When multiple bindings exist, AI Business HQ resolves in this order:
 6. channel wildcard (`account_id: "*"`)
 7. default agent
 
-If a binding points to a missing `agent_id`, AI Business HQ falls back to the default agent.
+If a binding points to a missing `agent_id`, OctAi falls back to the default agent.
 
 #### How matching works (step-by-step)
 
-1. AI Business HQ first filters bindings by `match.channel` (must equal current channel).
+1. OctAi first filters bindings by `match.channel` (must equal current channel).
 2. It then filters by `match.account_id`:
    - omitted: match only the channel's default account
    - `"*"`: match all accounts on this channel
@@ -222,7 +222,7 @@ In other words: **channel + account form the candidate set; peer/guild/team then
 
 ### 🔒 Security Sandbox
 
-AI Business HQ runs in a sandboxed environment by default. The agent can only access files and execute commands within the configured workspace.
+OctAi runs in a sandboxed environment by default. The agent can only access files and execute commands within the configured workspace.
 
 #### Default Configuration
 
@@ -286,7 +286,7 @@ Even with `restrict_to_workspace: false`, the `exec` tool blocks these dangerous
 
 #### Known Limitation: Child Processes From Build Tools
 
-The exec safety guard only inspects the command line AI Business HQ launches directly. It does not recursively inspect child
+The exec safety guard only inspects the command line OctAi launches directly. It does not recursively inspect child
 processes spawned by allowed developer tools such as `make`, `go run`, `cargo`, `npm run`, or custom build scripts.
 
 That means a top-level command can still compile or launch other binaries after it passes the initial guard check. In
@@ -297,7 +297,7 @@ For higher-risk environments:
 
 * Review build scripts before execution.
 * Prefer approval/manual review for compile-and-run workflows.
-* Run AI Business HQ inside a container or VM if you need stronger isolation than the built-in guard provides.
+* Run OctAi inside a container or VM if you need stronger isolation than the built-in guard provides.
 
 #### Error Examples
 
@@ -349,7 +349,7 @@ All paths share the same workspace restriction — there's no way to bypass the 
 
 ### Heartbeat (Periodic Tasks)
 
-AI Business HQ can perform periodic tasks automatically. Create a `HEARTBEAT.md` file in your workspace:
+OctAi can perform periodic tasks automatically. Create a `HEARTBEAT.md` file in your workspace:
 
 ```markdown
 # Periodic Tasks
@@ -435,7 +435,7 @@ The subagent has access to tools (message, web_search, etc.) and can communicate
 | ------------ | --------------------------------------- | ------------------------------------------------------------ |
 | `gemini`     | LLM (Gemini direct)                     | [aistudio.google.com](https://aistudio.google.com)           |
 | `zhipu`      | LLM (Zhipu direct)                      | [bigmodel.cn](https://bigmodel.cn)                           |
-| `volcengine` | LLM (Volcengine direct)                 | [volcengine.com](https://www.volcengine.com/activity/codingplan?utm_campaign=AI Business HQ&utm_content=AI Business HQ&utm_medium=devrel&utm_source=OWO&utm_term=AI Business HQ) |
+| `volcengine` | LLM (Volcengine direct)                 | [volcengine.com](https://www.volcengine.com/activity/codingplan?utm_campaign=OctAi&utm_content=OctAi&utm_medium=devrel&utm_source=OWO&utm_term=OctAi) |
 | `openrouter` | LLM (recommended, access to all models) | [openrouter.ai](https://openrouter.ai)                       |
 | `anthropic`  | LLM (Claude direct)                     | [console.anthropic.com](https://console.anthropic.com)       |
 | `openai`     | LLM (GPT direct)                        | [platform.openai.com](https://platform.openai.com)           |
@@ -447,7 +447,7 @@ The subagent has access to tools (message, web_search, etc.) and can communicate
 
 ### Model Configuration (model_list)
 
-> **What's New?** AI Business HQ now uses a **model-centric** configuration approach. Simply specify `vendor/model` format (e.g., `zhipu/glm-4.7`) to add new providers — **zero code changes required!**
+> **What's New?** OctAi now uses a **model-centric** configuration approach. Simply specify `vendor/model` format (e.g., `zhipu/glm-4.7`) to add new providers — **zero code changes required!**
 
 This design also enables **multi-agent support** with flexible provider selection:
 
@@ -458,7 +458,7 @@ This design also enables **multi-agent support** with flexible provider selectio
 
 #### 🔒 Security Configuration (Recommended)
 
-AI Business HQ supports separating sensitive data (API keys, tokens, secrets) from your main configuration by storing them in a `.security.yml` file.
+OctAi supports separating sensitive data (API keys, tokens, secrets) from your main configuration by storing them in a `.security.yml` file.
 
 **Key Benefits:**
 - **Security**: Sensitive data is never in your main config file
@@ -538,7 +538,7 @@ For complete documentation, see [`security_configuration.md`](security_configura
 | **LiteLLM Proxy**       | `litellm/`        | `http://localhost:4000/v1`                          | OpenAI    | Your LiteLLM proxy key                                           |
 | **VLLM**                | `vllm/`           | `http://localhost:8000/v1`                          | OpenAI    | Local                                                            |
 | **Cerebras**            | `cerebras/`       | `https://api.cerebras.ai/v1`                        | OpenAI    | [Get Key](https://cerebras.ai)                                   |
-| **VolcEngine (Doubao)** | `volcengine/`     | `https://ark.cn-beijing.volces.com/api/v3`          | OpenAI    | [Get Key](https://www.volcengine.com/activity/codingplan?utm_campaign=AI Business HQ&utm_content=AI Business HQ&utm_medium=devrel&utm_source=OWO&utm_term=AI Business HQ) |
+| **VolcEngine (Doubao)** | `volcengine/`     | `https://ark.cn-beijing.volces.com/api/v3`          | OpenAI    | [Get Key](https://www.volcengine.com/activity/codingplan?utm_campaign=OctAi&utm_content=OctAi&utm_medium=devrel&utm_source=OWO&utm_term=OctAi) |
 | **神算云**              | `shengsuanyun/`   | `https://router.shengsuanyun.com/api/v1`            | OpenAI    | —                                                                |
 | **BytePlus**            | `byteplus/`       | `https://ark.ap-southeast.bytepluses.com/api/v3`    | OpenAI    | [Get Key](https://www.byteplus.com)                              |
 | **Vivgrid**             | `vivgrid/`        | `https://api.vivgrid.com/v1`                        | OpenAI    | [Get Key](https://vivgrid.com)                                   |
@@ -691,13 +691,13 @@ For direct Anthropic API access or custom endpoints that only support Anthropic'
 }
 ```
 
-AI Business HQ strips only the outer `litellm/` prefix before sending the request, so `litellm/lite-gpt4` sends `lite-gpt4`, while `litellm/openai/gpt-4o` sends `openai/gpt-4o`.
+OctAi strips only the outer `litellm/` prefix before sending the request, so `litellm/lite-gpt4` sends `lite-gpt4`, while `litellm/openai/gpt-4o` sends `openai/gpt-4o`.
 
 </details>
 
 #### Load Balancing
 
-Configure multiple endpoints for the same model name — AI Business HQ will automatically round-robin between them:
+Configure multiple endpoints for the same model name — OctAi will automatically round-robin between them:
 
 **Option 1: Multiple API Keys in .security.yml (Recommended)**
 
@@ -751,7 +751,7 @@ The old `providers` configuration is **deprecated** but still supported for back
 
 ### Provider Architecture
 
-AI Business HQ routes providers by protocol family:
+OctAi routes providers by protocol family:
 
 - **OpenAI-compatible**: OpenRouter, Groq, Zhipu, vLLM-style endpoints, and most others.
 - **Anthropic**: Claude-native API behavior.
@@ -828,7 +828,7 @@ This keeps the runtime lightweight while making new OpenAI-compatible backends m
 
 ### Scheduled Tasks / Reminders
 
-AI Business HQ supports cron-style scheduled tasks via the `cron` tool. The agent can set, list, and cancel reminders or recurring jobs that trigger at specified times.
+OctAi supports cron-style scheduled tasks via the `cron` tool. The agent can set, list, and cancel reminders or recurring jobs that trigger at specified times.
 
 ```json
 {

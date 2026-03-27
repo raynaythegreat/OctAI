@@ -1,10 +1,10 @@
 # Analytics & Insights System Design
 
-> Design document for AI Business HQ analytics and business intelligence features
+> Design document for OctAi analytics and business intelligence features
 
 ## Overview
 
-This document outlines the analytics and insights system for AI Business HQ, designed to provide business users with actionable intelligence about AI usage, costs, and performance.
+This document outlines the analytics and insights system for OctAi, designed to provide business users with actionable intelligence about AI usage, costs, and performance.
 
 ---
 
@@ -304,7 +304,7 @@ set:active_users:{date}             -> Set of user IDs
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│  AI Business HQ - Analytics Dashboard                               │
+│  OctAi - Analytics Dashboard                               │
 ├─────────────────────────────────────────────────────────────────────┤
 │                                                                      │
 │  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌─────────────┐   │

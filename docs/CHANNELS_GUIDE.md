@@ -1,10 +1,10 @@
 # Channels Configuration Guide
 
-> Complete guide to configuring communication channels in AI Business HQ
+> Complete guide to configuring communication channels in OctAi
 
 ## Overview
 
-AI Business HQ supports 15+ communication channels. This guide covers setup for each channel.
+OctAi supports 15+ communication channels. This guide covers setup for each channel.
 
 ---
 

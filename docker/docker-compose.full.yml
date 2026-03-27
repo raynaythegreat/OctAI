@@ -1,44 +1,44 @@
 services:
   # ─────────────────────────────────────────────
-  # PicoClaw Agent (one-shot query) - Full MCP Support
-  #   docker compose -f docker/docker-compose.full.yml run --rm picoclaw-agent -m "Hello"
+  # OctAi Agent (one-shot query) - Full MCP Support
+  #   docker compose -f docker/docker-compose.full.yml run --rm octai-agent -m "Hello"
   # ─────────────────────────────────────────────
-  picoclaw-agent:
+  octai-agent:
     build:
       context: ..
       dockerfile: docker/Dockerfile.full
-    container_name: picoclaw-agent-full
+    container_name: octai-agent-full
     profiles:
       - agent
     volumes:
-      - ../config/config.json:/root/.picoclaw/config.json:ro
-      - picoclaw-workspace:/root/.picoclaw/workspace
-      - picoclaw-npm-cache:/root/.npm # npm cache for faster MCP server installs
-    entrypoint: ["picoclaw", "agent"]
+      - ../config/config.json:/root/.octai/config.json:ro
+      - octai-workspace:/root/.octai/workspace
+      - octai-npm-cache:/root/.npm # npm cache for faster MCP server installs
+    entrypoint: ["aibhq", "agent"]
     stdin_open: true
     tty: true
 
   # ─────────────────────────────────────────────
-  # PicoClaw Gateway (Long-running Bot) - Full MCP Support
+  # OctAi Gateway (Long-running Bot) - Full MCP Support
   #   docker compose -f docker/docker-compose.full.yml --profile gateway up
   # ─────────────────────────────────────────────
-  picoclaw-gateway:
+  octai-gateway:
     build:
       context: ..
       dockerfile: docker/Dockerfile.full
-    container_name: picoclaw-gateway-full
+    container_name: octai-gateway-full
     restart: unless-stopped
     profiles:
       - gateway
     volumes:
       # Configuration file
-      - ../config/config.json:/root/.picoclaw/config.json:ro
+      - ../config/config.json:/root/.octai/config.json:ro
       # Persistent workspace (sessions, memory, logs)
-      - picoclaw-workspace:/root/.picoclaw/workspace
+      - octai-workspace:/root/.octai/workspace
       # NPM cache for faster MCP server installs
-      - picoclaw-npm-cache:/root/.npm
+      - octai-npm-cache:/root/.npm
     command: ["gateway"]
 
 volumes:
-  picoclaw-workspace:
-  picoclaw-npm-cache: # Cache npm packages to speed up MCP server installations
+  octai-workspace:
+  octai-npm-cache: # Cache npm packages to speed up MCP server installations

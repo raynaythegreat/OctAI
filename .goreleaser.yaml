@@ -47,7 +47,7 @@ builds:
       - "7"
     gomips:
       - softfloat
-    main: ./cmd/picoclaw
+    main: ./cmd/aibhq
     ignore:
       - goos: windows
         goarch: arm
@@ -59,7 +59,7 @@ builds:
         goarch: arm
 
   - id: aibhq-launcher
-    binary: picoclaw-launcher
+    binary: octai-launcher
     env:
       - CGO_ENABLED=0
     tags:
@@ -98,7 +98,7 @@ builds:
         goarch: arm
 
   - id: aibhq-launcher-tui
-    binary: picoclaw-launcher-tui
+    binary: octai-launcher-tui
     env:
       - CGO_ENABLED=0
     tags:
@@ -125,7 +125,7 @@ builds:
       - "7"
     gomips:
       - softfloat
-    main: ./cmd/picoclaw-launcher-tui
+    main: ./cmd/octai-launcher-tui
     ignore:
       - goos: windows
         goarch: arm
@@ -144,7 +144,7 @@ dockers_v2:
     ids:
       - aibhq
     images:
-      - "ghcr.io/{{ .Env.GITHUB_REPOSITORY_OWNER }}/picoclaw"
+      - "ghcr.io/{{ .Env.GITHUB_REPOSITORY_OWNER }}/octai"
       - 'docker.io/{{ .Env.DOCKERHUB_IMAGE_NAME }}'
     tags:
       - '{{ if isEnvSet "NIGHTLY_BUILD" }}nightly{{ else }}{{ .Tag }}{{ end }}'
@@ -161,7 +161,7 @@ dockers_v2:
       - aibhq-launcher
       - aibhq-launcher-tui
     images:
-      - "ghcr.io/{{ .Env.GITHUB_REPOSITORY_OWNER }}/picoclaw"
+      - "ghcr.io/{{ .Env.GITHUB_REPOSITORY_OWNER }}/octai"
       - 'docker.io/{{ .Env.DOCKERHUB_IMAGE_NAME }}'
     tags:
       - '{{ if isEnvSet "NIGHTLY_BUILD" }}nightly-launcher{{ else }}{{ .Tag }}-launcher{{ end }}'
@@ -209,27 +209,27 @@ nfpms:
       - aibhq
       - aibhq-launcher
       - aibhq-launcher-tui
-    package_name: picoclaw
+    package_name: octai
     file_name_template: >-
       {{ .PackageName }}_
       {{- if eq .Arch "amd64" }}x86_64
       {{- else if eq .Arch "arm64" }}aarch64
       {{- else if eq .Arch "arm" }}armv{{ .Arm }}
       {{- else }}{{ .Arch }}{{ end }}
-    vendor: picoclaw
-    homepage: https://github.com/{{ .Env.GITHUB_REPOSITORY_OWNER }}/picoclaw
-    maintainer: picoclaw contributors
-    description: picoclaw - a tool for managing and running tasks
+    vendor: OctAi
+    homepage: https://github.com/{{ .Env.GITHUB_REPOSITORY_OWNER }}/octai
+    maintainer: OctAi contributors
+    description: OctAi - a tool for managing and running tasks
     license: MIT
     formats:
       - rpm
       - deb
     bindir: /usr/bin
     contents:
-      - src: web/picoclaw-launcher.desktop
-        dst: /usr/share/applications/picoclaw-launcher.desktop
-      - src: web/picoclaw-launcher.png
-        dst: /usr/share/icons/hicolor/512x512/apps/picoclaw-launcher.png
+      - src: web/octai-launcher.desktop
+        dst: /usr/share/applications/octai-launcher.desktop
+      - src: web/octai-launcher.png
+        dst: /usr/share/icons/hicolor/512x512/apps/octai-launcher.png
 
 changelog:
   sort: asc

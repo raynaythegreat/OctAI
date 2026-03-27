@@ -1,6 +1,6 @@
 # Quick Start Guide
 
-> Get AI Business HQ running in 5 minutes
+> Get OctAi running in 5 minutes
 
 ## Prerequisites
 

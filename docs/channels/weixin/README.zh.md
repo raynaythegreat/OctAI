@@ -1,6 +1,6 @@
 # 💬 微信个人号渠道 (Weixin)
 
-AI Business HQ 支持使用腾讯官方 iLink API 连接您的个人微信账号。
+OctAi 支持使用腾讯官方 iLink API 连接您的个人微信账号。
 
 ## 🚀 快速激活
 

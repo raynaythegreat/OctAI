@@ -2,7 +2,7 @@
 
 # QQ
 
-AI Business HQ prend en charge QQ via l'API Bot officielle de la plateforme ouverte QQ.
+OctAi prend en charge QQ via l'API Bot officielle de la plateforme ouverte QQ.
 
 ## Configuration
 
@@ -34,7 +34,7 @@ La plateforme ouverte QQ propose une entrée de création en un clic :
 
 1. Ouvrir [QQ Bot Quick Create](https://q.qq.com/qqbot/openclaw/index.html) et se connecter en scannant le QR code
 2. Le système crée automatiquement un bot — copier l'**App ID** et l'**App Secret**
-3. Renseigner les identifiants dans le fichier de configuration AI Business HQ
+3. Renseigner les identifiants dans le fichier de configuration OctAi
 4. Exécuter `aibhq gateway` pour démarrer le service
 5. Ouvrir QQ et commencer à discuter avec le bot
 
@@ -47,7 +47,7 @@ La plateforme ouverte QQ propose une entrée de création en un clic :
 1. Se connecter à la [plateforme ouverte QQ](https://q.qq.com/) avec son compte QQ et s'inscrire en tant que développeur
 2. Créer un bot QQ et personnaliser son avatar et son nom
 3. Obtenir l'**App ID** et l'**App Secret** dans les paramètres du bot
-4. Renseigner les identifiants dans le fichier de configuration AI Business HQ
+4. Renseigner les identifiants dans le fichier de configuration OctAi
 5. Exécuter `aibhq gateway` pour démarrer le service
 6. Rechercher votre bot dans QQ et commencer à discuter
 

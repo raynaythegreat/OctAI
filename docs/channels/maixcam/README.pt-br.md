@@ -28,8 +28,8 @@ MaixCam é um canal dedicado para conectar dispositivos de câmera AI Sipeed Mai
 
 ## Casos de uso
 
-O canal MaixCam permite que o AI Business HQ atue como backend de IA para dispositivos de borda:
+O canal MaixCam permite que o OctAi atue como backend de IA para dispositivos de borda:
 
-- **Vigilância inteligente**: MaixCAM envia quadros de imagem; AI Business HQ os analisa usando modelos de visão
-- **Controle IoT**: Dispositivos enviam dados de sensores; AI Business HQ coordena as respostas
-- **IA offline**: Implante o AI Business HQ em uma rede local para inferência de baixa latência
+- **Vigilância inteligente**: MaixCAM envia quadros de imagem; OctAi os analisa usando modelos de visão
+- **Controle IoT**: Dispositivos enviam dados de sensores; OctAi coordena as respostas
+- **IA offline**: Implante o OctAi em uma rede local para inferência de baixa latência

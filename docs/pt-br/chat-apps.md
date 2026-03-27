@@ -24,7 +24,7 @@ Converse com seu aibhq através do Telegram, Discord, WhatsApp, Matrix, QQ, Ding
 | **IRC**              | ⭐⭐ Médio         | Servidor + configuração TLS                           | [Documentação](#irc) |
 | **OneBot**           | ⭐⭐ Médio         | Compatível com NapCat/Go-CQHTTP, ecossistema comunitário | [Documentação](../channels/onebot/README.pt-br.md)                                                           |
 | **MaixCam**          | ⭐ Fácil           | Canal de integração de hardware para câmeras AI Sipeed | [Documentação](../channels/maixcam/README.pt-br.md)                                                            |
-| **Pico**             | ⭐ Fácil           | Canal de protocolo nativo AI Business HQ                    |                                                                                                                  |
+| **Pico**             | ⭐ Fácil           | Canal de protocolo nativo OctAi                    |                                                                                                                  |
 
 <a id="telegram"></a>
 <details>
@@ -60,10 +60,10 @@ aibhq gateway
 
 **4. Menu de comandos do Telegram (registrado automaticamente na inicialização)**
 
-O AI Business HQ agora mantém definições de comandos em um registro compartilhado. Na inicialização, o Telegram registrará automaticamente os comandos de bot suportados (por exemplo `/start`, `/help`, `/show`, `/list`) para que o menu de comandos e o comportamento em tempo de execução permaneçam sincronizados.
+O OctAi agora mantém definições de comandos em um registro compartilhado. Na inicialização, o Telegram registrará automaticamente os comandos de bot suportados (por exemplo `/start`, `/help`, `/show`, `/list`) para que o menu de comandos e o comportamento em tempo de execução permaneçam sincronizados.
 O registro do menu de comandos do Telegram permanece como descoberta UX local do canal; a execução genérica de comandos é tratada centralmente no loop do agente via commands executor.
 
-Se o registro de comandos falhar (erros transitórios de rede/API), o canal ainda inicia e o AI Business HQ tenta novamente o registro em segundo plano.
+Se o registro de comandos falhar (erros transitórios de rede/API), o canal ainda inicia e o OctAi tenta novamente o registro em segundo plano.
 
 </details>
 
@@ -145,7 +145,7 @@ aibhq gateway
 <details>
 <summary><b>WhatsApp</b> (nativo via whatsmeow)</summary>
 
-O AI Business HQ pode se conectar ao WhatsApp de duas formas:
+O OctAi pode se conectar ao WhatsApp de duas formas:
 
 - **Nativo (recomendado):** In-process usando [whatsmeow](https://github.com/tulir/whatsmeow). Sem bridge separado. Defina `"use_native": true` e deixe `bridge_url` vazio. Na primeira execução, escaneie o QR code com o WhatsApp (Dispositivos Vinculados). A sessão é armazenada no seu workspace (ex.: `workspace/whatsapp/`). O canal nativo é **opcional** para manter o binário padrão pequeno; compile com `-tags whatsapp_native` (ex.: `make build-whatsapp-native` ou `go build -tags whatsapp_native ./cmd/...`).
 - **Bridge:** Conecte-se a um bridge WebSocket externo. Defina `bridge_url` (ex.: `ws://localhost:3001`) e mantenha `use_native` como false.
@@ -173,7 +173,7 @@ Se `session_store_path` estiver vazio, a sessão é armazenada em `<workspace>/w
 <details>
 <summary><b>Weixin</b> (WeChat Pessoal)</summary>
 
-O AI Business HQ suporta conexão com sua conta pessoal do WeChat usando a API oficial Tencent iLink.
+O OctAi suporta conexão com sua conta pessoal do WeChat usando a API oficial Tencent iLink.
 
 **1. Login**
 
@@ -215,7 +215,7 @@ A QQ Open Platform oferece uma página de configuração com um clique para bots
 
 1. Abra o [QQ Bot Quick Start](https://q.qq.com/qqbot/openclaw/index.html) e escaneie o QR code para fazer login
 2. Um bot é criado automaticamente — copie o **App ID** e o **App Secret**
-3. Configure o AI Business HQ:
+3. Configure o OctAi:
 
 ```json
 {
@@ -393,7 +393,7 @@ aibhq gateway
 <details>
 <summary><b>WeCom (企业微信)</b></summary>
 
-O AI Business HQ suporta três tipos de integração WeCom:
+O OctAi suporta três tipos de integração WeCom:
 
 **Opção 1: WeCom Bot (Bot)** - Configuração mais fácil, suporta chats de grupo
 **Opção 2: WeCom App (App Personalizado)** - Mais recursos, mensagens proativas, apenas chat privado
@@ -507,7 +507,7 @@ aibhq gateway
 <details>
 <summary><b>Feishu (Lark)</b></summary>
 
-O AI Business HQ se conecta ao Feishu via modo WebSocket/SDK — não é necessário URL de webhook público nem servidor de callback.
+O OctAi se conecta ao Feishu via modo WebSocket/SDK — não é necessário URL de webhook público nem servidor de callback.
 
 **1. Criar um aplicativo**
 
@@ -617,7 +617,7 @@ O bot se conectará ao servidor IRC e entrará nos canais especificados.
 <details>
 <summary><b>OneBot (QQ via protocolo OneBot)</b></summary>
 
-OneBot é um protocolo aberto para bots QQ. O AI Business HQ se conecta a qualquer implementação compatível com OneBot v11 (ex.: [Lagrange](https://github.com/LagrangeDev/Lagrange.Core), [NapCat](https://github.com/NapNeko/NapCatQQ)) via WebSocket.
+OneBot é um protocolo aberto para bots QQ. O OctAi se conecta a qualquer implementação compatível com OneBot v11 (ex.: [Lagrange](https://github.com/LagrangeDev/Lagrange.Core), [NapCat](https://github.com/NapNeko/NapCatQQ)) via WebSocket.
 
 **1. Configurar uma implementação OneBot**
 
