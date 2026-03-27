@@ -41,7 +41,7 @@ func aibhqHomeDir() string {
 		return home
 	}
 	userHome, _ := os.UserHomeDir()
-	return filepath.Join(userHome, ".aibhq")
+	return filepath.Join(userHome, ".octai")
 }
 
 func buildWeixinSyncBufPath(cfg config.WeixinConfig) string {

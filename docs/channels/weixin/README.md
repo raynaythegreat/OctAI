@@ -7,18 +7,18 @@ OctAi supports connecting to your personal WeChat account using the official Ten
 The easiest way to set up the Weixin channel is using the interactive onboarding command:
 
 ```bash
-aibhq auth weixin
+octai auth weixin
 ```
 
 This command will:
 1. Request a QR code from the iLink API and display it in your terminal.
 2. Wait for you to scan the QR code with your WeChat mobile app.
-3. Upon approval, automatically save the generated access token to your `~/.aibhq/config.json`.
+3. Upon approval, automatically save the generated access token to your `~/.octai/config.json`.
 
 After onboarding, you can start the gateway:
 
 ```bash
-aibhq gateway
+octai gateway
 ```
 
 ---

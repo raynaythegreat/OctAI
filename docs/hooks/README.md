@@ -82,7 +82,7 @@ Example:
           "approve_tool"
         ],
         "env": {
-          "OCTAI_HOOK_LOG_FILE": "/tmp/aibhq-hook-review-gate.log"
+          "OCTAI_HOOK_LOG_FILE": "/tmp/octai-hook-review-gate.log"
         }
       }
     }
@@ -93,7 +93,7 @@ Example:
 Watch it with:
 
 ```bash
-tail -f /tmp/aibhq-hook-review-gate.log
+tail -f /tmp/octai-hook-review-gate.log
 ```
 
 If you are developing OctAi itself rather than only validating the protocol, continue with the Go in-process example as well.
@@ -278,7 +278,7 @@ If code mounting is enough, call this after `AgentLoop` is initialized:
 
 ```go
 hook := myhooks.NewExampleLoggerHook(myhooks.ExampleLoggerHookOptions{
-    LogFile:   "/tmp/aibhq-hook-example-logger.log",
+    LogFile:   "/tmp/octai-hook-example-logger.log",
     LogEvents: true,
 })
 
@@ -334,7 +334,7 @@ Only after you register that builtin will the following config work:
         "enabled": true,
         "priority": 10,
         "config": {
-          "log_file": "/tmp/aibhq-hook-example-logger.log",
+          "log_file": "/tmp/octai-hook-example-logger.log",
           "log_events": true
         }
       }
@@ -552,7 +552,7 @@ if __name__ == "__main__":
           "approve_tool"
         ],
         "env": {
-          "OCTAI_HOOK_LOG_FILE": "/tmp/aibhq-hook-review-gate.log"
+          "OCTAI_HOOK_LOG_FILE": "/tmp/octai-hook-review-gate.log"
         }
       }
     }

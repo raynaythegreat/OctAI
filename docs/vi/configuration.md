@@ -4,39 +4,39 @@
 
 ## ⚙️ Cấu Hình
 
-File cấu hình: `~/.aibhq/config.json`
+File cấu hình: `~/.octai/config.json`
 
 ### Biến Môi Trường
 
-Bạn có thể ghi đè các đường dẫn mặc định bằng biến môi trường. Điều này hữu ích cho cài đặt portable, triển khai container, hoặc chạy aibhq như dịch vụ hệ thống. Các biến này độc lập và kiểm soát các đường dẫn khác nhau.
+Bạn có thể ghi đè các đường dẫn mặc định bằng biến môi trường. Điều này hữu ích cho cài đặt portable, triển khai container, hoặc chạy octai như dịch vụ hệ thống. Các biến này độc lập và kiểm soát các đường dẫn khác nhau.
 
 | Biến              | Mô tả                                                                                                                             | Đường Dẫn Mặc Định       |
 |-------------------|-----------------------------------------------------------------------------------------------------------------------------------------|---------------------------|
-| `OCTAI_CONFIG` | Ghi đè đường dẫn đến file cấu hình. Chỉ định trực tiếp cho aibhq file `config.json` nào cần tải, bỏ qua tất cả vị trí khác. | `~/.aibhq/config.json` |
-| `OCTAI_HOME`   | Ghi đè thư mục gốc cho dữ liệu aibhq. Thay đổi vị trí mặc định của `workspace` và các thư mục dữ liệu khác.          | `~/.aibhq`             |
+| `OCTAI_CONFIG` | Ghi đè đường dẫn đến file cấu hình. Chỉ định trực tiếp cho octai file `config.json` nào cần tải, bỏ qua tất cả vị trí khác. | `~/.octai/config.json` |
+| `OCTAI_HOME`   | Ghi đè thư mục gốc cho dữ liệu octai. Thay đổi vị trí mặc định của `workspace` và các thư mục dữ liệu khác.          | `~/.octai`             |
 
 **Ví dụ:**
 
 ```bash
-# Chạy aibhq với file cấu hình cụ thể
+# Chạy octai với file cấu hình cụ thể
 # Đường dẫn workspace sẽ được đọc từ trong file cấu hình đó
-OCTAI_CONFIG=/etc/aibhq/production.json aibhq gateway
+OCTAI_CONFIG=/etc/octai/production.json octai gateway
 
-# Chạy aibhq với tất cả dữ liệu lưu tại /opt/aibhq
-# Cấu hình sẽ được tải từ mặc định ~/.aibhq/config.json
-# Workspace sẽ được tạo tại /opt/aibhq/workspace
-OCTAI_HOME=/opt/aibhq aibhq agent
+# Chạy octai với tất cả dữ liệu lưu tại /opt/octai
+# Cấu hình sẽ được tải từ mặc định ~/.octai/config.json
+# Workspace sẽ được tạo tại /opt/octai/workspace
+OCTAI_HOME=/opt/octai octai agent
 
 # Sử dụng cả hai cho thiết lập tùy chỉnh hoàn toàn
-OCTAI_HOME=/srv/aibhq OCTAI_CONFIG=/srv/aibhq/main.json aibhq gateway
+OCTAI_HOME=/srv/octai OCTAI_CONFIG=/srv/octai/main.json octai gateway
 ```
 
 ### Bố Cục Workspace
 
-OctAi lưu trữ dữ liệu trong workspace đã cấu hình (mặc định: `~/.aibhq/workspace`):
+OctAi lưu trữ dữ liệu trong workspace đã cấu hình (mặc định: `~/.octai/workspace`):
 
 ```
-~/.aibhq/workspace/
+~/.octai/workspace/
 ├── sessions/          # Phiên hội thoại và lịch sử
 ├── memory/           # Bộ nhớ dài hạn (MEMORY.md)
 ├── state/            # Trạng thái bền vững (kênh cuối, v.v.)
@@ -55,8 +55,8 @@ OctAi lưu trữ dữ liệu trong workspace đã cấu hình (mặc định: `~
 
 Mặc định, skill được tải từ:
 
-1. `~/.aibhq/workspace/skills` (workspace)
-2. `~/.aibhq/skills` (global)
+1. `~/.octai/workspace/skills` (workspace)
+2. `~/.octai/skills` (global)
 3. `<đường-dẫn-nhúng-khi-build>/skills` (tích hợp)
 
 Cho thiết lập nâng cao/test, bạn có thể ghi đè thư mục gốc skill builtin với:
@@ -82,7 +82,7 @@ OctAi chạy trong môi trường sandbox mặc định. Agent chỉ có thể t
 {
   "agents": {
     "defaults": {
-      "workspace": "~/.aibhq/workspace",
+      "workspace": "~/.octai/workspace",
       "restrict_to_workspace": true
     }
   }
@@ -91,7 +91,7 @@ OctAi chạy trong môi trường sandbox mặc định. Agent chỉ có thể t
 
 | Tùy chọn                | Mặc định                | Mô tả                                    |
 | ----------------------- | ----------------------- | ----------------------------------------- |
-| `workspace`             | `~/.aibhq/workspace` | Thư mục làm việc của agent               |
+| `workspace`             | `~/.octai/workspace` | Thư mục làm việc của agent               |
 | `restrict_to_workspace` | `true`                  | Giới hạn truy cập file/lệnh trong workspace |
 
 #### Công Cụ Được Bảo Vệ
@@ -352,7 +352,7 @@ OctAi hỗ trợ tác vụ theo lịch qua công cụ `cron`.
 }
 ```
 
-Tác vụ đã lên lịch được lưu trữ bền vững sau khi khởi động lại tại `~/.aibhq/workspace/cron/`.
+Tác vụ đã lên lịch được lưu trữ bền vững sau khi khởi động lại tại `~/.octai/workspace/cron/`.
 
 ### Chủ Đề Nâng Cao
 

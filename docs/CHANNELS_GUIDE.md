@@ -61,7 +61,7 @@ The easiest channel to set up. Recommended for beginners.
 ### Step 4: Run
 
 ```bash
-aibhq gateway
+octai gateway
 ```
 
 ### Telegram Commands
@@ -257,7 +257,7 @@ Connect to an external WhatsApp Web bridge.
 ### Step 1: Login
 
 ```bash
-aibhq auth weixin
+octai auth weixin
 ```
 
 ### Step 2: Scan QR Code
@@ -286,7 +286,7 @@ A QR code will appear in the terminal. Scan it with:
 ### Quick Setup
 
 ```bash
-aibhq auth wecom
+octai auth wecom
 ```
 
 Scan the QR code with WeCom to authenticate.
@@ -489,7 +489,7 @@ Set webhook URL in LINE Console: `https://your-ngrok-url.ngrok.io/webhook/line`
       "enabled": true,
       "server": "irc.libera.chat:6697",
       "tls": true,
-      "nick": "aibhq-bot",
+      "nick": "octai-bot",
       "channels": ["#your-channel"],
       "password": "",
       "allow_from": []
@@ -597,7 +597,7 @@ Configure your OneBot implementation to expose a WebSocket server.
 Enable verbose logging:
 
 ```bash
-aibhq gateway --debug
+octai gateway --debug
 ```
 
 Check logs for channel-specific errors.
@@ -614,7 +614,7 @@ Check logs for channel-specific errors.
 
 ### 2. Use Security File for Tokens
 
-Store sensitive tokens in `~/.aibhq/.security.yml`:
+Store sensitive tokens in `~/.octai/.security.yml`:
 
 ```yaml
 channels:

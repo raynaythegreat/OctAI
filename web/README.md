@@ -1,13 +1,13 @@
 # OctAi Web
 
-This directory contains the standalone web service for `aibhq`.
-It provides a complete unified web interface, acting as a dashboard, configuration center, and interactive console (channel client) for the core `aibhq` engine.
+This directory contains the standalone web service for `octai`.
+It provides a complete unified web interface, acting as a dashboard, configuration center, and interactive console (channel client) for the core `octai` engine.
 
 ## Architecture
 
 The service is structured as a monorepo containing both the backend and frontend code to ensure high cohesion and simplify deployment.
 
-*   **`backend/`**: The Go-based web server. It provides RESTful APIs, manages WebSocket connections for chat, and handles the lifecycle of the `aibhq` process. It eventually embeds the compiled frontend assets into a single executable.
+*   **`backend/`**: The Go-based web server. It provides RESTful APIs, manages WebSocket connections for chat, and handles the lifecycle of the `octai` process. It eventually embeds the compiled frontend assets into a single executable.
 *   **`frontend/`**: The Vite + React + TanStack Router single-page application (SPA). It provides the interactive user interface.
 
 ## Getting Started
@@ -40,7 +40,7 @@ Build the frontend and embed it into a single Go binary:
 make build
 ```
 
-The output binary is `backend/aibhq-web`.
+The output binary is `backend/octai-web`.
 
 ### Other Commands
 

@@ -4,39 +4,39 @@
 
 ## ⚙️ Configurazione
 
-File di configurazione: `~/.aibhq/config.json`
+File di configurazione: `~/.octai/config.json`
 
 ### Variabili d'Ambiente
 
-Puoi sovrascrivere i percorsi predefiniti usando variabili d'ambiente. Questo è utile per installazioni portatili, distribuzioni containerizzate, o per eseguire aibhq come servizio di sistema. Queste variabili sono indipendenti e controllano percorsi diversi.
+Puoi sovrascrivere i percorsi predefiniti usando variabili d'ambiente. Questo è utile per installazioni portatili, distribuzioni containerizzate, o per eseguire octai come servizio di sistema. Queste variabili sono indipendenti e controllano percorsi diversi.
 
 | Variabile         | Descrizione                                                                                                                             | Percorso Predefinito      |
 |-------------------|-----------------------------------------------------------------------------------------------------------------------------------------|---------------------------|
-| `OCTAI_CONFIG` | Sovrascrive il percorso al file di configurazione. Indica direttamente a aibhq quale `config.json` caricare, ignorando tutte le altre posizioni. | `~/.aibhq/config.json` |
-| `OCTAI_HOME`   | Sovrascrive la directory radice per i dati di aibhq. Modifica la posizione predefinita del `workspace` e delle altre directory dati.  | `~/.aibhq`             |
+| `OCTAI_CONFIG` | Sovrascrive il percorso al file di configurazione. Indica direttamente a octai quale `config.json` caricare, ignorando tutte le altre posizioni. | `~/.octai/config.json` |
+| `OCTAI_HOME`   | Sovrascrive la directory radice per i dati di octai. Modifica la posizione predefinita del `workspace` e delle altre directory dati.  | `~/.octai`             |
 
 **Esempi:**
 
 ```bash
-# Esegui aibhq usando un file di configurazione specifico
+# Esegui octai usando un file di configurazione specifico
 # Il percorso del workspace verrà letto da quel file di configurazione
-OCTAI_CONFIG=/etc/aibhq/production.json aibhq gateway
+OCTAI_CONFIG=/etc/octai/production.json octai gateway
 
-# Esegui aibhq con tutti i dati salvati in /opt/aibhq
-# La configurazione verrà caricata dal percorso predefinito ~/.aibhq/config.json
-# Il workspace verrà creato in /opt/aibhq/workspace
-OCTAI_HOME=/opt/aibhq aibhq agent
+# Esegui octai con tutti i dati salvati in /opt/octai
+# La configurazione verrà caricata dal percorso predefinito ~/.octai/config.json
+# Il workspace verrà creato in /opt/octai/workspace
+OCTAI_HOME=/opt/octai octai agent
 
 # Usa entrambi per un setup completamente personalizzato
-OCTAI_HOME=/srv/aibhq OCTAI_CONFIG=/srv/aibhq/main.json aibhq gateway
+OCTAI_HOME=/srv/octai OCTAI_CONFIG=/srv/octai/main.json octai gateway
 ```
 
 ### Struttura del Workspace
 
-OctAi salva i dati nel workspace configurato (predefinito: `~/.aibhq/workspace`):
+OctAi salva i dati nel workspace configurato (predefinito: `~/.octai/workspace`):
 
 ```
-~/.aibhq/workspace/
+~/.octai/workspace/
 ├── sessions/          # Sessioni di conversazione e cronologia
 ├── memory/           # Memoria a lungo termine (MEMORY.md)
 ├── state/            # Stato persistente (ultimo canale, ecc.)
@@ -55,8 +55,8 @@ OctAi salva i dati nel workspace configurato (predefinito: `~/.aibhq/workspace`)
 
 Per impostazione predefinita, le skill vengono caricate da:
 
-1. `~/.aibhq/workspace/skills` (workspace)
-2. `~/.aibhq/skills` (globale)
+1. `~/.octai/workspace/skills` (workspace)
+2. `~/.octai/skills` (globale)
 3. `<current-working-directory>/skills` (builtin)
 
 Per configurazioni avanzate/di test, puoi sovrascrivere la directory radice delle skill builtin con:
@@ -82,7 +82,7 @@ OctAi esegue in un ambiente sandboxed per impostazione predefinita. L'agent può
 {
   "agents": {
     "defaults": {
-      "workspace": "~/.aibhq/workspace",
+      "workspace": "~/.octai/workspace",
       "restrict_to_workspace": true
     }
   }
@@ -91,7 +91,7 @@ OctAi esegue in un ambiente sandboxed per impostazione predefinita. L'agent può
 
 | Opzione                 | Predefinito             | Descrizione                                          |
 | ----------------------- | ----------------------- | ---------------------------------------------------- |
-| `workspace`             | `~/.aibhq/workspace` | Directory di lavoro dell'agent                       |
+| `workspace`             | `~/.octai/workspace` | Directory di lavoro dell'agent                       |
 | `restrict_to_workspace` | `true`                  | Limita l'accesso a file/comandi al workspace         |
 
 #### Strumenti Protetti

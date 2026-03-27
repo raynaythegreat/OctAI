@@ -4,7 +4,7 @@
 
 ## 💬 Aplicativos de Chat
 
-Converse com seu aibhq através do Telegram, Discord, WhatsApp, Matrix, QQ, DingTalk, LINE, WeCom, Feishu, Slack, IRC, OneBot ou MaixCam
+Converse com seu octai através do Telegram, Discord, WhatsApp, Matrix, QQ, DingTalk, LINE, WeCom, Feishu, Slack, IRC, OneBot ou MaixCam
 
 > **Nota**: Todos os canais baseados em webhook (LINE, WeCom, etc.) são servidos em um único servidor HTTP Gateway compartilhado (`gateway.host`:`gateway.port`, padrão `127.0.0.1:18790`). Não há portas por canal para configurar. Nota: Feishu usa o modo WebSocket/SDK e não utiliza o servidor HTTP webhook compartilhado.
 
@@ -55,7 +55,7 @@ Converse com seu aibhq através do Telegram, Discord, WhatsApp, Matrix, QQ, Ding
 **3. Executar**
 
 ```bash
-aibhq gateway
+octai gateway
 ```
 
 **4. Menu de comandos do Telegram (registrado automaticamente na inicialização)**
@@ -136,7 +136,7 @@ Você também pode ativar por prefixos de palavras-chave (ex.: `!bot`):
 **6. Executar**
 
 ```bash
-aibhq gateway
+octai gateway
 ```
 
 </details>
@@ -165,7 +165,7 @@ O OctAi pode se conectar ao WhatsApp de duas formas:
 }
 ```
 
-Se `session_store_path` estiver vazio, a sessão é armazenada em `<workspace>/whatsapp/`. Execute `aibhq gateway`; na primeira execução, escaneie o QR code impresso no terminal com WhatsApp → Dispositivos Vinculados.
+Se `session_store_path` estiver vazio, a sessão é armazenada em `<workspace>/whatsapp/`. Execute `octai gateway`; na primeira execução, escaneie o QR code impresso no terminal com WhatsApp → Dispositivos Vinculados.
 
 </details>
 
@@ -179,7 +179,7 @@ O OctAi suporta conexão com sua conta pessoal do WeChat usando a API oficial Te
 
 Execute o fluxo de login interativo por QR code:
 ```bash
-aibhq auth weixin
+octai auth weixin
 ```
 Escaneie o QR code exibido com seu aplicativo WeChat mobile. Após o login bem-sucedido, o token é salvo na sua configuração.
 
@@ -200,7 +200,7 @@ Escaneie o QR code exibido com seu aplicativo WeChat mobile. Após o login bem-s
 
 **3. Executar**
 ```bash
-aibhq gateway
+octai gateway
 ```
 
 </details>
@@ -230,7 +230,7 @@ A QQ Open Platform oferece uma página de configuração com um clique para bots
 }
 ```
 
-4. Execute `aibhq gateway` e abra o QQ para conversar com seu bot
+4. Execute `octai gateway` e abra o QQ para conversar com seu bot
 
 > O App Secret é exibido apenas uma vez. Salve-o imediatamente — visualizá-lo novamente forçará uma redefinição.
 >
@@ -243,7 +243,7 @@ Se preferir criar o bot manualmente:
 * Faça login na [QQ Open Platform](https://q.qq.com/) para se registrar como desenvolvedor
 * Crie um bot QQ — personalize seu avatar e nome
 * Copie o **App ID** e o **App Secret** nas configurações do bot
-* Configure conforme mostrado acima e execute `aibhq gateway`
+* Configure conforme mostrado acima e execute `octai gateway`
 
 </details>
 
@@ -277,7 +277,7 @@ Se preferir criar o bot manualmente:
 **3. Executar**
 
 ```bash
-aibhq gateway
+octai gateway
 ```
 
 </details>
@@ -299,7 +299,7 @@ Canal de integração projetado especificamente para hardware de câmera AI Sipe
 ```
 
 ```bash
-aibhq gateway
+octai gateway
 ```
 
 </details>
@@ -333,7 +333,7 @@ aibhq gateway
 **3. Executar**
 
 ```bash
-aibhq gateway
+octai gateway
 ```
 
 Para opções completas (`device_id`, `join_on_invite`, `group_trigger`, `placeholder`, `reasoning_channel_id`), veja o [Guia de Configuração do Canal Matrix](../channels/matrix/README.md).
@@ -382,7 +382,7 @@ Em seguida, defina a URL do Webhook no LINE Developers Console como `https://you
 **4. Executar**
 
 ```bash
-aibhq gateway
+octai gateway
 ```
 
 > Em chats de grupo, o bot responde apenas quando @mencionado. As respostas citam a mensagem original.
@@ -463,7 +463,7 @@ Veja o [Guia de Configuração do WeCom AI Bot](../channels/wecom/wecom_aibot/RE
 **4. Executar**
 
 ```bash
-aibhq gateway
+octai gateway
 ```
 
 > **Nota**: Os callbacks de webhook do WeCom são servidos na porta do Gateway (padrão 18790). Use um proxy reverso para HTTPS.
@@ -496,7 +496,7 @@ aibhq gateway
 **3. Executar**
 
 ```bash
-aibhq gateway
+octai gateway
 ```
 
 > **Nota**: O WeCom AI Bot usa protocolo de streaming pull — sem preocupações com timeout de resposta. Tarefas longas (>30 segundos) mudam automaticamente para entrega via `response_url` push.
@@ -536,7 +536,7 @@ Opcional: `encrypt_key` e `verification_token` para criptografia de eventos (rec
 **3. Executar e conversar**
 
 ```bash
-aibhq gateway
+octai gateway
 ```
 
 Abra o Feishu, pesquise o nome do seu bot e comece a conversar. Você também pode adicionar o bot a um grupo — use `group_trigger.mention_only: true` para responder apenas quando @mencionado.
@@ -574,7 +574,7 @@ Para opções completas, veja o [Guia de Configuração do Canal Feishu](../chan
 **3. Executar**
 
 ```bash
-aibhq gateway
+octai gateway
 ```
 
 </details>
@@ -592,7 +592,7 @@ aibhq gateway
       "enabled": true,
       "server": "irc.libera.chat:6697",
       "tls": true,
-      "nick": "aibhq-bot",
+      "nick": "octai-bot",
       "channels": ["#your-channel"],
       "password": "",
       "allow_from": []
@@ -606,7 +606,7 @@ Opcional: `nickserv_password` para autenticação NickServ, `sasl_user`/`sasl_pa
 **2. Executar**
 
 ```bash
-aibhq gateway
+octai gateway
 ```
 
 O bot se conectará ao servidor IRC e entrará nos canais especificados.
@@ -647,7 +647,7 @@ Instale e execute um framework de bot QQ compatível com OneBot v11. Habilite se
 **3. Executar**
 
 ```bash
-aibhq gateway
+octai gateway
 ```
 
 </details>
@@ -668,7 +668,7 @@ Canal de integração projetado especificamente para hardware de câmera AI Sipe
 ```
 
 ```bash
-aibhq gateway
+octai gateway
 ```
 
 </details>

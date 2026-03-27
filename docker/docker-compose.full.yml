@@ -14,7 +14,7 @@ services:
       - ../config/config.json:/root/.octai/config.json:ro
       - octai-workspace:/root/.octai/workspace
       - octai-npm-cache:/root/.npm # npm cache for faster MCP server installs
-    entrypoint: ["aibhq", "agent"]
+    entrypoint: ["octai", "agent"]
     stdin_open: true
     tty: true
 

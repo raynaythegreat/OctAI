@@ -20,11 +20,11 @@ func logFilePath() string {
 	if err != nil {
 		home = "."
 	}
-	primary := filepath.Join(home, ".aibhq", "logs", "gateway.log")
+	primary := filepath.Join(home, ".octai", "logs", "gateway.log")
 	if _, err := os.Stat(primary); err == nil {
 		return primary
 	}
-	return filepath.Join(home, ".aibhq", "gateway.log")
+	return filepath.Join(home, ".octai", "gateway.log")
 }
 
 func readLastLines(path string, n int) string {

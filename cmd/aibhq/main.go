@@ -34,9 +34,9 @@ func NewPicoclawCommand() *cobra.Command {
 	short := fmt.Sprintf("%s OctAi - Personal AI Assistant v%s\n\n", internal.Logo, config.GetVersion())
 
 	cmd := &cobra.Command{
-		Use:     "aibhq",
+		Use:     "octai",
 		Short:   short,
-		Example: "aibhq version",
+		Example: "octai version",
 	}
 
 	cmd.AddCommand(

@@ -15,7 +15,7 @@ export OCTAI_KEY_PASSPHRASE="your-passphrase"
 
 **2. Encrypt an API key**
 
-Run `aibhq onboard` — it prompts for your passphrase and generates the SSH key,
+Run `octai onboard` — it prompts for your passphrase and generates the SSH key,
 then automatically re-encrypts any plaintext `api_key` entries in your config on
 the next `SaveConfig` call. The resulting `enc://` value will look like:
 
@@ -60,7 +60,7 @@ Encryption uses **HKDF-SHA256** with an SSH private key as a second factor.
 ```
 sshHash = SHA256(ssh_private_key_file_bytes)
 ikm     = HMAC-SHA256(key=sshHash, message=passphrase)
-aes_key = HKDF-SHA256(ikm, salt, info="aibhq-credential-v1", 32 bytes)
+aes_key = HKDF-SHA256(ikm, salt, info="octai-credential-v1", 32 bytes)
 ```
 
 ### Encryption
@@ -118,22 +118,22 @@ This means a leaked config file alone is not sufficient to recover the API key, 
 | Variable | Required | Description |
 |----------|----------|-------------|
 | `OCTAI_KEY_PASSPHRASE` | Yes (for `enc://`) | Passphrase used for key derivation |
-| `OCTAI_SSH_KEY_PATH` | No | Path to SSH private key. If not set, auto-detects from `~/.ssh/aibhq_ed25519.key` |
+| `OCTAI_SSH_KEY_PATH` | No | Path to SSH private key. If not set, auto-detects from `~/.ssh/octai_ed25519.key` |
 
 ### SSH Key Auto-Detection
 
-If `OCTAI_SSH_KEY_PATH` is not set, OctAi looks for the aibhq-specific key:
+If `OCTAI_SSH_KEY_PATH` is not set, OctAi looks for the octai-specific key:
 
 ```
-~/.ssh/aibhq_ed25519.key
+~/.ssh/octai_ed25519.key
 ```
 
 This dedicated file avoids conflicts with the user's existing SSH keys.
-Run `aibhq onboard` to generate it automatically.
+Run `octai onboard` to generate it automatically.
 
 `os.UserHomeDir()` is used for cross-platform home directory resolution (reads `USERPROFILE` on Windows, `HOME` on Unix/macOS).
 
-> **Note:** An SSH key file is required for credential encryption. If no key is found and `OCTAI_SSH_KEY_PATH` is not set, encryption/decryption will fail. Run `aibhq onboard` to generate the key automatically.
+> **Note:** An SSH key file is required for credential encryption. If no key is found and `OCTAI_SSH_KEY_PATH` is not set, encryption/decryption will fail. Run `octai onboard` to generate the key automatically.
 
 ---
 
@@ -151,7 +151,7 @@ No re-encryption is needed.
 
 ## Security Considerations
 
-- **Both passphrase and SSH key are required.** The SSH key acts as a second factor — without it, encryption/decryption will fail. Run `aibhq onboard` to generate the key if it doesn't exist.
+- **Both passphrase and SSH key are required.** The SSH key acts as a second factor — without it, encryption/decryption will fail. Run `octai onboard` to generate the key if it doesn't exist.
 - **The SSH key is read-only at runtime.** OctAi never writes to or modifies the SSH key file.
 - **Plaintext keys remain supported.** Existing configs without `enc://` are unaffected.
-- **The `enc://` format is versioned** via the HKDF `info` field (`aibhq-credential-v1`), allowing future algorithm upgrades without breaking existing encrypted values.
+- **The `enc://` format is versioned** via the HKDF `info` field (`octai-credential-v1`), allowing future algorithm upgrades without breaking existing encrypted values.

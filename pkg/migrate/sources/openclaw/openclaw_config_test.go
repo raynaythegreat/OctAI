@@ -82,8 +82,8 @@ func TestLoadOpenClawConfig(t *testing.T) {
 	}
 
 	workspace := cfg.GetDefaultWorkspace()
-	if workspace != "~/.aibhq/workspace" {
-		t.Errorf("expected workspace '~/.aibhq/workspace', got '%s'", workspace)
+	if workspace != "~/.octai/workspace" {
+		t.Errorf("expected workspace '~/.octai/workspace', got '%s'", workspace)
 	}
 
 	agents := cfg.GetAgents()
@@ -245,8 +245,8 @@ func TestConvertToAIBusinessHQ(t *testing.T) {
 	if picoCfg.Agents.Defaults.ModelName != "claude-sonnet-4-20250514" {
 		t.Errorf("expected model 'claude-sonnet-4-20250514', got '%s'", picoCfg.Agents.Defaults.ModelName)
 	}
-	if picoCfg.Agents.Defaults.Workspace != "~/.aibhq/workspace" {
-		t.Errorf("expected workspace '~/.aibhq/workspace', got '%s'", picoCfg.Agents.Defaults.Workspace)
+	if picoCfg.Agents.Defaults.Workspace != "~/.octai/workspace" {
+		t.Errorf("expected workspace '~/.octai/workspace', got '%s'", picoCfg.Agents.Defaults.Workspace)
 	}
 
 	if len(picoCfg.Agents.List) != 2 {
@@ -639,7 +639,7 @@ func TestToStandardConfig(t *testing.T) {
 			Defaults: AgentDefaults{
 				Provider:  "anthropic",
 				ModelName: "claude-sonnet-4-20250514",
-				Workspace: "~/.aibhq/workspace",
+				Workspace: "~/.octai/workspace",
 			},
 			List: []AgentConfig{
 				{
@@ -681,8 +681,8 @@ func TestToStandardConfig(t *testing.T) {
 	if stdCfg.Agents.Defaults.ModelName != "claude-sonnet-4-20250514" {
 		t.Errorf("expected model name 'claude-sonnet-4-20250514', got '%s'", stdCfg.Agents.Defaults.ModelName)
 	}
-	if stdCfg.Agents.Defaults.Workspace != "~/.aibhq/workspace" {
-		t.Errorf("expected workspace '~/.aibhq/workspace', got '%s'", stdCfg.Agents.Defaults.Workspace)
+	if stdCfg.Agents.Defaults.Workspace != "~/.octai/workspace" {
+		t.Errorf("expected workspace '~/.octai/workspace', got '%s'", stdCfg.Agents.Defaults.Workspace)
 	}
 
 	if len(stdCfg.Agents.List) != 1 {

@@ -35,7 +35,7 @@ Nền tảng Mở QQ cung cấp lối vào tạo bot một chạm:
 1. Mở [QQ Bot Quick Create](https://q.qq.com/qqbot/openclaw/index.html) và đăng nhập bằng cách quét mã QR
 2. Hệ thống tự động tạo bot — sao chép **App ID** và **App Secret**
 3. Điền thông tin xác thực vào file cấu hình OctAi
-4. Chạy `aibhq gateway` để khởi động dịch vụ
+4. Chạy `octai gateway` để khởi động dịch vụ
 5. Mở QQ và bắt đầu trò chuyện với bot
 
 > App Secret chỉ hiển thị một lần — hãy lưu lại ngay. Xem lại sẽ buộc phải đặt lại.
@@ -48,7 +48,7 @@ Nền tảng Mở QQ cung cấp lối vào tạo bot một chạm:
 2. Tạo bot QQ, tùy chỉnh ảnh đại diện và tên
 3. Lấy **App ID** và **App Secret** trong cài đặt bot
 4. Điền thông tin xác thực vào file cấu hình OctAi
-5. Chạy `aibhq gateway` để khởi động dịch vụ
+5. Chạy `octai gateway` để khởi động dịch vụ
 6. Tìm kiếm bot của bạn trong QQ và bắt đầu trò chuyện
 
 > Trong giai đoạn phát triển, nên bật chế độ sandbox và thêm người dùng, nhóm thử nghiệm vào sandbox để gỡ lỗi.

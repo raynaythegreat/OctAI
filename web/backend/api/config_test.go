@@ -23,7 +23,7 @@ func TestHandleUpdateConfig_PreservesExecAllowRemoteDefaultWhenOmitted(t *testin
 "version": 1,
 		"agents": {
 			"defaults": {
-				"workspace": "~/.aibhq/workspace"
+				"workspace": "~/.octai/workspace"
 			}
 		},
 		"model_list": [
@@ -62,7 +62,7 @@ func TestHandleUpdateConfig_DoesNotInheritDefaultModelFields(t *testing.T) {
 	req := httptest.NewRequest(http.MethodPut, "/api/config", bytes.NewBufferString(`{
 		"agents": {
 			"defaults": {
-				"workspace": "~/.aibhq/workspace"
+				"workspace": "~/.octai/workspace"
 			}
 		},
 		"model_list": [
@@ -155,7 +155,7 @@ func setupPicoEnabledEnv(t *testing.T) (string, func()) {
 	if err := os.Setenv("HOME", tmp); err != nil {
 		t.Fatalf("set HOME: %v", err)
 	}
-	if err := os.Setenv("OCTAI_HOME", filepath.Join(tmp, ".aibhq")); err != nil {
+	if err := os.Setenv("OCTAI_HOME", filepath.Join(tmp, ".octai")); err != nil {
 		t.Fatalf("set OCTAI_HOME: %v", err)
 	}
 
@@ -204,7 +204,7 @@ func TestHandleUpdateConfig_SucceedsWhenPicoTokenInSecurityOnly(t *testing.T) {
 		"version": 1,
 		"agents": {
 			"defaults": {
-				"workspace": "~/.aibhq/workspace",
+				"workspace": "~/.octai/workspace",
 				"model_name": "custom-default"
 			}
 		},

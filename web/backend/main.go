@@ -7,9 +7,9 @@
 //
 // Usage:
 //
-//	go build -o aibhq-web ./web/backend/
-//	./aibhq-web [config.json]
-//	./aibhq-web -public config.json
+//	go build -o octai-web ./web/backend/
+//	./octai-web [config.json]
+//	./octai-web -public config.json
 
 package main
 

@@ -151,7 +151,7 @@ Cette conception permet également le **support multi-agents** avec une sélecti
 }
 ```
 
-> Exécutez `aibhq auth login --provider anthropic` pour coller votre token API.
+> Exécutez `octai auth login --provider anthropic` pour coller votre token API.
 
 **API Anthropic Messages (format natif)**
 
@@ -297,7 +297,7 @@ Cela maintient le runtime léger tout en faisant des nouveaux backends compatibl
 {
   "agents": {
     "defaults": {
-      "workspace": "~/.aibhq/workspace",
+      "workspace": "~/.octai/workspace",
       "model_name": "glm-4.7",
       "max_tokens": 8192,
       "temperature": 0.7,
@@ -316,7 +316,7 @@ Cela maintient le runtime léger tout en faisant des nouveaux backends compatibl
 **3. Lancer**
 
 ```bash
-aibhq agent -m "Hello"
+octai agent -m "Hello"
 ```
 
 </details>

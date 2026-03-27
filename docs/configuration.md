@@ -4,41 +4,41 @@
 
 ## ⚙️ Configuration
 
-Config file: `~/.aibhq/config.json`
+Config file: `~/.octai/config.json`
 
 ### Environment Variables
 
-You can override default paths using environment variables. This is useful for portable installations, containerized deployments, or running aibhq as a system service. These variables are independent and control different paths.
+You can override default paths using environment variables. This is useful for portable installations, containerized deployments, or running octai as a system service. These variables are independent and control different paths.
 
 | Variable          | Description                                                                                                                             | Default Path              |
 |-------------------|-----------------------------------------------------------------------------------------------------------------------------------------|---------------------------|
-| `AIBHQ_CONFIG` | Overrides the path to the configuration file. This directly tells aibhq which `config.json` to load, ignoring all other locations. | `~/.aibhq/config.json` |
-| `AIBHQ_HOME`   | Overrides the root directory for aibhq data. This changes the default location of the `workspace` and other data directories.          | `~/.aibhq`             |
+| `AIBHQ_CONFIG` | Overrides the path to the configuration file. This directly tells octai which `config.json` to load, ignoring all other locations. | `~/.octai/config.json` |
+| `AIBHQ_HOME`   | Overrides the root directory for octai data. This changes the default location of the `workspace` and other data directories.          | `~/.octai`             |
 
 > **Note**: Legacy environment variables `OCTAI_CONFIG` and `OCTAI_HOME` are still supported for backward compatibility.
 
 **Examples:**
 
 ```bash
-# Run aibhq using a specific config file
+# Run octai using a specific config file
 # The workspace path will be read from within that config file
-AIBHQ_CONFIG=/etc/aibhq/production.json aibhq gateway
+AIBHQ_CONFIG=/etc/octai/production.json octai gateway
 
-# Run aibhq with all its data stored in /opt/aibhq
-# Config will be loaded from the default ~/.aibhq/config.json
-# Workspace will be created at /opt/aibhq/workspace
-AIBHQ_HOME=/opt/aibhq aibhq agent
+# Run octai with all its data stored in /opt/octai
+# Config will be loaded from the default ~/.octai/config.json
+# Workspace will be created at /opt/octai/workspace
+AIBHQ_HOME=/opt/octai octai agent
 
 # Use both for a fully customized setup
-AIBHQ_HOME=/srv/aibhq AIBHQ_CONFIG=/srv/aibhq/main.json aibhq gateway
+AIBHQ_HOME=/srv/octai AIBHQ_CONFIG=/srv/octai/main.json octai gateway
 ```
 
 ### Workspace Layout
 
-OctAi stores data in your configured workspace (default: `~/.aibhq/workspace`):
+OctAi stores data in your configured workspace (default: `~/.octai/workspace`):
 
 ```
-~/.aibhq/workspace/
+~/.octai/workspace/
 ├── sessions/          # Conversation sessions and history
 ├── memory/           # Long-term memory (MEMORY.md)
 ├── state/            # Persistent state (last channel, etc.)
@@ -57,8 +57,8 @@ OctAi stores data in your configured workspace (default: `~/.aibhq/workspace`):
 
 By default, skills are loaded from:
 
-1. `~/.aibhq/workspace/skills` (workspace)
-2. `~/.aibhq/skills` (global)
+1. `~/.octai/workspace/skills` (workspace)
+2. `~/.octai/skills` (global)
 3. `<binary-embedded-path>/skills` (builtin, set at build time)
 
 For advanced/test setups, you can override the builtin skills root with:
@@ -100,7 +100,7 @@ Use `bindings` in `config.json` to route incoming messages to different agents b
 {
   "agents": {
     "defaults": {
-      "workspace": "~/.aibhq/workspace",
+      "workspace": "~/.octai/workspace",
       "model_name": "gpt-4o-mini"
     },
     "list": [
@@ -230,7 +230,7 @@ OctAi runs in a sandboxed environment by default. The agent can only access file
 {
   "agents": {
     "defaults": {
-      "workspace": "~/.aibhq/workspace",
+      "workspace": "~/.octai/workspace",
       "restrict_to_workspace": true
     }
   }
@@ -239,7 +239,7 @@ OctAi runs in a sandboxed environment by default. The agent can only access file
 
 | Option                  | Default                 | Description                               |
 | ----------------------- | ----------------------- | ----------------------------------------- |
-| `workspace`             | `~/.aibhq/workspace` | Working directory for the agent           |
+| `workspace`             | `~/.octai/workspace` | Working directory for the agent           |
 | `restrict_to_workspace` | `true`                  | Restrict file/command access to workspace |
 
 #### Protected Tools
@@ -468,7 +468,7 @@ OctAi supports separating sensitive data (API keys, tokens, secrets) from your m
 
 **Quick Setup:**
 
-1. Create `~/.aibhq/.security.yml` with your API keys:
+1. Create `~/.octai/.security.yml` with your API keys:
 ```yaml
 model_list:
   gpt-5.4:
@@ -490,7 +490,7 @@ web:
 
 2. Set proper permissions:
 ```bash
-chmod 600 ~/.aibhq/.security.yml
+chmod 600 ~/.octai/.security.yml
 ```
 
 3. Remove sensitive fields from `config.json` (recommended):
@@ -650,7 +650,7 @@ For complete documentation, see [`security_configuration.md`](security_configura
 }
 ```
 
-> Run `aibhq auth login --provider anthropic` to paste your API token.
+> Run `octai auth login --provider anthropic` to paste your API token.
 
 For direct Anthropic API access or custom endpoints that only support Anthropic's native message format:
 
@@ -766,7 +766,7 @@ This keeps the runtime lightweight while making new OpenAI-compatible backends m
 {
   "agents": {
     "defaults": {
-      "workspace": "~/.aibhq/workspace",
+      "workspace": "~/.octai/workspace",
       "model": "glm-4.7",
       "max_tokens": 8192,
       "temperature": 0.7,
@@ -841,7 +841,7 @@ OctAi supports cron-style scheduled tasks via the `cron` tool. The agent can set
 }
 ```
 
-Scheduled tasks persist across restarts and are stored in `~/.aibhq/workspace/cron/`.
+Scheduled tasks persist across restarts and are stored in `~/.octai/workspace/cron/`.
 
 ### Advanced Topics
 

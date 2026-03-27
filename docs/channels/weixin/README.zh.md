@@ -7,18 +7,18 @@ OctAi 支持使用腾讯官方 iLink API 连接您的个人微信账号。
 最简单的方法是使用交互式 onboarding 命令进行一键激活：
 
 ```bash
-aibhq auth weixin
+octai auth weixin
 ```
 
 该命令将：
 1. 从 iLink API 获取二维码并在终端中打印。
 2. 等待您使用手机微信 App 扫码。
-3. 扫码确认后，自动将生成的 Access Token 保存至您的 `~/.aibhq/config.json` 中。
+3. 扫码确认后，自动将生成的 Access Token 保存至您的 `~/.octai/config.json` 中。
 
 配置完成后，即可启动网关：
 
 ```bash
-aibhq gateway
+octai gateway
 ```
 
 ---

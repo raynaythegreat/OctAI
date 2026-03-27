@@ -42,8 +42,8 @@ For substantial new features, please open an issue first to discuss the design b
 1. **Fork** the repository on GitHub.
 2. **Clone** your fork locally:
    ```bash
-   git clone https://github.com/<your-username>/aibhq.git
-   cd aibhq
+   git clone https://github.com/<your-username>/octai.git
+   cd octai
    ```
 3. Add the upstream remote:
    ```bash

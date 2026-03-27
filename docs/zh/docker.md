@@ -9,7 +9,7 @@
 ```bash
 # 1. 克隆仓库
 git clone https://github.com/raynaythegreat/ai-business-hq.git
-cd aibhq
+cd octai
 
 # 2. 首次运行 — 自动生成 docker/data/config.json 后退出
 #    （仅在 config.json 和 workspace/ 都不存在时触发）
@@ -28,7 +28,7 @@ docker compose -f docker/docker-compose.yml --profile gateway up -d
 
 ```bash
 # 5. 查看日志
-docker compose -f docker/docker-compose.yml logs -f aibhq-gateway
+docker compose -f docker/docker-compose.yml logs -f octai-gateway
 
 # 6. 停止
 docker compose -f docker/docker-compose.yml --profile gateway down
@@ -36,7 +36,7 @@ docker compose -f docker/docker-compose.yml --profile gateway down
 
 ### Launcher 模式 (Web 控制台)
 
-`launcher` 镜像包含所有三个二进制文件（`aibhq`、`aibhq-launcher`、`aibhq-launcher-tui`），默认启动 Web 控制台，提供基于浏览器的配置和聊天界面。
+`launcher` 镜像包含所有三个二进制文件（`octai`、`octai-launcher`、`octai-launcher-tui`），默认启动 Web 控制台，提供基于浏览器的配置和聊天界面。
 
 ```bash
 docker compose -f docker/docker-compose.yml --profile launcher up -d
@@ -51,10 +51,10 @@ docker compose -f docker/docker-compose.yml --profile launcher up -d
 
 ```bash
 # 提问
-docker compose -f docker/docker-compose.yml run --rm aibhq-agent -m "2+2 等于几？"
+docker compose -f docker/docker-compose.yml run --rm octai-agent -m "2+2 等于几？"
 
 # 交互模式
-docker compose -f docker/docker-compose.yml run --rm aibhq-agent
+docker compose -f docker/docker-compose.yml run --rm octai-agent
 ```
 
 ### 更新镜像
@@ -69,21 +69,21 @@ docker compose -f docker/docker-compose.yml --profile gateway up -d
 ## 🚀 快速开始
 
 > [!TIP]
-> 在 `~/.aibhq/config.json` 中设置您的 API Key。获取 API Key: [火山引擎 (CodingPlan)](https://www.volcengine.com/activity/codingplan?utm_campaign=OctAi&utm_content=OctAi&utm_medium=devrel&utm_source=OWO&utm_term=OctAi) (LLM) · [OpenRouter](https://openrouter.ai/keys) (LLM) · [Zhipu (智谱)](https://open.bigmodel.cn/usercenter/proj-mgmt/apikeys) (LLM)。网络搜索是 **可选的** — 获取免费的 [Tavily API](https://tavily.com) (每月 1000 次免费查询) 或 [Brave Search API](https://brave.com/search/api) (每月 2000 次免费查询)。
+> 在 `~/.octai/config.json` 中设置您的 API Key。获取 API Key: [火山引擎 (CodingPlan)](https://www.volcengine.com/activity/codingplan?utm_campaign=OctAi&utm_content=OctAi&utm_medium=devrel&utm_source=OWO&utm_term=OctAi) (LLM) · [OpenRouter](https://openrouter.ai/keys) (LLM) · [Zhipu (智谱)](https://open.bigmodel.cn/usercenter/proj-mgmt/apikeys) (LLM)。网络搜索是 **可选的** — 获取免费的 [Tavily API](https://tavily.com) (每月 1000 次免费查询) 或 [Brave Search API](https://brave.com/search/api) (每月 2000 次免费查询)。
 
 **1. 初始化 (Initialize)**
 
 ```bash
-aibhq onboard
+octai onboard
 ```
 
-**2. 配置 (Configure)** (`~/.aibhq/config.json`)
+**2. 配置 (Configure)** (`~/.octai/config.json`)
 
 ```json
 {
   "agents": {
     "defaults": {
-      "workspace": "~/.aibhq/workspace",
+      "workspace": "~/.octai/workspace",
       "model_name": "gpt-5.4",
       "max_tokens": 8192,
       "temperature": 0.7,
@@ -161,7 +161,7 @@ aibhq onboard
 **4. 对话 (Chat)**
 
 ```bash
-aibhq agent -m "2+2 等于几？"
+octai agent -m "2+2 等于几？"
 ```
 
 就是这样！您在 2 分钟内就拥有了一个可工作的 AI 助手。

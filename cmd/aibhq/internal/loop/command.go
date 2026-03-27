@@ -9,7 +9,7 @@ import (
 	"github.com/raynaythegreat/ai-business-hq/pkg/agent"
 )
 
-// NewLoopCommand returns the `aibhq loop` cobra command.
+// NewLoopCommand returns the `octai loop` cobra command.
 func NewLoopCommand() *cobra.Command {
 	var (
 		maxRuns int
@@ -22,8 +22,8 @@ func NewLoopCommand() *cobra.Command {
 
 The interval is a Go duration string such as 5m, 1h, or 30s.
 The gateway must be running for loops to execute.`,
-		Example: `  aibhq loop 5m "check build status"
-  aibhq loop 1h "summarise today's activity" --max-runs 8`,
+		Example: `  octai loop 5m "check build status"
+  octai loop 1h "summarise today's activity" --max-runs 8`,
 		Args: cobra.ExactArgs(2),
 		RunE: func(_ *cobra.Command, args []string) error {
 			intervalStr := args[0]
@@ -53,7 +53,7 @@ The gateway must be running for loops to execute.`,
 				fmt.Printf("  Max runs: %d\n", maxRuns)
 			}
 			fmt.Println()
-			fmt.Println("Note: Start the gateway with `aibhq gateway start` to execute loops.")
+			fmt.Println("Note: Start the gateway with `octai gateway start` to execute loops.")
 
 			return nil
 		},

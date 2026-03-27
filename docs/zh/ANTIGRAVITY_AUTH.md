@@ -19,7 +19,7 @@
 7. [集成要求](#集成要求)
 8. [API 端点](#api-端点)
 9. [配置](#配置)
-10. [在 OctAi 中创建新提供商](#在-aibhq-中创建新提供商)
+10. [在 OctAi 中创建新提供商](#在-octai-中创建新提供商)
 
 ---
 
@@ -590,7 +590,7 @@ export function sanitizeAntigravityThinkingBlocks(
 
 ### 认证配置文件存储
 
-认证配置文件存储在 `~/.aibhq/auth.json` 中：
+认证配置文件存储在 `~/.octai/auth.json` 中：
 
 ```json
 {
@@ -672,7 +672,7 @@ case "your-provider":
 
 #### 5. 添加认证支持（可选）
 
-如果你的提供商需要 OAuth 或特殊认证，在 `cmd/aibhq/internal/auth/helpers.go` 中添加分支：
+如果你的提供商需要 OAuth 或特殊认证，在 `cmd/octai/internal/auth/helpers.go` 中添加分支：
 
 ```go
 case "your-provider":
@@ -702,16 +702,16 @@ case "your-provider":
 
 ```bash
 # 使用提供商进行认证
-aibhq auth login --provider your-provider
+octai auth login --provider your-provider
 
 # 列出模型（用于 Antigravity）
-aibhq auth models
+octai auth models
 
 # 启动网关
-aibhq gateway
+octai gateway
 
 # 使用指定模型运行代理
-aibhq agent -m "Hello" --model your-model
+octai agent -m "Hello" --model your-model
 ```
 
 ### 测试用环境变量
@@ -731,10 +731,10 @@ export OCTAI_MODEL_LIST='[{"model_name":"your-model","model":"your-provider/mode
 - **源文件：**
   - `pkg/providers/antigravity_provider.go` - Antigravity 提供商实现
   - `pkg/auth/oauth.go` - OAuth 流程实现
-  - `pkg/auth/store.go` - 认证凭据存储（`~/.aibhq/auth.json`）
+  - `pkg/auth/store.go` - 认证凭据存储（`~/.octai/auth.json`）
   - `pkg/providers/factory.go` - 提供商工厂和协议路由
   - `pkg/providers/types.go` - 提供商接口定义
-  - `cmd/aibhq/internal/auth/helpers.go` - 认证 CLI 命令
+  - `cmd/octai/internal/auth/helpers.go` - 认证 CLI 命令
 
 - **文档：**
   - `docs/ANTIGRAVITY_USAGE.md` - Antigravity 使用指南
@@ -790,7 +790,7 @@ export OCTAI_MODEL_LIST='[{"model_name":"your-model","model":"your-provider/mode
 ## 故障排除
 
 ### "Token expired"（令牌已过期）
-- 刷新 OAuth 令牌：`aibhq auth login --provider antigravity`
+- 刷新 OAuth 令牌：`octai auth login --provider antigravity`
 
 ### "Gemini for Google Cloud is not enabled"（Gemini for Google Cloud 未启用）
 - 在 Google Cloud Console 中启用该 API
@@ -801,5 +801,5 @@ export OCTAI_MODEL_LIST='[{"model_name":"your-model","model":"your-provider/mode
 
 ### 模型未出现在列表中
 - 验证 OAuth 认证是否成功完成
-- 检查认证配置文件存储：`~/.aibhq/auth.json`
-- 重新运行 `aibhq auth login --provider antigravity`
+- 检查认证配置文件存储：`~/.octai/auth.json`
+- 重新运行 `octai auth login --provider antigravity`

@@ -61,7 +61,7 @@ func (a *App) newHomePage() tview.Primitive {
 			return
 		}
 		a.tapp.Suspend(func() {
-			cmd := exec.Command("aibhq", "agent")
+			cmd := exec.Command("octai", "agent")
 			cmd.Stdin = os.Stdin
 			cmd.Stdout = os.Stdout
 			cmd.Stderr = os.Stderr

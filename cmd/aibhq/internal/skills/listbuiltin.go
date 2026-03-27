@@ -6,7 +6,7 @@ func newListBuiltinCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "list-builtin",
 		Short:   "List available builtin skills",
-		Example: `aibhq skills list-builtin`,
+		Example: `octai skills list-builtin`,
 		Run: func(_ *cobra.Command, _ []string) {
 			skillsListBuiltinCmd()
 		},

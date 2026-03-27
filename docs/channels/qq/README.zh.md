@@ -37,7 +37,7 @@ QQ 开放平台提供了一键创建入口：
 1. 打开 [QQ 机器人快速创建](https://q.qq.com/qqbot/openclaw/index.html)，扫码登录
 2. 系统自动创建机器人，复制 **App ID** 和 **App Secret**
 3. 将凭证填入 OctAi 配置文件
-4. 运行 `aibhq gateway` 启动服务
+4. 运行 `octai gateway` 启动服务
 5. 打开 QQ，与机器人开始对话
 
 > App Secret 仅显示一次，请立即保存。再次查看将强制重置。
@@ -50,7 +50,7 @@ QQ 开放平台提供了一键创建入口：
 2. 创建 QQ 机器人，自定义头像和名称
 3. 在机器人设置中获取 **App ID** 和 **App Secret**
 4. 将凭证填入 OctAi 配置文件
-5. 运行 `aibhq gateway` 启动服务
+5. 运行 `octai gateway` 启动服务
 6. 在 QQ 中搜索你的机器人，开始对话
 
 > 开发阶段建议开启沙箱模式，将测试用户和群添加到沙箱中进行调试。

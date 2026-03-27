@@ -31,7 +31,7 @@ func getPidPath() string {
 	if err != nil {
 		home = "."
 	}
-	return filepath.Join(home, ".aibhq", pidFileName)
+	return filepath.Join(home, ".octai", pidFileName)
 }
 
 func isProcessRunning(pid int) bool {

@@ -17,7 +17,7 @@ export OCTAI_KEY_PASSPHRASE="your-passphrase"
 
 **2. API キーを暗号化する**
 
-`aibhq onboard` を実行します — パスフレーズの入力を求められ、SSH キーが生成されます。
+`octai onboard` を実行します — パスフレーズの入力を求められ、SSH キーが生成されます。
 その後、次の `SaveConfig` 呼び出し時に、設定内のすべての平文 `api_key` エントリが自動的に再暗号化されます。生成される `enc://` 値は以下のようになります：
 
 ```
@@ -61,7 +61,7 @@ enc://AAAA...base64...
 ```
 sshHash = SHA256(ssh_private_key_file_bytes)
 ikm     = HMAC-SHA256(key=sshHash, message=passphrase)
-aes_key = HKDF-SHA256(ikm, salt, info="aibhq-credential-v1", 32 bytes)
+aes_key = HKDF-SHA256(ikm, salt, info="octai-credential-v1", 32 bytes)
 ```
 
 ### 暗号化
@@ -119,22 +119,22 @@ SSH 秘密鍵が提供されている場合、暗号を破るには**両方**が
 | 変数 | 必須 | 説明 |
 |------|------|------|
 | `OCTAI_KEY_PASSPHRASE` | はい（`enc://` 使用時） | 鍵導出に使用するパスフレーズ |
-| `OCTAI_SSH_KEY_PATH` | いいえ | SSH 秘密鍵のパス。未設定の場合、`~/.ssh/aibhq_ed25519.key` から自動検出 |
+| `OCTAI_SSH_KEY_PATH` | いいえ | SSH 秘密鍵のパス。未設定の場合、`~/.ssh/octai_ed25519.key` から自動検出 |
 
 ### SSH キーの自動検出
 
 `OCTAI_SSH_KEY_PATH` が設定されていない場合、OctAi は専用キーを探します：
 
 ```
-~/.ssh/aibhq_ed25519.key
+~/.ssh/octai_ed25519.key
 ```
 
 この専用ファイルにより、ユーザーの既存の SSH キーとの競合を回避します。
-`aibhq onboard` を実行すると自動的に生成されます。
+`octai onboard` を実行すると自動的に生成されます。
 
 `os.UserHomeDir()` はクロスプラットフォームのホームディレクトリ解決に使用されます（Windows では `USERPROFILE`、Unix/macOS では `HOME` を読み取ります）。
 
-> **注意：** SSH キーファイルはクレデンシャル暗号化に必須です。キーが見つからず `OCTAI_SSH_KEY_PATH` も設定されていない場合、暗号化/復号は失敗します。`aibhq onboard` を実行してキーを自動生成してください。
+> **注意：** SSH キーファイルはクレデンシャル暗号化に必須です。キーが見つからず `OCTAI_SSH_KEY_PATH` も設定されていない場合、暗号化/復号は失敗します。`octai onboard` を実行してキーを自動生成してください。
 
 ---
 
@@ -152,7 +152,7 @@ SSH 秘密鍵が提供されている場合、暗号を破るには**両方**が
 
 ## セキュリティに関する考慮事項
 
-- **パスフレーズと SSH キーの両方が必須です。** SSH キーは第二要素として機能します — これがなければ暗号化/復号は失敗します。キーが存在しない場合は `aibhq onboard` を実行して生成してください。
+- **パスフレーズと SSH キーの両方が必須です。** SSH キーは第二要素として機能します — これがなければ暗号化/復号は失敗します。キーが存在しない場合は `octai onboard` を実行して生成してください。
 - **SSH キーは実行時に読み取り専用です。** OctAi は SSH キーファイルへの書き込みや変更を行いません。
 - **平文キーは引き続きサポートされます。** `enc://` を使用しない既存の設定は影響を受けません。
-- **`enc://` 形式はバージョン管理されています。** HKDF `info` フィールド（`aibhq-credential-v1`）により、既存の暗号化値を壊すことなく将来のアルゴリズムアップグレードが可能です。
+- **`enc://` 形式はバージョン管理されています。** HKDF `info` フィールド（`octai-credential-v1`）により、既存の暗号化値を壊すことなく将来のアルゴリズムアップグレードが可能です。

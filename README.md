@@ -59,10 +59,10 @@ git clone https://github.com/raynaythegreat/ai-business-hq.git
 cd ai-business-hq
 
 # Build
-go build -o aibhq ./cmd/aibhq
+go build -o octai ./cmd/aibhq
 
 # Run
-./aibhq
+./octai
 ```
 
 ### Docker

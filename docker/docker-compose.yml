@@ -13,7 +13,7 @@ services:
     #  - "host.docker.internal:host-gateway"
     volumes:
       - ./data:/root/.octai
-    entrypoint: ["aibhq", "agent"]
+    entrypoint: ["octai", "agent"]
     stdin_open: true
     tty: true
 

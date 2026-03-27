@@ -17,7 +17,7 @@ export OCTAI_KEY_PASSPHRASE="your-passphrase"
 
 **2. Chiffrer une clé API**
 
-Exécutez `aibhq onboard` — il vous demande votre phrase secrète et génère la clé SSH,
+Exécutez `octai onboard` — il vous demande votre phrase secrète et génère la clé SSH,
 puis re-chiffre automatiquement toutes les entrées `api_key` en clair dans votre configuration
 lors du prochain appel à `SaveConfig`. La valeur `enc://` résultante ressemblera à :
 
@@ -62,7 +62,7 @@ Le chiffrement utilise **HKDF-SHA256** avec une clé privée SSH comme second fa
 ```
 sshHash = SHA256(ssh_private_key_file_bytes)
 ikm     = HMAC-SHA256(key=sshHash, message=passphrase)
-aes_key = HKDF-SHA256(ikm, salt, info="aibhq-credential-v1", 32 bytes)
+aes_key = HKDF-SHA256(ikm, salt, info="octai-credential-v1", 32 bytes)
 ```
 
 ### Chiffrement
@@ -120,22 +120,22 @@ Cela signifie qu'un fichier de configuration divulgué seul ne suffit pas pour r
 | Variable | Requis | Description |
 |----------|--------|-------------|
 | `OCTAI_KEY_PASSPHRASE` | Oui (pour `enc://`) | Phrase secrète utilisée pour la dérivation de clé |
-| `OCTAI_SSH_KEY_PATH` | Non | Chemin vers la clé privée SSH. Si non défini, détection automatique depuis `~/.ssh/aibhq_ed25519.key` |
+| `OCTAI_SSH_KEY_PATH` | Non | Chemin vers la clé privée SSH. Si non défini, détection automatique depuis `~/.ssh/octai_ed25519.key` |
 
 ### Détection automatique de la clé SSH
 
 Si `OCTAI_SSH_KEY_PATH` n'est pas défini, OctAi recherche la clé dédiée :
 
 ```
-~/.ssh/aibhq_ed25519.key
+~/.ssh/octai_ed25519.key
 ```
 
 Ce fichier dédié évite les conflits avec les clés SSH existantes de l'utilisateur.
-Exécutez `aibhq onboard` pour le générer automatiquement.
+Exécutez `octai onboard` pour le générer automatiquement.
 
 `os.UserHomeDir()` est utilisé pour la résolution multiplateforme du répertoire personnel (lit `USERPROFILE` sous Windows, `HOME` sous Unix/macOS).
 
-> **Remarque :** Un fichier de clé SSH est requis pour le chiffrement des identifiants. Si aucune clé n'est trouvée et que `OCTAI_SSH_KEY_PATH` n'est pas défini, le chiffrement/déchiffrement échouera. Exécutez `aibhq onboard` pour générer la clé automatiquement.
+> **Remarque :** Un fichier de clé SSH est requis pour le chiffrement des identifiants. Si aucune clé n'est trouvée et que `OCTAI_SSH_KEY_PATH` n'est pas défini, le chiffrement/déchiffrement échouera. Exécutez `octai onboard` pour générer la clé automatiquement.
 
 ---
 
@@ -153,7 +153,7 @@ Aucun re-chiffrement n'est nécessaire.
 
 ## Considérations de sécurité
 
-- **La phrase secrète et la clé SSH sont toutes deux requises.** La clé SSH agit comme un second facteur — sans elle, le chiffrement/déchiffrement échouera. Exécutez `aibhq onboard` pour générer la clé si elle n'existe pas.
+- **La phrase secrète et la clé SSH sont toutes deux requises.** La clé SSH agit comme un second facteur — sans elle, le chiffrement/déchiffrement échouera. Exécutez `octai onboard` pour générer la clé si elle n'existe pas.
 - **La clé SSH est en lecture seule à l'exécution.** OctAi n'écrit ni ne modifie jamais le fichier de clé SSH.
 - **Les clés en texte clair restent prises en charge.** Les configurations existantes sans `enc://` ne sont pas affectées.
-- **Le format `enc://` est versionné** via le champ `info` de HKDF (`aibhq-credential-v1`), permettant de futures mises à niveau d'algorithme sans casser les valeurs chiffrées existantes.
+- **Le format `enc://` est versionné** via le champ `info` de HKDF (`octai-credential-v1`), permettant de futures mises à niveau d'algorithme sans casser les valeurs chiffrées existantes.

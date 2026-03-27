@@ -1319,7 +1319,7 @@ func (m *APIKeyManager) Create(ctx context.Context, req *CreateAPIKeyRequest) (*
     }
     
     rawKey := hex.EncodeToString(keyBytes)
-    prefix := "aibhq_" + req.Integration[:3] + "_"
+    prefix := "octai_" + req.Integration[:3] + "_"
     fullKey := prefix + rawKey
     
     keyHash := hashKey(fullKey)
@@ -1354,7 +1354,7 @@ func (m *APIKeyManager) Create(ctx context.Context, req *CreateAPIKeyRequest) (*
 
 func (m *APIKeyManager) Validate(ctx context.Context, key string) (*APIKey, error) {
     parts := strings.Split(key, "_")
-    if len(parts) < 3 || parts[0] != "aibhq" {
+    if len(parts) < 3 || parts[0] != "octai" {
         return nil, ErrInvalidAPIKey
     }
     
@@ -3221,17 +3221,17 @@ info:
     
   contact:
     name: OctAi Support
-    email: api@aibhq.io
-    url: https://aibhq.io/docs/api
+    email: api@octai.io
+    url: https://octai.io/docs/api
     
   license:
     name: MIT
     url: https://opensource.org/licenses/MIT
 
 servers:
-  - url: https://api.aibhq.io/v1
+  - url: https://api.octai.io/v1
     description: Production
-  - url: https://api-staging.aibhq.io/v1
+  - url: https://api-staging.octai.io/v1
     description: Staging
 
 security:
@@ -3850,21 +3850,21 @@ var sdkConfigs = []SDKConfig{
         Language:   "Go",
         Generator:  "go",
         OutputDir:  "sdks/go",
-        PackageName: "aibhq",
+        PackageName: "octai",
     },
     {
         Name:       "typescript",
         Language:   "TypeScript",
         Generator:  "typescript-axios",
         OutputDir:  "sdks/typescript",
-        PackageName: "@aibhq/sdk",
+        PackageName: "@octai/sdk",
     },
     {
         Name:       "python",
         Language:   "Python",
         Generator:  "python",
         OutputDir:  "sdks/python",
-        PackageName: "aibhq",
+        PackageName: "octai",
     },
 }
 

@@ -37,12 +37,12 @@ func TestExpandHomeWithTilde(t *testing.T) {
 }
 
 func TestResolveWorkspace(t *testing.T) {
-	result := ResolveWorkspace("/home/user/.aibhq")
-	assert.Equal(t, "/home/user/.aibhq/workspace", result)
+	result := ResolveWorkspace("/home/user/.octai")
+	assert.Equal(t, "/home/user/.octai/workspace", result)
 }
 
 func TestRelPath(t *testing.T) {
-	result := RelPath("/home/user/.aibhq/workspace/file.txt", "/home/user/.aibhq")
+	result := RelPath("/home/user/.octai/workspace/file.txt", "/home/user/.octai")
 	assert.Equal(t, "workspace/file.txt", result)
 }
 
@@ -57,7 +57,7 @@ func TestResolveTargetHome(t *testing.T) {
 
 	result, err := ResolveTargetHome("")
 	require.NoError(t, err)
-	assert.Equal(t, filepath.Join(home, ".aibhq"), result)
+	assert.Equal(t, filepath.Join(home, ".octai"), result)
 }
 
 func TestResolveTargetHomeWithOverride(t *testing.T) {

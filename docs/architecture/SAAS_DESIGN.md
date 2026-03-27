@@ -100,7 +100,7 @@ Organization (Tenant)
 
 Tenants are identified via:
 
-1. **Subdomain**: `acme.aibhq.com` → extracts `acme` as organization slug
+1. **Subdomain**: `acme.octai.com` → extracts `acme` as organization slug
 2. **Header**: `X-Organization-ID: org_abc123`
 3. **JWT Claim**: `org_id` in access token
 
@@ -636,8 +636,8 @@ func (s *StripeService) CreateCheckoutSession(ctx context.Context, orgID, priceI
         LineItems: []*stripe.CheckoutSessionLineItemParams{
             {Price: stripe.String(priceID), Quantity: stripe.Int64(1)},
         },
-        SuccessURL: stripe.String(fmt.Sprintf("https://%s.aibhq.com/settings/billing?success=true", org.Slug)),
-        CancelURL:  stripe.String(fmt.Sprintf("https://%s.aibhq.com/settings/billing?canceled=true", org.Slug)),
+        SuccessURL: stripe.String(fmt.Sprintf("https://%s.octai.com/settings/billing?success=true", org.Slug)),
+        CancelURL:  stripe.String(fmt.Sprintf("https://%s.octai.com/settings/billing?canceled=true", org.Slug)),
     }
     
     session, err := s.client.CheckoutSessions.New(params)
@@ -1024,7 +1024,7 @@ func TenantMiddleware() gin.HandlerFunc {
         // 3. Try subdomain
         if orgID == "" {
             host := c.Request.Host
-            if idx := strings.Index(host, ".aibhq.com"); idx > 0 {
+            if idx := strings.Index(host, ".octai.com"); idx > 0 {
                 slug := host[:idx]
                 org, _ := orgCache.GetBySlug(slug)
                 if org != nil {
@@ -1313,7 +1313,7 @@ func RegisterRoutes(r *gin.Engine, services *Services) {
 
 ```bash
 # Database
-DATABASE_URL=postgres://user:pass@localhost:5432/aibhq?sslmode=disable
+DATABASE_URL=postgres://user:pass@localhost:5432/octai?sslmode=disable
 
 # Redis
 REDIS_URL=redis://localhost:6379/0
@@ -1339,8 +1339,8 @@ GITHUB_CLIENT_ID=xxx
 GITHUB_CLIENT_SECRET=xxx
 
 # App
-APP_URL=https://app.aibhq.com
-BASE_DOMAIN=aibhq.com
+APP_URL=https://app.octai.com
+BASE_DOMAIN=octai.com
 ```
 
 ## Appendix B: Migration Strategy

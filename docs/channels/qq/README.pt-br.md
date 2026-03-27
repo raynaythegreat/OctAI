@@ -35,7 +35,7 @@ A Plataforma Aberta QQ oferece uma entrada de criação com um clique:
 1. Abra o [QQ Bot Quick Create](https://q.qq.com/qqbot/openclaw/index.html) e faça login escaneando o QR code
 2. O sistema cria o bot automaticamente — copie o **App ID** e o **App Secret**
 3. Preencha as credenciais no arquivo de configuração do OctAi
-4. Execute `aibhq gateway` para iniciar o serviço
+4. Execute `octai gateway` para iniciar o serviço
 5. Abra o QQ e comece a conversar com o bot
 
 > O App Secret é exibido apenas uma vez — salve-o imediatamente. Visualizá-lo novamente forçará uma redefinição.
@@ -48,7 +48,7 @@ A Plataforma Aberta QQ oferece uma entrada de criação com um clique:
 2. Crie um bot QQ e personalize seu avatar e nome
 3. Obtenha o **App ID** e o **App Secret** nas configurações do bot
 4. Preencha as credenciais no arquivo de configuração do OctAi
-5. Execute `aibhq gateway` para iniciar o serviço
+5. Execute `octai gateway` para iniciar o serviço
 6. Pesquise seu bot no QQ e comece a conversar
 
 > Durante o desenvolvimento, recomenda-se habilitar o modo sandbox e adicionar usuários e grupos de teste ao sandbox para depuração.

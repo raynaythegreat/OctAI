@@ -23,7 +23,7 @@ func main() {
 
 	configDir := filepath.Dir(configPath)
 	if _, err := os.Stat(configDir); os.IsNotExist(err) {
-		cmd := exec.Command("aibhq", "onboard")
+		cmd := exec.Command("octai", "onboard")
 		cmd.Stdin = os.Stdin
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr

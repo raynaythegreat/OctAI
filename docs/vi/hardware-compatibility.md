@@ -130,14 +130,14 @@ Bất kỳ điện thoại Android ARM64 nào (2015+) với 1GB+ RAM. Cài đặ
 
 ```bash
 # 1. Tải xuống cho kiến trúc của bạn
-wget https://github.com/raynaythegreat/ai-business-hq/releases/latest/download/aibhq_Linux_arm64.tar.gz
-tar xzf aibhq_Linux_arm64.tar.gz
+wget https://github.com/raynaythegreat/ai-business-hq/releases/latest/download/octai_Linux_arm64.tar.gz
+tar xzf octai_Linux_arm64.tar.gz
 
 # 2. Khởi tạo
-./aibhq onboard
+./octai onboard
 
 # 3. Kiểm thử
-./aibhq agent -m "Hello, what board am I running on?"
+./octai agent -m "Hello, what board am I running on?"
 ```
 
 Các bản dựng có sẵn: `linux-amd64`, `linux-arm64`, `linux-arm`, `linux-riscv64`, `linux-loong64`, `linux-mipsle`

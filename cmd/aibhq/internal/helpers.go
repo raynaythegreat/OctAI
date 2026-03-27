@@ -11,8 +11,8 @@ import (
 
 const Logo = pkg.Logo
 
-// GetPicoclawHome returns the aibhq home directory.
-// Priority: $OCTAI_HOME > ~/.aibhq
+// GetPicoclawHome returns the octai home directory.
+// Priority: $OCTAI_HOME > ~/.octai
 func GetPicoclawHome() string {
 	if home := os.Getenv(config.EnvHome); home != "" {
 		return home

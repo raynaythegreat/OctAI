@@ -26,7 +26,7 @@ func NewTUICommand() *cobra.Command {
 
 			configDir := filepath.Dir(configPath)
 			if _, err := os.Stat(configDir); os.IsNotExist(err) {
-				onboard := exec.Command("aibhq", "onboard")
+				onboard := exec.Command("octai", "onboard")
 				onboard.Stdin = os.Stdin
 				onboard.Stdout = os.Stdout
 				onboard.Stderr = os.Stderr

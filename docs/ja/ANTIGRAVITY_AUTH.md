@@ -19,7 +19,7 @@
 7. [統合要件](#統合要件)
 8. [API エンドポイント](#api-エンドポイント)
 9. [設定](#設定)
-10. [OctAi での新しいプロバイダーの作成](#aibhq-での新しいプロバイダーの作成)
+10. [OctAi での新しいプロバイダーの作成](#octai-での新しいプロバイダーの作成)
 
 ---
 
@@ -590,7 +590,7 @@ export function sanitizeAntigravityThinkingBlocks(
 
 ### 認証プロファイルの保存
 
-認証プロファイルは `~/.aibhq/auth.json` に保存されます：
+認証プロファイルは `~/.octai/auth.json` に保存されます：
 
 ```json
 {
@@ -672,7 +672,7 @@ case "your-provider":
 
 #### 5. 認証サポートの追加（オプション）
 
-プロバイダーが OAuth や特別な認証を必要とする場合、`cmd/aibhq/internal/auth/helpers.go` にケースを追加します：
+プロバイダーが OAuth や特別な認証を必要とする場合、`cmd/octai/internal/auth/helpers.go` にケースを追加します：
 
 ```go
 case "your-provider":
@@ -702,16 +702,16 @@ case "your-provider":
 
 ```bash
 # プロバイダーで認証
-aibhq auth login --provider your-provider
+octai auth login --provider your-provider
 
 # モデルの一覧表示（Antigravity 用）
-aibhq auth models
+octai auth models
 
 # ゲートウェイの起動
-aibhq gateway
+octai gateway
 
 # 特定のモデルでエージェントを実行
-aibhq agent -m "Hello" --model your-model
+octai agent -m "Hello" --model your-model
 ```
 
 ### テスト用環境変数
@@ -731,10 +731,10 @@ export OCTAI_MODEL_LIST='[{"model_name":"your-model","model":"your-provider/mode
 - **ソースファイル：**
   - `pkg/providers/antigravity_provider.go` - Antigravity プロバイダー実装
   - `pkg/auth/oauth.go` - OAuth フロー実装
-  - `pkg/auth/store.go` - 認証情報ストレージ（`~/.aibhq/auth.json`）
+  - `pkg/auth/store.go` - 認証情報ストレージ（`~/.octai/auth.json`）
   - `pkg/providers/factory.go` - プロバイダーファクトリーとプロトコルルーティング
   - `pkg/providers/types.go` - プロバイダーインターフェース定義
-  - `cmd/aibhq/internal/auth/helpers.go` - 認証 CLI コマンド
+  - `cmd/octai/internal/auth/helpers.go` - 認証 CLI コマンド
 
 - **ドキュメント：**
   - `docs/ANTIGRAVITY_USAGE.md` - Antigravity 使用ガイド
@@ -790,7 +790,7 @@ export OCTAI_MODEL_LIST='[{"model_name":"your-model","model":"your-provider/mode
 ## トラブルシューティング
 
 ### "Token expired"（トークン期限切れ）
-- OAuth トークンを更新：`aibhq auth login --provider antigravity`
+- OAuth トークンを更新：`octai auth login --provider antigravity`
 
 ### "Gemini for Google Cloud is not enabled"（Gemini for Google Cloud が有効になっていない）
 - Google Cloud Console で API を有効にしてください
@@ -801,5 +801,5 @@ export OCTAI_MODEL_LIST='[{"model_name":"your-model","model":"your-provider/mode
 
 ### モデルがリストに表示されない
 - OAuth 認証が正常に完了したことを確認してください
-- 認証プロファイルストレージを確認：`~/.aibhq/auth.json`
-- `aibhq auth login --provider antigravity` を再実行してください
+- 認証プロファイルストレージを確認：`~/.octai/auth.json`
+- `octai auth login --provider antigravity` を再実行してください

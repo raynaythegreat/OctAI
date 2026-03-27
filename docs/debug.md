@@ -6,9 +6,9 @@ OctAi performs multiple complex interactions under the hood for every single req
 To get detailed information about what the agent is doing (LLM requests, tool calls, message routing), you can start the OctAi gateway with the debug flag:
 
 ```bash
-aibhq gateway --debug
+octai gateway --debug
 # or
-aibhq gateway -d
+octai gateway -d
 ```
 
 In this mode, the system will format the logs extensively and display previews of system prompts and tool execution results.
@@ -22,7 +22,7 @@ If you need to inspect the complete output of a command or the exact payload sen
 **Note:** This flag *only* works when combined with the `--debug` mode.
 
 ```bash
-aibhq gateway --debug --no-truncate
+octai gateway --debug --no-truncate
 
 ```
 
@@ -50,7 +50,7 @@ A typical synchronous tool call produces two consecutive lines in the console:
 
 ```
 [...] [INFO] agent: LLM requested tool calls {tools=[web_search], count=1, iteration=1}
-[...] [INFO] agent: Tool call: web_search({"query":"aibhq release notes"}) {tool=web_search, iteration=1}
+[...] [INFO] agent: Tool call: web_search({"query":"octai release notes"}) {tool=web_search, iteration=1}
 ```
 
 The arguments preview is hard-capped at **200 characters** in the logs regardless of the `--no-truncate` flag, because it belongs to the `INFO`-level path. Use `--no-truncate` together with `--debug` to see the full `tools_json` field emitted by the `Full LLM request` DEBUG entry, which contains every tool definition sent to the model.
@@ -76,7 +76,7 @@ When `enabled` is `true`, every tool call sends a short message to the chat befo
 
 ```bash
 🔧 `web_search`
-{"query": "aibhq release notes"}
+{"query": "octai release notes"}
 ```
 
 

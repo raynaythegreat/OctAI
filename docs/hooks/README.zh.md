@@ -82,7 +82,7 @@ HookManager 的排序规则是：
           "approve_tool"
         ],
         "env": {
-          "OCTAI_HOOK_LOG_FILE": "/tmp/aibhq-hook-review-gate.log"
+          "OCTAI_HOOK_LOG_FILE": "/tmp/octai-hook-review-gate.log"
         }
       }
     }
@@ -93,7 +93,7 @@ HookManager 的排序规则是：
 观察方式：
 
 ```bash
-tail -f /tmp/aibhq-hook-review-gate.log
+tail -f /tmp/octai-hook-review-gate.log
 ```
 
 如果你是在开发 OctAi 本体，而不是只想验证协议，那么再看后面的 Go in-process 示例。
@@ -278,7 +278,7 @@ func (h *ExampleLoggerHook) record(stage string, meta agent.EventMeta, payload a
 
 ```go
 hook := myhooks.NewExampleLoggerHook(myhooks.ExampleLoggerHookOptions{
-    LogFile:   "/tmp/aibhq-hook-example-logger.log",
+    LogFile:   "/tmp/octai-hook-example-logger.log",
     LogEvents: true,
 })
 
@@ -334,7 +334,7 @@ func init() {
         "enabled": true,
         "priority": 10,
         "config": {
-          "log_file": "/tmp/aibhq-hook-example-logger.log",
+          "log_file": "/tmp/octai-hook-example-logger.log",
           "log_events": true
         }
       }
@@ -552,7 +552,7 @@ if __name__ == "__main__":
           "approve_tool"
         ],
         "env": {
-          "OCTAI_HOOK_LOG_FILE": "/tmp/aibhq-hook-review-gate.log"
+          "OCTAI_HOOK_LOG_FILE": "/tmp/octai-hook-review-gate.log"
         }
       }
     }

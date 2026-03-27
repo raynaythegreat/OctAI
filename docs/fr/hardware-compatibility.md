@@ -130,14 +130,14 @@ Tout téléphone Android ARM64 (2015+) avec 1 Go+ de RAM. Installez [Termux](htt
 
 ```bash
 # 1. Télécharger pour votre architecture
-wget https://github.com/raynaythegreat/ai-business-hq/releases/latest/download/aibhq_Linux_arm64.tar.gz
-tar xzf aibhq_Linux_arm64.tar.gz
+wget https://github.com/raynaythegreat/ai-business-hq/releases/latest/download/octai_Linux_arm64.tar.gz
+tar xzf octai_Linux_arm64.tar.gz
 
 # 2. Initialiser
-./aibhq onboard
+./octai onboard
 
 # 3. Tester
-./aibhq agent -m "Hello, what board am I running on?"
+./octai agent -m "Hello, what board am I running on?"
 ```
 
 Builds disponibles : `linux-amd64`, `linux-arm64`, `linux-arm`, `linux-riscv64`, `linux-loong64`, `linux-mipsle`

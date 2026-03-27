@@ -19,7 +19,7 @@ func skillsDir() string {
 	if err != nil {
 		home = "."
 	}
-	return filepath.Join(home, ".aibhq", "workspace", "skills")
+	return filepath.Join(home, ".octai", "workspace", "skills")
 }
 
 func (a *App) newSkillsPage() tview.Primitive {

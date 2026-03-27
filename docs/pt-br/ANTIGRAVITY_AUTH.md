@@ -19,7 +19,7 @@
 7. [Requisitos de Integração](#requisitos-de-integração)
 8. [Endpoints da API](#endpoints-da-api)
 9. [Configuração](#configuração)
-10. [Criando um Novo Provedor no OctAi](#criando-um-novo-provedor-no-aibhq)
+10. [Criando um Novo Provedor no OctAi](#criando-um-novo-provedor-no-octai)
 
 ---
 
@@ -590,7 +590,7 @@ Cada mensagem SSE (`data: {...}`) é encapsulada em um campo `response`:
 
 ### Armazenamento do Perfil de Autenticação
 
-Os perfis de autenticação são armazenados em `~/.aibhq/auth.json`:
+Os perfis de autenticação são armazenados em `~/.octai/auth.json`:
 
 ```json
 {
@@ -672,7 +672,7 @@ Adicione uma entrada padrão em `pkg/config/defaults.go`:
 
 #### 5. Adicionar Suporte de Autenticação (Opcional)
 
-Se seu provedor requer OAuth ou autenticação especial, adicione um caso em `cmd/aibhq/internal/auth/helpers.go`:
+Se seu provedor requer OAuth ou autenticação especial, adicione um caso em `cmd/octai/internal/auth/helpers.go`:
 
 ```go
 case "your-provider":
@@ -702,16 +702,16 @@ case "your-provider":
 
 ```bash
 # Autenticar com um provedor
-aibhq auth login --provider your-provider
+octai auth login --provider your-provider
 
 # Listar modelos (para Antigravity)
-aibhq auth models
+octai auth models
 
 # Iniciar o gateway
-aibhq gateway
+octai gateway
 
 # Executar um agente com um modelo específico
-aibhq agent -m "Hello" --model your-model
+octai agent -m "Hello" --model your-model
 ```
 
 ### Variáveis de Ambiente para Testes
@@ -731,10 +731,10 @@ export OCTAI_MODEL_LIST='[{"model_name":"your-model","model":"your-provider/mode
 - **Arquivos Fonte:**
   - `pkg/providers/antigravity_provider.go` - Implementação do provedor Antigravity
   - `pkg/auth/oauth.go` - Implementação do fluxo OAuth
-  - `pkg/auth/store.go` - Armazenamento de credenciais de autenticação (`~/.aibhq/auth.json`)
+  - `pkg/auth/store.go` - Armazenamento de credenciais de autenticação (`~/.octai/auth.json`)
   - `pkg/providers/factory.go` - Factory de provedores e roteamento de protocolo
   - `pkg/providers/types.go` - Definições da interface do provedor
-  - `cmd/aibhq/internal/auth/helpers.go` - Comandos CLI de autenticação
+  - `cmd/octai/internal/auth/helpers.go` - Comandos CLI de autenticação
 
 - **Documentação:**
   - `docs/ANTIGRAVITY_USAGE.md` - Guia de uso do Antigravity
@@ -790,7 +790,7 @@ Alguns modelos podem aparecer na lista de modelos disponíveis, mas retornar uma
 ## Solução de Problemas
 
 ### "Token expired" (token expirado)
-- Atualizar tokens OAuth: `aibhq auth login --provider antigravity`
+- Atualizar tokens OAuth: `octai auth login --provider antigravity`
 
 ### "Gemini for Google Cloud is not enabled" (Gemini for Google Cloud não está habilitado)
 - Habilitar a API no seu Google Cloud Console
@@ -801,5 +801,5 @@ Alguns modelos podem aparecer na lista de modelos disponíveis, mas retornar uma
 
 ### Modelos não aparecem na lista
 - Verificar se a autenticação OAuth foi concluída com sucesso
-- Verificar o armazenamento do perfil de autenticação: `~/.aibhq/auth.json`
-- Executar novamente `aibhq auth login --provider antigravity`
+- Verificar o armazenamento do perfil de autenticação: `~/.octai/auth.json`
+- Executar novamente `octai auth login --provider antigravity`

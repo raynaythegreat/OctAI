@@ -4,39 +4,39 @@
 
 ## ⚙️ Configuração
 
-Arquivo de configuração: `~/.aibhq/config.json`
+Arquivo de configuração: `~/.octai/config.json`
 
 ### Variáveis de Ambiente
 
-Você pode substituir os caminhos padrão usando variáveis de ambiente. Isso é útil para instalações portáteis, implantações em contêineres ou execução do aibhq como serviço do sistema. Essas variáveis são independentes e controlam caminhos diferentes.
+Você pode substituir os caminhos padrão usando variáveis de ambiente. Isso é útil para instalações portáteis, implantações em contêineres ou execução do octai como serviço do sistema. Essas variáveis são independentes e controlam caminhos diferentes.
 
 | Variável          | Descrição                                                                                                                             | Caminho Padrão              |
 |-------------------|-----------------------------------------------------------------------------------------------------------------------------------------|---------------------------|
-| `OCTAI_CONFIG` | Substitui o caminho para o arquivo de configuração. Isso indica diretamente ao aibhq qual `config.json` carregar, ignorando todos os outros locais. | `~/.aibhq/config.json` |
-| `OCTAI_HOME`   | Substitui o diretório raiz para dados do aibhq. Isso altera o local padrão do `workspace` e outros diretórios de dados.          | `~/.aibhq`             |
+| `OCTAI_CONFIG` | Substitui o caminho para o arquivo de configuração. Isso indica diretamente ao octai qual `config.json` carregar, ignorando todos os outros locais. | `~/.octai/config.json` |
+| `OCTAI_HOME`   | Substitui o diretório raiz para dados do octai. Isso altera o local padrão do `workspace` e outros diretórios de dados.          | `~/.octai`             |
 
 **Exemplos:**
 
 ```bash
-# Executar aibhq usando um arquivo de configuração específico
+# Executar octai usando um arquivo de configuração específico
 # O caminho do workspace será lido de dentro desse arquivo de configuração
-OCTAI_CONFIG=/etc/aibhq/production.json aibhq gateway
+OCTAI_CONFIG=/etc/octai/production.json octai gateway
 
-# Executar aibhq com todos os dados armazenados em /opt/aibhq
-# A configuração será carregada do padrão ~/.aibhq/config.json
-# O workspace será criado em /opt/aibhq/workspace
-OCTAI_HOME=/opt/aibhq aibhq agent
+# Executar octai com todos os dados armazenados em /opt/octai
+# A configuração será carregada do padrão ~/.octai/config.json
+# O workspace será criado em /opt/octai/workspace
+OCTAI_HOME=/opt/octai octai agent
 
 # Usar ambos para uma configuração totalmente personalizada
-OCTAI_HOME=/srv/aibhq OCTAI_CONFIG=/srv/aibhq/main.json aibhq gateway
+OCTAI_HOME=/srv/octai OCTAI_CONFIG=/srv/octai/main.json octai gateway
 ```
 
 ### Layout do Workspace
 
-O OctAi armazena dados no seu workspace configurado (padrão: `~/.aibhq/workspace`):
+O OctAi armazena dados no seu workspace configurado (padrão: `~/.octai/workspace`):
 
 ```
-~/.aibhq/workspace/
+~/.octai/workspace/
 ├── sessions/          # Sessões de conversa e histórico
 ├── memory/           # Memória de longo prazo (MEMORY.md)
 ├── state/            # Estado persistente (último canal, etc.)
@@ -55,8 +55,8 @@ O OctAi armazena dados no seu workspace configurado (padrão: `~/.aibhq/workspac
 
 Por padrão, as skills são carregadas de:
 
-1. `~/.aibhq/workspace/skills` (workspace)
-2. `~/.aibhq/skills` (global)
+1. `~/.octai/workspace/skills` (workspace)
+2. `~/.octai/skills` (global)
 3. `<caminho-embutido-na-compilação>/skills` (embutido)
 
 Para configurações avançadas/de teste, você pode substituir o diretório raiz de skills builtin com:
@@ -82,7 +82,7 @@ O OctAi é executado em um ambiente sandbox por padrão. O agente só pode acess
 {
   "agents": {
     "defaults": {
-      "workspace": "~/.aibhq/workspace",
+      "workspace": "~/.octai/workspace",
       "restrict_to_workspace": true
     }
   }
@@ -91,7 +91,7 @@ O OctAi é executado em um ambiente sandbox por padrão. O agente só pode acess
 
 | Opção                   | Padrão                  | Descrição                                 |
 | ----------------------- | ----------------------- | ----------------------------------------- |
-| `workspace`             | `~/.aibhq/workspace` | Diretório de trabalho do agente           |
+| `workspace`             | `~/.octai/workspace` | Diretório de trabalho do agente           |
 | `restrict_to_workspace` | `true`                  | Restringir acesso a arquivos/comandos ao workspace |
 
 #### Ferramentas Protegidas
@@ -352,7 +352,7 @@ OctAi suporta tarefas agendadas via ferramenta `cron`.
 }
 ```
 
-As tarefas agendadas persistem após reinicializações em `~/.aibhq/workspace/cron/`.
+As tarefas agendadas persistem após reinicializações em `~/.octai/workspace/cron/`.
 
 ### Tópicos Avançados
 

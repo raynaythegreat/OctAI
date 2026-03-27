@@ -9,9 +9,9 @@ OctAi effectue de multiples interactions complexes en arrière-plan pour chaque 
 Pour obtenir des informations détaillées sur ce que fait l'agent (requêtes LLM, appels d'outils, routage des messages), vous pouvez démarrer la passerelle OctAi avec le drapeau de débogage :
 
 ```bash
-aibhq gateway --debug
+octai gateway --debug
 # or
-aibhq gateway -d
+octai gateway -d
 ```
 
 Dans ce mode, le système formate les logs de manière détaillée et affiche des aperçus des prompts système et des résultats d'exécution des outils.
@@ -25,7 +25,7 @@ Si vous avez besoin d'inspecter la sortie complète d'une commande ou le payload
 **Remarque :** Ce drapeau fonctionne *uniquement* en combinaison avec le mode `--debug`.
 
 ```bash
-aibhq gateway --debug --no-truncate
+octai gateway --debug --no-truncate
 
 ```
 

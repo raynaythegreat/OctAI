@@ -34,12 +34,12 @@ Choose one provider to start:
 
 ```bash
 # Linux/macOS
-curl -fsSL https://github.com/raynaythegreat/ai-business-hq/releases/latest/download/aibhq-$(uname -s)-$(uname -m) -o aibhq
-chmod +x aibhq
-sudo mv aibhq /usr/local/bin/
+curl -fsSL https://github.com/raynaythegreat/ai-business-hq/releases/latest/download/octai-$(uname -s)-$(uname -m) -o octai
+chmod +x octai
+sudo mv octai /usr/local/bin/
 
 # Verify
-aibhq --version
+octai --version
 ```
 
 ### Option 2: Build from Source
@@ -47,13 +47,13 @@ aibhq --version
 ```bash
 git clone https://github.com/raynaythegreat/ai-business-hq.git
 cd ai-business-hq
-go build -o aibhq ./cmd/aibhq
+go build -o octai ./cmd/octai
 ```
 
 ### Option 3: Docker
 
 ```bash
-docker pull ghcr.io/raynaythegreat/aibhq:latest
+docker pull ghcr.io/raynaythegreat/octai:latest
 ```
 
 ---
@@ -63,14 +63,14 @@ docker pull ghcr.io/raynaythegreat/aibhq:latest
 ### Step 1: Initialize Configuration
 
 ```bash
-aibhq onboard
+octai onboard
 ```
 
-This creates `~/.aibhq/config.json` with sensible defaults.
+This creates `~/.octai/config.json` with sensible defaults.
 
 ### Step 2: Add Your API Key
 
-Edit `~/.aibhq/config.json`:
+Edit `~/.octai/config.json`:
 
 ```json
 {
@@ -92,7 +92,7 @@ Edit `~/.aibhq/config.json`:
 ### Step 3: Test Your Setup
 
 ```bash
-aibhq agent -m "Hello! What can you help me with?"
+octai agent -m "Hello! What can you help me with?"
 ```
 
 ---
@@ -102,7 +102,7 @@ aibhq agent -m "Hello! What can you help me with?"
 ### 1. Start the Web Dashboard
 
 ```bash
-aibhq launcher
+octai launcher
 ```
 
 Open http://localhost:18800 in your browser.
@@ -126,7 +126,7 @@ Add a Telegram bot (easiest option):
 Then start the gateway:
 
 ```bash
-aibhq gateway
+octai gateway
 ```
 
 ### 3. Enable Web Search (Optional)
@@ -150,12 +150,12 @@ aibhq gateway
 
 | Command | Description |
 |---------|-------------|
-| `aibhq agent -m "message"` | Single query |
-| `aibhq agent` | Interactive chat |
-| `aibhq gateway` | Start bot gateway |
-| `aibhq launcher` | Web dashboard |
-| `aibhq onboard` | Initial setup |
-| `aibhq auth login --provider anthropic` | OAuth login |
+| `octai agent -m "message"` | Single query |
+| `octai agent` | Interactive chat |
+| `octai gateway` | Start bot gateway |
+| `octai launcher` | Web dashboard |
+| `octai onboard` | Initial setup |
+| `octai auth login --provider anthropic` | OAuth login |
 
 ---
 

@@ -15,7 +15,7 @@ import (
 // It is intended for providers that do not have a native Files API; callers can
 // inline the file content when constructing messages by reading the stored file.
 type LocalFileStore struct {
-	baseDir string // root directory, e.g. ~/.aibhq/files/
+	baseDir string // root directory, e.g. ~/.octai/files/
 }
 
 // NewLocalFileStore creates a LocalFileStore rooted at baseDir.

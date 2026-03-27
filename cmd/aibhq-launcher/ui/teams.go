@@ -24,7 +24,7 @@ func mainConfigPath() string {
 	if err != nil {
 		home = "."
 	}
-	return filepath.Join(home, ".aibhq", "config.json")
+	return filepath.Join(home, ".octai", "config.json")
 }
 
 func (a *App) newTeamsPage() tview.Primitive {

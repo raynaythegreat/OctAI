@@ -954,7 +954,7 @@ func TestFindPicoclawBinary_EnvOverride_InvalidPath(t *testing.T) {
 	t.Setenv("OCTAI_BINARY", "/nonexistent/aibhq-binary")
 
 	got := utils.FindPicoclawBinary()
-	// Should not return the invalid path; falls back to "aibhq" or another found path
+	// Should not return the invalid path; falls back to "octai" or another found path
 	if got == "/nonexistent/aibhq-binary" {
 		t.Errorf("FindPicoclawBinary() returned invalid env path %q, expected fallback", got)
 	}

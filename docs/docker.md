@@ -9,7 +9,7 @@ You can also run OctAi using Docker Compose without installing anything locally.
 ```bash
 # 1. Clone this repo
 git clone https://github.com/raynaythegreat/ai-business-hq.git
-cd aibhq
+cd octai
 
 # 2. First run — auto-generates docker/data/config.json then exits
 #    (only triggers when both config.json and workspace/ are missing)
@@ -28,7 +28,7 @@ docker compose -f docker/docker-compose.yml --profile gateway up -d
 
 ```bash
 # 5. Check logs
-docker compose -f docker/docker-compose.yml logs -f aibhq-gateway
+docker compose -f docker/docker-compose.yml logs -f octai-gateway
 
 # 6. Stop
 docker compose -f docker/docker-compose.yml --profile gateway down
@@ -36,7 +36,7 @@ docker compose -f docker/docker-compose.yml --profile gateway down
 
 ### Launcher Mode (Web Console)
 
-The `launcher` image includes all three binaries (`aibhq`, `aibhq-launcher`, `aibhq-launcher-tui`) and starts the web console by default, which provides a browser-based UI for configuration and chat.
+The `launcher` image includes all three binaries (`octai`, `octai-launcher`, `octai-launcher-tui`) and starts the web console by default, which provides a browser-based UI for configuration and chat.
 
 ```bash
 docker compose -f docker/docker-compose.yml --profile launcher up -d
@@ -51,10 +51,10 @@ Open http://localhost:18800 in your browser. The launcher manages the gateway pr
 
 ```bash
 # Ask a question
-docker compose -f docker/docker-compose.yml run --rm aibhq-agent -m "What is 2+2?"
+docker compose -f docker/docker-compose.yml run --rm octai-agent -m "What is 2+2?"
 
 # Interactive mode
-docker compose -f docker/docker-compose.yml run --rm aibhq-agent
+docker compose -f docker/docker-compose.yml run --rm octai-agent
 ```
 
 ### Update
@@ -67,21 +67,21 @@ docker compose -f docker/docker-compose.yml --profile gateway up -d
 ### 🚀 Quick Start
 
 > [!TIP]
-> Set your API Key in `~/.aibhq/config.json`. Get API Keys: [Volcengine (CodingPlan)](https://www.volcengine.com/activity/codingplan?utm_campaign=OctAi&utm_content=OctAi&utm_medium=devrel&utm_source=OWO&utm_term=OctAi) (LLM) · [OpenRouter](https://openrouter.ai/keys) (LLM) · [Zhipu](https://open.bigmodel.cn/usercenter/proj-mgmt/apikeys) (LLM). Web search is optional — get a free [Tavily API](https://tavily.com) (1000 free queries/month) or [Brave Search API](https://brave.com/search/api) (2000 free queries/month).
+> Set your API Key in `~/.octai/config.json`. Get API Keys: [Volcengine (CodingPlan)](https://www.volcengine.com/activity/codingplan?utm_campaign=OctAi&utm_content=OctAi&utm_medium=devrel&utm_source=OWO&utm_term=OctAi) (LLM) · [OpenRouter](https://openrouter.ai/keys) (LLM) · [Zhipu](https://open.bigmodel.cn/usercenter/proj-mgmt/apikeys) (LLM). Web search is optional — get a free [Tavily API](https://tavily.com) (1000 free queries/month) or [Brave Search API](https://brave.com/search/api) (2000 free queries/month).
 
 **1. Initialize**
 
 ```bash
-aibhq onboard
+octai onboard
 ```
 
-**2. Configure** (`~/.aibhq/config.json`)
+**2. Configure** (`~/.octai/config.json`)
 
 ```json
 {
   "agents": {
     "defaults": {
-      "workspace": "~/.aibhq/workspace",
+      "workspace": "~/.octai/workspace",
       "model_name": "gpt-5.4",
       "max_tokens": 8192,
       "temperature": 0.7,
@@ -159,7 +159,7 @@ aibhq onboard
 **4. Chat**
 
 ```bash
-aibhq agent -m "What is 2+2?"
+octai agent -m "What is 2+2?"
 ```
 
 That's it! You have a working AI assistant in 2 minutes.

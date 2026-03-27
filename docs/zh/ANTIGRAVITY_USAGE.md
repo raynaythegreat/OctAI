@@ -14,7 +14,7 @@
 要使用 Antigravity 进行身份验证，请运行以下命令：
 
 ```bash
-aibhq auth login --provider antigravity
+octai auth login --provider antigravity
 ```
 
 ### 手动验证（无界面/VPS 环境）
@@ -34,15 +34,15 @@ OctAi 将自动提取授权码并完成流程。
 查看你的项目可以访问哪些模型并检查其配额：
 
 ```bash
-aibhq auth models
+octai auth models
 ```
 
 ### 切换模型
-你可以在 `~/.aibhq/config.json` 中更改默认模型，或通过 CLI 覆盖：
+你可以在 `~/.octai/config.json` 中更改默认模型，或通过 CLI 覆盖：
 
 ```bash
 # 为单个命令覆盖
-aibhq agent -m "Hello" --model claude-opus-4-6-thinking
+octai agent -m "Hello" --model claude-opus-4-6-thinking
 ```
 
 ## 3. 实际使用（Coolify/Docker）
@@ -54,7 +54,7 @@ aibhq agent -m "Hello" --model claude-opus-4-6-thinking
 2.  **身份验证持久化**：
     如果你已在本地登录，可以将凭据复制到服务器：
     ```bash
-    scp ~/.aibhq/auth.json user@your-server:~/.aibhq/
+    scp ~/.octai/auth.json user@your-server:~/.octai/
     ```
     *或者*，如果你有终端访问权限，可以在服务器上运行一次 `auth login` 命令。
 
@@ -62,7 +62,7 @@ aibhq agent -m "Hello" --model claude-opus-4-6-thinking
 
 *   **空响应**：如果模型返回空回复，可能是该模型在你的项目中受到限制。请尝试 `gemini-3-flash` 或 `claude-opus-4-6-thinking`。
 *   **429 速率限制**：Antigravity 有严格的配额限制。如果触发限制，OctAi 将在错误消息中显示"重置时间"。
-*   **404 未找到**：确保你使用的是 `aibhq auth models` 列表中的模型 ID。请使用短 ID（例如 `gemini-3-flash`），而非完整路径。
+*   **404 未找到**：确保你使用的是 `octai auth models` 列表中的模型 ID。请使用短 ID（例如 `gemini-3-flash`），而非完整路径。
 
 ## 5. 可用模型总结
 

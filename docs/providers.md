@@ -186,7 +186,7 @@ If `voice.model_name` is not configured, OctAi will continue to fall back to Gro
 }
 ```
 
-> Run `aibhq auth login --provider anthropic` to paste your API token.
+> Run `octai auth login --provider anthropic` to paste your API token.
 
 **Anthropic Messages API (native format)**
 
@@ -332,7 +332,7 @@ This keeps the runtime lightweight while making new OpenAI-compatible backends m
 {
   "agents": {
     "defaults": {
-      "workspace": "~/.aibhq/workspace",
+      "workspace": "~/.octai/workspace",
       "model_name": "glm-4.7",
       "max_tokens": 8192,
       "temperature": 0.7,
@@ -351,7 +351,7 @@ This keeps the runtime lightweight while making new OpenAI-compatible backends m
 **3. Run**
 
 ```bash
-aibhq agent -m "Hello"
+octai agent -m "Hello"
 ```
 
 </details>

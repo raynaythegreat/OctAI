@@ -11,13 +11,13 @@ func NewMigrateCommand() *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "migrate",
-		Short: "Migrate from xxxclaw(openclaw, etc.) to aibhq",
+		Short: "Migrate from xxxclaw(openclaw, etc.) to octai",
 		Args:  cobra.NoArgs,
-		Example: `  aibhq migrate
-  aibhq migrate --from openclaw
-  aibhq migrate --dry-run
-  aibhq migrate --refresh
-  aibhq migrate --force`,
+		Example: `  octai migrate
+  octai migrate --from openclaw
+  octai migrate --dry-run
+  octai migrate --refresh
+  octai migrate --force`,
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			m := migrate.NewMigrateInstance(opts)
 			result, err := m.Run(opts)
@@ -46,7 +46,7 @@ func NewMigrateCommand() *cobra.Command {
 	cmd.Flags().StringVar(&opts.SourceHome, "source-home", "",
 		"Override source home directory (default: ~/.openclaw)")
 	cmd.Flags().StringVar(&opts.TargetHome, "target-home", "",
-		"Override target home directory (default: ~/.aibhq)")
+		"Override target home directory (default: ~/.octai)")
 
 	return cmd
 }

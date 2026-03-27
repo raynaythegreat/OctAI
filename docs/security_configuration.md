@@ -12,7 +12,7 @@ OctAi supports separating sensitive data (API keys, tokens, secrets, passwords) 
 ## File Structure
 
 ```
-~/.aibhq/
+~/.octai/
 ├── config.json          # Main configuration (safe to share)
 └── .security.yml         # Security data (never share)
 ```
@@ -120,17 +120,17 @@ skills:
 
 Create or copy the security file:
 ```bash
-cp security.example.yml ~/.aibhq/.security.yml
+cp security.example.yml ~/.octai/.security.yml
 ```
 
 ### Step 2: Fill in your actual values
 
-Edit `~/.aibhq/.security.yml` and replace placeholder values with your actual API keys and tokens.
+Edit `~/.octai/.security.yml` and replace placeholder values with your actual API keys and tokens.
 
 ### Step 3: Set proper permissions
 
 ```bash
-chmod 600 ~/.aibhq/.security.yml
+chmod 600 ~/.octai/.security.yml
 ```
 
 ### Step 4: Simplify config.json (Recommended)
@@ -181,7 +181,7 @@ You can now remove sensitive fields from `config.json` since they're loaded from
 
 Restart OctAi and verify it loads correctly:
 ```bash
-aibhq --version
+octai --version
 ```
 
 ## Field Mapping Rules
@@ -398,7 +398,7 @@ The pattern is: `OCTAI_<SECTION>_<KEY>_<FIELD>` with underscores separating path
 
 1. **Never commit `.security.yml`** to version control
 2. **Add to .gitignore**: Ensure `.security.yml` is in your `.gitignore` file
-3. **Set file permissions**: `chmod 600 ~/.aibhq/.security.yml`
+3. **Set file permissions**: `chmod 600 ~/.octai/.security.yml`
 4. **Use different keys** for different environments (dev, staging, production)
 5. **Rotate keys regularly** and update `.security.yml`
 6. **Backup securely**: Encrypt backups containing `.security.yml`
@@ -447,7 +447,7 @@ Returns the path to `.security.yml` relative to the config file.
   "version": 1,
   "agents": {
     "defaults": {
-      "workspace": "~/aibhq-workspace",
+      "workspace": "~/octai-workspace",
       "model_name": "gpt-5.4"
     }
   },
@@ -548,7 +548,7 @@ go test ./pkg/config -run TestSecurityConfig
 ### Keys Not Being Applied
 
 - Check that `.security.yml` is in the same directory as `config.json`
-- Verify the file permissions allow reading (`chmod 600 ~/.aibhq/.security.yml`)
+- Verify the file permissions allow reading (`chmod 600 ~/.octai/.security.yml`)
 - Ensure the YAML structure matches the expected format
 - Check for typos in field names (case-sensitive)
 - Verify the model/channel names match exactly (case-sensitive)
@@ -558,18 +558,18 @@ go test ./pkg/config -run TestSecurityConfig
 ### Step 1: Backup your config
 
 ```bash
-cp ~/.aibhq/config.json ~/.aibhq/config.json.backup
+cp ~/.octai/config.json ~/.octai/config.json.backup
 ```
 
 ### Step 2: Create .security.yml
 
 ```bash
-cp security.example.yml ~/.aibhq/.security.yml
+cp security.example.yml ~/.octai/.security.yml
 ```
 
 ### Step 3: Fill in your API keys
 
-Edit `~/.aibhq/.security.yml` and replace placeholder values with your actual keys.
+Edit `~/.octai/.security.yml` and replace placeholder values with your actual keys.
 
 ### Step 4: Remove sensitive fields from config.json
 
@@ -582,13 +582,13 @@ Remove or comment out sensitive fields from `config.json`:
 ### Step 5: Set proper permissions
 
 ```bash
-chmod 600 ~/.aibhq/.security.yml
+chmod 600 ~/.octai/.security.yml
 ```
 
 ### Step 6: Test
 
 ```bash
-aibhq --version
+octai --version
 ```
 
 ### Step 7: Verify functionality
@@ -599,7 +599,7 @@ Test your models and channels to ensure everything works correctly.
 
 If everything works, you can delete the backup:
 ```bash
-rm ~/.aibhq/config.json.backup
+rm ~/.octai/config.json.backup
 ```
 
 ## Advanced: Encrypted API Keys

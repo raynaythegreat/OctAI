@@ -224,7 +224,7 @@ func setupOAuthTestEnv(t *testing.T) (string, func()) {
 	if err := os.Setenv("HOME", tmp); err != nil {
 		t.Fatalf("set HOME: %v", err)
 	}
-	if err := os.Setenv("OCTAI_HOME", filepath.Join(tmp, ".aibhq")); err != nil {
+	if err := os.Setenv("OCTAI_HOME", filepath.Join(tmp, ".octai")); err != nil {
 		t.Fatalf("set OCTAI_HOME: %v", err)
 	}
 

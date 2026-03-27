@@ -14,7 +14,7 @@ Este guia explica como configurar e usar o provedor **Antigravity** (Google Clou
 Para se autenticar com o Antigravity, execute o seguinte comando:
 
 ```bash
-aibhq auth login --provider antigravity
+octai auth login --provider antigravity
 ```
 
 ### Autenticação manual (Headless/VPS)
@@ -34,15 +34,15 @@ O OctAi extrairá automaticamente o código de autorização e completará o pro
 Para ver quais modelos seu projeto tem acesso e verificar suas cotas:
 
 ```bash
-aibhq auth models
+octai auth models
 ```
 
 ### Trocar de modelo
-Você pode alterar o modelo padrão em `~/.aibhq/config.json` ou substituí-lo via CLI:
+Você pode alterar o modelo padrão em `~/.octai/config.json` ou substituí-lo via CLI:
 
 ```bash
 # Substituir para um único comando
-aibhq agent -m "Hello" --model claude-opus-4-6-thinking
+octai agent -m "Hello" --model claude-opus-4-6-thinking
 ```
 
 ## 3. Uso em produção (Coolify/Docker)
@@ -54,7 +54,7 @@ Se você está implantando via Coolify ou Docker, siga estas etapas para testar:
 2.  **Persistência da autenticação**:
     Se você já fez login localmente, pode copiar suas credenciais para o servidor:
     ```bash
-    scp ~/.aibhq/auth.json user@your-server:~/.aibhq/
+    scp ~/.octai/auth.json user@your-server:~/.octai/
     ```
     *Alternativamente*, execute o comando `auth login` uma vez no servidor se você tiver acesso ao terminal.
 
@@ -62,7 +62,7 @@ Se você está implantando via Coolify ou Docker, siga estas etapas para testar:
 
 *   **Resposta vazia**: Se um modelo retorna uma resposta vazia, ele pode estar restrito para o seu projeto. Tente `gemini-3-flash` ou `claude-opus-4-6-thinking`.
 *   **429 Limite de taxa**: O Antigravity possui cotas rigorosas. O OctAi exibirá o "tempo de redefinição" na mensagem de erro se você atingir um limite.
-*   **404 Não encontrado**: Certifique-se de que está usando um ID de modelo da lista `aibhq auth models`. Use o ID curto (ex.: `gemini-3-flash`) e não o caminho completo.
+*   **404 Não encontrado**: Certifique-se de que está usando um ID de modelo da lista `octai auth models`. Use o ID curto (ex.: `gemini-3-flash`) e não o caminho completo.
 
 ## 5. Resumo dos modelos funcionais
 

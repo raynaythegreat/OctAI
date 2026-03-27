@@ -316,7 +316,7 @@ func globalConfigDir() string {
 	if err != nil {
 		return ""
 	}
-	return filepath.Join(home, ".aibhq")
+	return filepath.Join(home, ".octai")
 }
 
 func builtinSkillsDir() string {

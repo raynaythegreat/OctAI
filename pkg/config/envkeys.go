@@ -14,7 +14,7 @@ package config
 const (
 	// EnvHome overrides the base directory for all aibhq data
 	// (config, workspace, skills, auth store, …).
-	// Default: ~/.aibhq
+	// Default: ~/.octai
 	EnvHome = "OCTAI_HOME"
 
 	// EnvConfig overrides the full path to the JSON config file.

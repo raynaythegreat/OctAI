@@ -9,9 +9,9 @@ O OctAi realiza múltiplas interações complexas nos bastidores para cada requi
 Para obter informações detalhadas sobre o que o agente está fazendo (requisições LLM, chamadas de ferramentas, roteamento de mensagens), você pode iniciar o gateway do OctAi com a flag de depuração:
 
 ```bash
-aibhq gateway --debug
+octai gateway --debug
 # or
-aibhq gateway -d
+octai gateway -d
 ```
 
 Neste modo, o sistema formata os logs de forma detalhada e exibe prévias dos prompts do sistema e dos resultados de execução das ferramentas.
@@ -25,7 +25,7 @@ Se você precisar inspecionar a saída completa de um comando ou o payload exato
 **Nota:** Esta flag *só* funciona quando combinada com o modo `--debug`.
 
 ```bash
-aibhq gateway --debug --no-truncate
+octai gateway --debug --no-truncate
 
 ```
 

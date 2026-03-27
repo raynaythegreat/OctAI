@@ -16,7 +16,7 @@ before:
     - go-winres make --in web/backend/winres/winres.json --out web/backend/rsrc --product-version={{ .Version }} --file-version={{ .Version }}
 
 builds:
-  - id: aibhq
+  - id: octai
     env:
       - CGO_ENABLED=0
     tags:
@@ -58,7 +58,7 @@ builds:
       - goos: netbsd
         goarch: arm
 
-  - id: aibhq-launcher
+  - id: octai-launcher
     binary: octai-launcher
     env:
       - CGO_ENABLED=0
@@ -97,7 +97,7 @@ builds:
       - goos: netbsd
         goarch: arm
 
-  - id: aibhq-launcher-tui
+  - id: octai-launcher-tui
     binary: octai-launcher-tui
     env:
       - CGO_ENABLED=0
@@ -137,12 +137,12 @@ builds:
         goarch: arm
 
 dockers_v2:
-  - id: aibhq
+  - id: octai
     dockerfile: docker/Dockerfile.goreleaser
     extra_files:
       - docker/entrypoint.sh
     ids:
-      - aibhq
+      - octai
     images:
       - "ghcr.io/{{ .Env.GITHUB_REPOSITORY_OWNER }}/octai"
       - 'docker.io/{{ .Env.DOCKERHUB_IMAGE_NAME }}'
@@ -154,12 +154,12 @@ dockers_v2:
       - linux/arm64
       - linux/riscv64
 
-  - id: aibhq-launcher
+  - id: octai-launcher
     dockerfile: docker/Dockerfile.goreleaser.launcher
     ids:
-      - aibhq
-      - aibhq-launcher
-      - aibhq-launcher-tui
+      - octai
+      - octai-launcher
+      - octai-launcher-tui
     images:
       - "ghcr.io/{{ .Env.GITHUB_REPOSITORY_OWNER }}/octai"
       - 'docker.io/{{ .Env.DOCKERHUB_IMAGE_NAME }}'
@@ -175,9 +175,9 @@ notarize:
   macos:
     - enabled: '{{ isEnvSet "MACOS_SIGN_P12" }}'
       ids:
-        - aibhq
-        - aibhq-launcher
-        - aibhq-launcher-tui
+        - octai
+        - octai-launcher
+        - octai-launcher-tui
       sign:
         certificate: "{{.Env.MACOS_SIGN_P12}}"
         password: "{{.Env.MACOS_SIGN_PASSWORD}}"
@@ -204,11 +204,11 @@ archives:
         formats: [zip]
 
 nfpms:
-  - id: aibhq
+  - id: octai
     ids:
-      - aibhq
-      - aibhq-launcher
-      - aibhq-launcher-tui
+      - octai
+      - octai-launcher
+      - octai-launcher-tui
     package_name: octai
     file_name_template: >-
       {{ .PackageName }}_

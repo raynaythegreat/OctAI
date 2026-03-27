@@ -151,7 +151,7 @@ Thiết kế này cũng cho phép **hỗ trợ đa agent** với lựa chọn pr
 }
 ```
 
-> Chạy `aibhq auth login --provider anthropic` để dán API token.
+> Chạy `octai auth login --provider anthropic` để dán API token.
 
 **Anthropic Messages API (định dạng native)**
 
@@ -297,7 +297,7 @@ OctAi định tuyến provider theo họ giao thức:
 {
   "agents": {
     "defaults": {
-      "workspace": "~/.aibhq/workspace",
+      "workspace": "~/.octai/workspace",
       "model_name": "glm-4.7",
       "max_tokens": 8192,
       "temperature": 0.7,
@@ -316,7 +316,7 @@ OctAi định tuyến provider theo họ giao thức:
 **3. Chạy**
 
 ```bash
-aibhq agent -m "Hello"
+octai agent -m "Hello"
 ```
 
 </details>

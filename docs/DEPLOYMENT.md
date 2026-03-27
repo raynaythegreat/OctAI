@@ -18,31 +18,31 @@
 
 ```bash
 # Pull the latest image
-docker pull docker.io/sipeed/aibhq:latest
+docker pull docker.io/sipeed/octai:latest
 
 # Run the gateway mode
-docker run -d --name aibhq \
-  -v ~/.aibhq:/root/.aibhq \
+docker run -d --name octai \
+  -v ~/.octai:/root/.octai \
   -p 18790:18790 \
-  docker.io/sipeed/aibhq:latest gateway
+  docker.io/sipeed/octai:latest gateway
 ```
 
 ### Available Images
 
 | Image | Description | Size |
 |-------|-------------|------|
-| `aibhq:latest` | Minimal image for gateway | ~15MB |
-| `aibhq:launcher` | Web console + gateway | ~25MB |
-| `aibhq:full` | Full MCP support | ~30MB |
+| `octai:latest` | Minimal image for gateway | ~15MB |
+| `octai:launcher` | Web console + gateway | ~25MB |
+| `octai:full` | Full MCP support | ~30MB |
 
 ### Building Custom Images
 
 ```bash
 # Standard build
-docker build -t aibhq:latest -f docker/Dockerfile .
+docker build -t octai:latest -f docker/Dockerfile .
 
 # Full MCP support
-docker build -t aibhq:full -f docker/Dockerfile.full .
+docker build -t octai:full -f docker/Dockerfile.full .
 ```
 
 ---
@@ -57,14 +57,14 @@ Create `docker-compose.yml`:
 version: '3.8'
 
 services:
-  aibhq-gateway:
-    image: docker.io/sipeed/aibhq:latest
-    container_name: aibhq-gateway
+  octai-gateway:
+    image: docker.io/sipeed/octai:latest
+    container_name: octai-gateway
     restart: unless-stopped
     environment:
       - AIBHQ_GATEWAY_HOST=0.0.0.0
     volumes:
-      - ./data:/root/.aibhq
+      - ./data:/root/.octai
     ports:
       - "18790:18790"
 ```
@@ -75,15 +75,15 @@ services:
 version: '3.8'
 
 services:
-  aibhq-gateway:
-    image: docker.io/sipeed/aibhq:latest
-    container_name: aibhq-gateway
+  octai-gateway:
+    image: docker.io/sipeed/octai:latest
+    container_name: octai-gateway
     restart: unless-stopped
     environment:
       - AIBHQ_GATEWAY_HOST=0.0.0.0
     volumes:
-      - ./config:/root/.aibhq/config.json:ro
-      - aibhq-workspace:/root/.aibhq/workspace
+      - ./config:/root/.octai/config.json:ro
+      - octai-workspace:/root/.octai/workspace
     ports:
       - "18790:18790"
     healthcheck:
@@ -95,7 +95,7 @@ services:
   # Optional: Redis for session caching
   redis:
     image: redis:7-alpine
-    container_name: aibhq-redis
+    container_name: octai-redis
     restart: unless-stopped
     volumes:
       - redis-data:/data
@@ -105,7 +105,7 @@ services:
   # Optional: Reverse proxy
   nginx:
     image: nginx:alpine
-    container_name: aibhq-nginx
+    container_name: octai-nginx
     restart: unless-stopped
     ports:
       - "80:80"
@@ -113,10 +113,10 @@ services:
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
-      - aibhq-gateway
+      - octai-gateway
 
 volumes:
-  aibhq-workspace:
+  octai-workspace:
   redis-data:
 ```
 
@@ -127,7 +127,7 @@ volumes:
 docker-compose up -d
 
 # View logs
-docker-compose logs -f aibhq-gateway
+docker-compose logs -f octai-gateway
 
 # Stop services
 docker-compose down
@@ -143,22 +143,22 @@ docker-compose down
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: aibhq
+  name: octai
   labels:
-    app: aibhq
+    app: octai
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: aibhq
+      app: octai
   template:
     metadata:
       labels:
-        app: aibhq
+        app: octai
     spec:
       containers:
-        - name: aibhq
-          image: docker.io/sipeed/aibhq:latest
+        - name: octai
+          image: docker.io/sipeed/octai:latest
           args: ["gateway"]
           env:
             - name: AIBHQ_GATEWAY_HOST
@@ -172,7 +172,7 @@ spec:
               mountPath: /config
               readOnly: true
             - name: workspace
-              mountPath: /root/.aibhq/workspace
+              mountPath: /root/.octai/workspace
           resources:
             requests:
               memory: "128Mi"
@@ -183,16 +183,16 @@ spec:
       volumes:
         - name: config
           configMap:
-            name: aibhq-config
+            name: octai-config
         - name: workspace
           persistentVolumeClaim:
-            claimName: aibhq-workspace
+            claimName: octai-workspace
             readOnly: false
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: aibhq-config
+  name: octai-config
 data:
   config.json: |
     {
@@ -213,7 +213,7 @@ data:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: aibhq-workspace
+  name: octai-workspace
 spec:
   accessModes:
     - ReadWriteOnce
@@ -224,10 +224,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: aibhq
+  name: octai
 spec:
   selector:
-    app: aibhq
+    app: octai
   ports:
     - port: 18790
       targetPort: 18790
@@ -237,13 +237,13 @@ spec:
 
 ```bash
 # Apply manifests
-kubectl apply -f k8s-aibhq.yaml
+kubectl apply -f k8s-octai.yaml
 
 # Check status
-kubectl get pods -l app=aibhq
+kubectl get pods -l app=octai
 
 # View logs
-kubectl logs -f deployment/aibhq
+kubectl logs -f deployment/octai
 ```
 
 ### Horizontal Scaling
@@ -266,8 +266,8 @@ spec:
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `AIBHQ_CONFIG` | `~/.aibhq/config.json` | Path to configuration file |
-| `AIBHQ_HOME` | `~/.aibhq` | Root directory for data |
+| `AIBHQ_CONFIG` | `~/.octai/config.json` | Path to configuration file |
+| `AIBHQ_HOME` | `~/.octai` | Root directory for data |
 | `AIBHQ_GATEWAY_HOST` | `127.0.0.1` | Gateway bind address |
 | `AIBHQ_GATEWAY_PORT` | `18790` | Gateway HTTP port |
 
@@ -276,7 +276,7 @@ spec:
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `AIBHQ_AGENTS_DEFAULTS_MODEL_NAME` | - | Default model name |
-| `AIBHQ_AGENTS_DEFAULTS_WORKSPACE` | `~/.aibhq/workspace` | Workspace directory |
+| `AIBHQ_AGENTS_DEFAULTS_WORKSPACE` | `~/.octai/workspace` | Workspace directory |
 | `AIBHQ_AGENTS_DEFAULTS_MAX_TOKENS` | `4096` | Maximum response tokens |
 | `AIBHQ_AGENTS_DEFAULTS_TEMPERATURE` | `0.7` | Response temperature |
 | `AIBHQ_AGENTS_DEFAULTS_RESTRICT_TO_WORKSPACE` | `true` | Sandbox mode |
@@ -294,13 +294,13 @@ spec:
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `AIBHQ_DOCKER_DATA_DIR` | `/root/.aibhq` | Data directory in container |
+| `AIBHQ_DOCKER_DATA_DIR` | `/root/.octai` | Data directory in container |
 
 ### Example Docker Compose Environment
 
 ```yaml
 services:
-  aibhq:
+  octai:
     environment:
       - AIBHQ_GATEWAY_HOST=0.0.0.0
       - AIBHQ_AGENTS_DEFAULTS_MODEL_NAME=gpt-4o-mini
@@ -319,7 +319,7 @@ services:
 ```yaml
 # Restrict API access to internal network only
 services:
-  aibhq:
+  octai:
     networks:
       - internal
     expose:
@@ -336,15 +336,15 @@ networks:
 
 ```bash
 # Create secret
-echo "sk-your-api-key" | docker secret create aibhq-api-key -
+echo "sk-your-api-key" | docker secret create octai-api-key -
 
 # Use in compose
 services:
-  aibhq:
+  octai:
     secrets:
-      - aibhq-api-key
+      - octai-api-key
     environment:
-      - OPENAI_API_KEY_FILE=/run/secrets/aibhq-api-key
+      - OPENAI_API_KEY_FILE=/run/secrets/octai-api-key
 ```
 
 **Using Kubernetes Secrets:**
@@ -353,7 +353,7 @@ services:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: aibhq-secrets
+  name: octai-secrets
 type: Opaque
 stringData:
   config.json: |
@@ -374,13 +374,13 @@ stringData:
 # nginx.conf for TLS termination
 server {
     listen 443 ssl;
-    server_name aibhq.example.com;
+    server_name octai.example.com;
 
     ssl_certificate /etc/nginx/ssl/tls.crt;
     ssl_certificate_key /etc/nginx/ssl/tls.key;
 
     location / {
-        proxy_pass http://aibhq-gateway:18790;
+        proxy_pass http://octai-gateway:18790;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
     }
@@ -407,12 +407,12 @@ resources:
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: aibhq-hpa
+  name: octai-hpa
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: aibhq
+    name: octai
   minReplicas: 1
   maxReplicas: 5
   metrics:
@@ -450,12 +450,12 @@ readinessProbe:
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
-  name: aibhq-pdb
+  name: octai-pdb
 spec:
   minAvailable: 1
   selector:
     matchLabels:
-      app: aibhq
+      app: octai
 ```
 
 ### Monitoring
@@ -477,7 +477,7 @@ environment:
     Name              tail
     Path              /var/log/containers/*.log
     Parser            docker
-    Tag               aibhq
+    Tag               octai
 
 [OUTPUT]
     Match              *
@@ -492,7 +492,7 @@ environment:
 apiVersion: snapshot.storage.k8s.io/v1
 kind: VolumeSnapshotClass
 metadata:
-  name: aibhq-snapshot-class
+  name: octai-snapshot-class
 driver: csi-driver
 parameters:
   type: snap
@@ -505,7 +505,7 @@ deletionPolicy: Delete
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: aibhq-backup
+  name: octai-backup
 spec:
   schedule: "0 2 * * *"
   jobTemplate:

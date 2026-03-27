@@ -11,14 +11,14 @@ import (
 	"github.com/raynaythegreat/ai-business-hq/pkg/config"
 )
 
-// GetPicoclawHome returns the aibhq home directory.
-// Priority: $OCTAI_HOME > ~/.aibhq
+// GetPicoclawHome returns the octai home directory.
+// Priority: $OCTAI_HOME > ~/.octai
 func GetPicoclawHome() string {
 	if home := os.Getenv(config.EnvHome); home != "" {
 		return home
 	}
 	home, _ := os.UserHomeDir()
-	return filepath.Join(home, ".aibhq")
+	return filepath.Join(home, ".octai")
 }
 
 // GetAIBHQHome returns the aibhq home directory (alias for GetPicoclawHome).
@@ -34,15 +34,15 @@ func GetDefaultConfigPath() string {
 	return filepath.Join(GetPicoclawHome(), "config.json")
 }
 
-// FindPicoclawBinary locates the aibhq executable.
+// FindPicoclawBinary locates the octai executable.
 // Search order:
 //  1. OCTAI_BINARY environment variable (explicit override)
 //  2. Same directory as the current executable
-//  3. Falls back to "aibhq" and relies on $PATH
+//  3. Falls back to "octai" and relies on $PATH
 func FindPicoclawBinary() string {
-	binaryName := "aibhq"
+	binaryName := "octai"
 	if runtime.GOOS == "windows" {
-		binaryName = "aibhq.exe"
+		binaryName = "octai.exe"
 	}
 
 	if p := os.Getenv(config.EnvBinary); p != "" {
@@ -58,7 +58,7 @@ func FindPicoclawBinary() string {
 		}
 	}
 
-	return "aibhq"
+	return "octai"
 }
 
 // GetLocalIP returns the local IP address of the machine.

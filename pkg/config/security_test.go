@@ -34,8 +34,8 @@ func TestSecurityPath(t *testing.T) {
 	}{
 		{
 			name:      "standard path",
-			configDir: "/home/user/.aibhq/config.json",
-			want:      "/home/user/.aibhq/.security.yml",
+			configDir: "/home/user/.octai/config.json",
+			want:      "/home/user/.octai/.security.yml",
 		},
 		{
 			name:      "nested path",

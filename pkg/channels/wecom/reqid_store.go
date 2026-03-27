@@ -36,7 +36,7 @@ func newReqIDStore(path string) *reqIDStore {
 
 func defaultReqIDStorePath() string {
 	if home, err := os.UserHomeDir(); err == nil && home != "" {
-		return filepath.Join(home, ".aibhq", "wecom", "reqid-store.json")
+		return filepath.Join(home, ".octai", "wecom", "reqid-store.json")
 	}
 	return filepath.Join(os.TempDir(), "aibhq-wecom-reqid-store.json")
 }

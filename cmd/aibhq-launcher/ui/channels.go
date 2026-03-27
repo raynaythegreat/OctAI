@@ -39,7 +39,7 @@ func (a *App) newChannelsPage() tview.Primitive {
 		if err != nil {
 			home = "."
 		}
-		configPath := filepath.Join(home, ".aibhq", "config.json")
+		configPath := filepath.Join(home, ".octai", "config.json")
 
 		var cfg map[string]any
 		if data, err := os.ReadFile(configPath); err == nil {

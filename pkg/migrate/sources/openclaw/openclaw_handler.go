@@ -141,7 +141,7 @@ func findSourceConfig(sourceHome string) (string, error) {
 }
 
 func rewriteWorkspacePath(path string) string {
-	path = strings.Replace(path, ".openclaw", ".aibhq", 1)
+	path = strings.Replace(path, ".openclaw", ".octai", 1)
 	return path
 }
 

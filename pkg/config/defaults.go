@@ -16,7 +16,7 @@ import (
 // DefaultConfig returns the default configuration for OctAi.
 func DefaultConfig() *Config {
 	// Determine the base path for the workspace.
-	// Priority: $OCTAI_HOME > ~/.aibhq
+	// Priority: $OCTAI_HOME > ~/.octai
 	var homePath string
 	if aibhqHome := os.Getenv(EnvHome); aibhqHome != "" {
 		homePath = aibhqHome

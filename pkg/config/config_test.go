@@ -101,7 +101,7 @@ func TestAgentConfig_FullParse(t *testing.T) {
 	jsonData := `{
 		"agents": {
 			"defaults": {
-				"workspace": "~/.aibhq/workspace",
+				"workspace": "~/.octai/workspace",
 				"model": "glm-4.7",
 				"max_tokens": 8192,
 				"max_tool_iterations": 20
@@ -202,7 +202,7 @@ func TestConfig_BackwardCompat_NoAgentsList(t *testing.T) {
 	jsonData := `{
 		"agents": {
 			"defaults": {
-				"workspace": "~/.aibhq/workspace",
+				"workspace": "~/.octai/workspace",
 				"model": "glm-4.7",
 				"max_tokens": 8192,
 				"max_tool_iterations": 20
@@ -765,7 +765,7 @@ func TestDefaultConfig_WorkspacePath_Default(t *testing.T) {
 	}
 
 	cfg := DefaultConfig()
-	want := filepath.Join(fakeHome, ".aibhq", "workspace")
+	want := filepath.Join(fakeHome, ".octai", "workspace")
 
 	if cfg.Agents.Defaults.Workspace != want {
 		t.Errorf("Default workspace path = %q, want %q", cfg.Agents.Defaults.Workspace, want)

@@ -4,7 +4,7 @@
 
 ## 💬 Chat Apps
 
-Talk to your aibhq through Telegram, Discord, WhatsApp, Matrix, QQ, DingTalk, LINE, WeCom, Feishu, Slack, IRC, OneBot, MaixCam, or Pico (native protocol)
+Talk to your octai through Telegram, Discord, WhatsApp, Matrix, QQ, DingTalk, LINE, WeCom, Feishu, Slack, IRC, OneBot, MaixCam, or Pico (native protocol)
 
 > **Note**: Channels that rely on HTTP callbacks share a single Gateway HTTP server (`gateway.host`:`gateway.port`, default `127.0.0.1:18790`). Socket/stream-based channels such as Feishu, DingTalk, and WeCom do not rely on the shared webhook server for inbound delivery.
 
@@ -56,7 +56,7 @@ Talk to your aibhq through Telegram, Discord, WhatsApp, Matrix, QQ, DingTalk, LI
 **3. Run**
 
 ```bash
-aibhq gateway
+octai gateway
 ```
 
 **4. Telegram command menu (auto-registered at startup)**
@@ -147,7 +147,7 @@ You can also trigger by keyword prefixes (e.g. `!bot`):
 **6. Run**
 
 ```bash
-aibhq gateway
+octai gateway
 ```
 
 </details>
@@ -176,7 +176,7 @@ OctAi can connect to WhatsApp in two ways:
 }
 ```
 
-If `session_store_path` is empty, the session is stored in `<workspace>/whatsapp/`. Run `aibhq gateway`; on first run, scan the QR code printed in the terminal with WhatsApp → Linked Devices.
+If `session_store_path` is empty, the session is stored in `<workspace>/whatsapp/`. Run `octai gateway`; on first run, scan the QR code printed in the terminal with WhatsApp → Linked Devices.
 
 </details>
 
@@ -190,7 +190,7 @@ OctAi supports connecting to your personal WeChat account using the official Ten
 
 Run the interactive QR login flow:
 ```bash
-aibhq auth weixin
+octai auth weixin
 ```
 Scan the printed QR code with your WeChat mobile app. On success, the token is saved to your config.
 
@@ -211,7 +211,7 @@ Scan the printed QR code with your WeChat mobile app. On success, the token is s
 
 **3. Run**
 ```bash
-aibhq gateway
+octai gateway
 ```
 
 </details>
@@ -241,7 +241,7 @@ QQ Open Platform provides a one-click setup page for OpenClaw-compatible bots:
 }
 ```
 
-4. Run `aibhq gateway` and open QQ to chat with your bot
+4. Run `octai gateway` and open QQ to chat with your bot
 
 > The App Secret is only shown once. Save it immediately — viewing it again will force a reset.
 >
@@ -254,7 +254,7 @@ If you prefer to create the bot manually:
 * Log in at [QQ Open Platform](https://q.qq.com/) to register as a developer
 * Create a QQ bot — customize its avatar and name
 * Copy the **App ID** and **App Secret** from the bot settings
-* Configure as shown above and run `aibhq gateway`
+* Configure as shown above and run `octai gateway`
 
 </details>
 
@@ -288,7 +288,7 @@ If you prefer to create the bot manually:
 **3. Run**
 
 ```bash
-aibhq gateway
+octai gateway
 ```
 </details>
 
@@ -320,7 +320,7 @@ aibhq gateway
 **3. Run**
 
 ```bash
-aibhq gateway
+octai gateway
 ```
 
 For full options (`device_id`, `join_on_invite`, `group_trigger`, `placeholder`, `reasoning_channel_id`), see [Matrix Channel Configuration Guide](channels/matrix/README.md).
@@ -369,7 +369,7 @@ Then set the Webhook URL in LINE Developers Console to `https://your-domain/webh
 **4. Run**
 
 ```bash
-aibhq gateway
+octai gateway
 ```
 
 > In group chats, the bot responds only when @mentioned. Replies quote the original message.
@@ -390,7 +390,7 @@ See [WeCom Configuration Guide](channels/wecom/README.md) for the full configura
 **1. Authenticate**
 
 ```bash
-aibhq auth wecom
+octai auth wecom
 ```
 
 This command shows a QR code, waits for approval in WeCom, and writes `bot_id` + `secret` into `channels.wecom`.
@@ -416,7 +416,7 @@ This command shows a QR code, waits for approval in WeCom, and writes `bot_id` +
 **3. Run**
 
 ```bash
-aibhq gateway
+octai gateway
 ```
 
 > Legacy `wecom_app` and `wecom_aibot` entries are replaced by the unified `channels.wecom` config in this branch.
@@ -456,7 +456,7 @@ Optional fields: `encrypt_key` and `verification_token` for event encryption (re
 **3. Run and chat**
 
 ```bash
-aibhq gateway
+octai gateway
 ```
 
 Open Feishu, search for your bot name, and start chatting. You can also add the bot to a group — use `group_trigger.mention_only: true` to only respond when @mentioned.
@@ -494,7 +494,7 @@ For full options, see [Feishu Channel Configuration Guide](channels/feishu/READM
 **3. Run**
 
 ```bash
-aibhq gateway
+octai gateway
 ```
 
 </details>
@@ -512,7 +512,7 @@ aibhq gateway
       "enabled": true,
       "server": "irc.libera.chat:6697",
       "tls": true,
-      "nick": "aibhq-bot",
+      "nick": "octai-bot",
       "channels": ["#your-channel"],
       "password": "",
       "allow_from": []
@@ -526,7 +526,7 @@ Optional: `nickserv_password` for NickServ authentication, `sasl_user`/`sasl_pas
 **2. Run**
 
 ```bash
-aibhq gateway
+octai gateway
 ```
 
 The bot will connect to the IRC server and join the specified channels.
@@ -567,7 +567,7 @@ Install and run a OneBot v11 compatible QQ bot framework. Enable its WebSocket s
 **3. Run**
 
 ```bash
-aibhq gateway
+octai gateway
 ```
 
 </details>

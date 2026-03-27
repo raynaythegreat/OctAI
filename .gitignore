@@ -67,5 +67,5 @@ web/backend/dist/*
 .claude/
 
 docker/data
-aibhq
-aibhq-launcher
+octai
+octai-launcher

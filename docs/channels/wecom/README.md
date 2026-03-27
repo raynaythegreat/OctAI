@@ -11,7 +11,7 @@ This replaces the legacy `wecom`, `wecom_app`, and `wecom_aibot` split with one 
 - Channel-side streaming replies over WeCom's AI Bot protocol
 - Incoming text, voice, image, file, video, and mixed messages
 - Outbound text and media replies (`image`, `file`, `voice`, `video`)
-- QR-based CLI onboarding with `aibhq auth wecom`
+- QR-based CLI onboarding with `octai auth wecom`
 - Shared allowlist and `reasoning_channel_id` routing
 
 > No public webhook callback URL is required for this channel. OctAi opens an outbound WebSocket connection to WeCom.
@@ -23,7 +23,7 @@ This replaces the legacy `wecom`, `wecom_app`, and `wecom_aibot` split with one 
 Run:
 
 ```bash
-aibhq auth wecom
+octai auth wecom
 ```
 
 The command prints a QR code in the terminal, waits for confirmation in WeCom, and then writes the resulting
@@ -32,7 +32,7 @@ The command prints a QR code in the terminal, waits for confirmation in WeCom, a
 Use `--timeout` if you want to wait longer:
 
 ```bash
-aibhq auth wecom --timeout 10m
+octai auth wecom --timeout 10m
 ```
 
 ### Option 2: Configure Manually
@@ -87,7 +87,7 @@ This branch removes the old multi-channel WeCom model.
 
 ## Troubleshooting
 
-### `aibhq auth wecom` times out
+### `octai auth wecom` times out
 
 - Re-run with a larger `--timeout`.
 - Make sure the QR code was confirmed inside WeCom, not only scanned.

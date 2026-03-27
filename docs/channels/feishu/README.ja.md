@@ -38,7 +38,7 @@
 3. バージョンを作成してアプリケーションを公開する（公開後に設定が有効になる）
 4. **App ID**（`cli_` で始まる）と **App Secret** を取得する
 5. OctAi 設定ファイルに App ID と App Secret を入力する
-6. `aibhq gateway` を実行してサービスを起動する
+6. `octai gateway` を実行してサービスを起動する
 7. 飛書でボット名を検索して会話を始める
 
 > OctAi は WebSocket/SDK モードで飛書に接続するため、公開コールバックアドレスや Webhook URL の設定は不要です。

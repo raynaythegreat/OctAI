@@ -3,7 +3,7 @@
 //
 // Copyright (c) 2026 OctAi contributors
 
-// Package config provides types and I/O for ~/.aibhq/tui.toml.
+// Package config provides types and I/O for ~/.octai/tui.toml.
 package config
 
 import (
@@ -24,10 +24,10 @@ func DefaultConfigPath() string {
 	if err != nil {
 		home = "."
 	}
-	return filepath.Join(home, ".aibhq", "tui.toml")
+	return filepath.Join(home, ".octai", "tui.toml")
 }
 
-// TUIConfig is the top-level structure of ~/.aibhq/tui.toml.
+// TUIConfig is the top-level structure of ~/.octai/tui.toml.
 type TUIConfig struct {
 	Version  string   `toml:"version"`
 	Model    Model    `toml:"model"`
@@ -151,7 +151,7 @@ func (p *Provider) UsersForScheme(schemeName string) []User {
 	return out
 }
 
-// SyncSelectedModelToMainConfig syncs the currently selected model to ~/.aibhq/config.json
+// SyncSelectedModelToMainConfig syncs the currently selected model to ~/.octai/config.json
 // Adds/replaces a "tui-prefer" model entry and sets it as the default model.
 // Preserves all other existing fields in the config file unchanged.
 func SyncSelectedModelToMainConfig(scheme Scheme, user User, modelID string) error {
@@ -159,7 +159,7 @@ func SyncSelectedModelToMainConfig(scheme Scheme, user User, modelID string) err
 	if err != nil {
 		home = "."
 	}
-	mainConfigPath := filepath.Join(home, ".aibhq", "config.json")
+	mainConfigPath := filepath.Join(home, ".octai", "config.json")
 
 	var cfg map[string]any
 	if data, readErr := os.ReadFile(mainConfigPath); readErr == nil {

@@ -17,7 +17,7 @@
 7. [Integration Requirements](#integration-requirements)
 8. [API Endpoints](#api-endpoints)
 9. [Configuration](#configuration)
-10. [Creating a New Provider in OctAi](#creating-a-new-provider-in-aibhq)
+10. [Creating a New Provider in OctAi](#creating-a-new-provider-in-octai)
 
 ---
 
@@ -588,7 +588,7 @@ Each SSE message (`data: {...}`) is wrapped in a `response` field:
 
 ### Auth Profile Storage
 
-Auth profiles are stored in `~/.aibhq/auth.json`:
+Auth profiles are stored in `~/.octai/auth.json`:
 
 ```json
 {
@@ -670,7 +670,7 @@ Add a default entry in `pkg/config/defaults.go`:
 
 #### 5. Add Auth Support (Optional)
 
-If your provider requires OAuth or special authentication, add a case to `cmd/aibhq/internal/auth/helpers.go`:
+If your provider requires OAuth or special authentication, add a case to `cmd/octai/internal/auth/helpers.go`:
 
 ```go
 case "your-provider":
@@ -700,16 +700,16 @@ case "your-provider":
 
 ```bash
 # Authenticate with a provider
-aibhq auth login --provider your-provider
+octai auth login --provider your-provider
 
 # List models (for Antigravity)
-aibhq auth models
+octai auth models
 
 # Start the gateway
-aibhq gateway
+octai gateway
 
 # Run an agent with a specific model
-aibhq agent -m "Hello" --model your-model
+octai agent -m "Hello" --model your-model
 ```
 
 ### Environment Variables for Testing
@@ -729,10 +729,10 @@ export OCTAI_MODEL_LIST='[{"model_name":"your-model","model":"your-provider/mode
 - **Source Files:**
   - `pkg/providers/antigravity_provider.go` - Antigravity provider implementation
   - `pkg/auth/oauth.go` - OAuth flow implementation
-  - `pkg/auth/store.go` - Auth credential storage (`~/.aibhq/auth.json`)
+  - `pkg/auth/store.go` - Auth credential storage (`~/.octai/auth.json`)
   - `pkg/providers/factory.go` - Provider factory and protocol routing
   - `pkg/providers/types.go` - Provider interface definitions
-  - `cmd/aibhq/internal/auth/helpers.go` - Auth CLI commands
+  - `cmd/octai/internal/auth/helpers.go` - Auth CLI commands
 
 - **Documentation:**
   - `docs/ANTIGRAVITY_USAGE.md` - Antigravity usage guide
@@ -788,7 +788,7 @@ Some models might show up in the available models list but return an empty respo
 ## Troubleshooting
 
 ### "Token expired"
-- Refresh OAuth tokens: `aibhq auth login --provider antigravity`
+- Refresh OAuth tokens: `octai auth login --provider antigravity`
 
 ### "Gemini for Google Cloud is not enabled"
 - Enable the API in your Google Cloud Console
@@ -799,5 +799,5 @@ Some models might show up in the available models list but return an empty respo
 
 ### Models not appearing in list
 - Verify OAuth authentication completed successfully
-- Check auth profile storage: `~/.aibhq/auth.json`
-- Re-run `aibhq auth login --provider antigravity`
+- Check auth profile storage: `~/.octai/auth.json`
+- Re-run `octai auth login --provider antigravity`

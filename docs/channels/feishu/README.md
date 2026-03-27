@@ -38,7 +38,7 @@ Feishu (international name: Lark) is an enterprise collaboration platform by Byt
 3. Create a version and publish the application (configuration takes effect only after publishing)
 4. Obtain the **App ID** (starts with `cli_`) and **App Secret**
 5. Fill in the App ID and App Secret in the OctAi configuration file
-6. Run `aibhq gateway` to start the service
+6. Run `octai gateway` to start the service
 7. Search for the bot name in Feishu and start a conversation
 
 > OctAi connects to Feishu using WebSocket/SDK mode — no public callback address or Webhook URL is required.

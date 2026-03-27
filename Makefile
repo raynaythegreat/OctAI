@@ -1,9 +1,9 @@
 .PHONY: all build install uninstall clean help test
 
 # Build variables
-BINARY_NAME=aibhq
+BINARY_NAME=octai
 BUILD_DIR=build
-CMD_DIR=cmd/$(BINARY_NAME)
+CMD_DIR=cmd/aibhq
 MAIN_GO=$(CMD_DIR)/main.go
 
 # Version
@@ -118,7 +118,7 @@ generate:
 	@$(GO) generate ./...
 	@echo "Run generate complete"
 
-## build: Build the aibhq binary for current platform
+## build: Build the octai binary for current platform
 build: generate
 	@echo "Building $(BINARY_NAME) for $(PLATFORM)/$(ARCH)..."
 	@mkdir -p $(BUILD_DIR)
@@ -126,25 +126,25 @@ build: generate
 	@echo "Build complete: $(BINARY_PATH)"
 	@ln -sf $(BINARY_NAME)-$(PLATFORM)-$(ARCH) $(BUILD_DIR)/$(BINARY_NAME)
 
-## build-launcher: Build the aibhq-launcher (web console) binary
+## build-launcher: Build the octai-launcher (web console) binary
 build-launcher:
-	@echo "Building aibhq-launcher for $(PLATFORM)/$(ARCH)..."
+	@echo "Building octai-launcher for $(PLATFORM)/$(ARCH)..."
 	@mkdir -p $(BUILD_DIR)
 	@if [ ! -f web/backend/dist/index.html ]; then \
 		echo "Building frontend..."; \
 		cd web/frontend && pnpm install && pnpm build:backend; \
 	fi
-	@$(WEB_GO) build $(GOFLAGS) -o $(BUILD_DIR)/aibhq-launcher-$(PLATFORM)-$(ARCH) ./web/backend
-	@ln -sf aibhq-launcher-$(PLATFORM)-$(ARCH) $(BUILD_DIR)/aibhq-launcher
-	@echo "Build complete: $(BUILD_DIR)/aibhq-launcher"
+	@$(WEB_GO) build $(GOFLAGS) -o $(BUILD_DIR)/octai-launcher-$(PLATFORM)-$(ARCH) ./web/backend
+	@ln -sf octai-launcher-$(PLATFORM)-$(ARCH) $(BUILD_DIR)/octai-launcher
+	@echo "Build complete: $(BUILD_DIR)/octai-launcher"
 
-## build-launcher-tui: Build the aibhq-launcher TUI binary
+## build-launcher-tui: Build the octai-launcher TUI binary
 build-launcher-tui:
-	@echo "Building aibhq-launcher-tui for $(PLATFORM)/$(ARCH)..."
+	@echo "Building octai-launcher-tui for $(PLATFORM)/$(ARCH)..."
 	@mkdir -p $(BUILD_DIR)
-	@$(GO) build $(GOFLAGS) -o $(BUILD_DIR)/aibhq-launcher-tui-$(PLATFORM)-$(ARCH) ./cmd/aibhq-launcher-tui
-	@ln -sf aibhq-launcher-tui-$(PLATFORM)-$(ARCH) $(BUILD_DIR)/aibhq-launcher-tui
-	@echo "Build complete: $(BUILD_DIR)/aibhq-launcher-tui"
+	@$(GO) build $(GOFLAGS) -o $(BUILD_DIR)/octai-launcher-tui-$(PLATFORM)-$(ARCH) ./cmd/aibhq-launcher-tui
+	@ln -sf octai-launcher-tui-$(PLATFORM)-$(ARCH) $(BUILD_DIR)/octai-launcher-tui
+	@echo "Build complete: $(BUILD_DIR)/octai-launcher-tui"
 
 ## build-whatsapp-native: Build with WhatsApp native (whatsmeow) support; larger binary
 build-whatsapp-native: generate
@@ -190,7 +190,7 @@ build-linux-mipsle: generate
 build-pi-zero: build-linux-arm build-linux-arm64
 	@echo "Pi Zero 2 W builds: $(BUILD_DIR)/$(BINARY_NAME)-linux-arm (32-bit), $(BUILD_DIR)/$(BINARY_NAME)-linux-arm64 (64-bit)"
 
-## build-all: Build aibhq for all platforms
+## build-all: Build octai for all platforms
 build-all: generate
 	@echo "Building for multiple platforms..."
 	@mkdir -p $(BUILD_DIR)
@@ -209,7 +209,7 @@ build-all: generate
 	GOOS=netbsd GOARCH=arm64 $(GO) build $(GOFLAGS) -ldflags "$(LDFLAGS)" -o $(BUILD_DIR)/$(BINARY_NAME)-netbsd-arm64 ./$(CMD_DIR)
 	@echo "All builds complete"
 
-## install: Install aibhq to system and copy builtin skills
+## install: Install octai to system and copy builtin skills
 install: build
 	@echo "Installing $(BINARY_NAME)..."
 	@mkdir -p $(INSTALL_BIN_DIR)
@@ -220,7 +220,7 @@ install: build
 	@echo "Installed binary to $(INSTALL_BIN_DIR)/$(BINARY_NAME)"
 	@echo "Installation complete!"
 
-## uninstall: Remove aibhq from system
+## uninstall: Remove octai from system
 uninstall:
 	@echo "Uninstalling $(BINARY_NAME)..."
 	@rm -f $(INSTALL_BIN_DIR)/$(BINARY_NAME)
@@ -228,7 +228,7 @@ uninstall:
 	@echo "Note: Only the executable file has been deleted."
 	@echo "If you need to delete all configurations (config.json, workspace, etc.), run 'make uninstall-all'"
 
-## uninstall-all: Remove aibhq and all data
+## uninstall-all: Remove octai and all data
 uninstall-all:
 	@echo "Removing workspace and skills..."
 	@rm -rf $(OCTAI_HOME)
@@ -277,7 +277,7 @@ update-deps:
 ## check: Run vet, fmt, and verify dependencies
 check: deps fmt vet test
 
-## run: Build and run aibhq
+## run: Build and run octai
 run: build
 	@$(BUILD_DIR)/$(BINARY_NAME) $(ARGS)
 
@@ -317,7 +317,7 @@ docker-run-agent-full:
 docker-clean:
 	docker compose -f docker/docker-compose.yml down -v
 	docker compose -f docker/docker-compose.full.yml down -v
-	docker rmi aibhq:latest aibhq:full 2>/dev/null || true
+	docker rmi octai:latest octai:full 2>/dev/null || true
 
 
 ## build-macos-app: Build OctAi macOS .app bundle (no terminal window)
@@ -333,7 +333,7 @@ build-macos-app:
 
 ## help: Show this help message
 help:
-	@echo "aibhq Makefile"
+	@echo "octai Makefile"
 	@echo ""
 	@echo "Usage:"
 	@echo "  make [target]"

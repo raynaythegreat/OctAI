@@ -4,39 +4,39 @@
 
 ## ⚙️ 設定詳細
 
-設定ファイルパス: `~/.aibhq/config.json`
+設定ファイルパス: `~/.octai/config.json`
 
 ### 環境変数
 
-環境変数を使用してデフォルトパスを上書きできます。ポータブルインストール、コンテナ化デプロイ、または aibhq をシステムサービスとして実行する場合に便利です。これらの変数は独立しており、異なるパスを制御します。
+環境変数を使用してデフォルトパスを上書きできます。ポータブルインストール、コンテナ化デプロイ、または octai をシステムサービスとして実行する場合に便利です。これらの変数は独立しており、異なるパスを制御します。
 
 | 変数              | 説明                                                                                                                             | デフォルトパス            |
 |-------------------|-----------------------------------------------------------------------------------------------------------------------------------------|---------------------------|
-| `OCTAI_CONFIG` | 設定ファイルのパスを上書きします。aibhq がどの `config.json` を読み込むかを直接指定し、他のすべての場所を無視します。 | `~/.aibhq/config.json` |
-| `OCTAI_HOME`   | aibhq データのルートディレクトリを上書きします。`workspace` やその他のデータディレクトリのデフォルト場所を変更します。          | `~/.aibhq`             |
+| `OCTAI_CONFIG` | 設定ファイルのパスを上書きします。octai がどの `config.json` を読み込むかを直接指定し、他のすべての場所を無視します。 | `~/.octai/config.json` |
+| `OCTAI_HOME`   | octai データのルートディレクトリを上書きします。`workspace` やその他のデータディレクトリのデフォルト場所を変更します。          | `~/.octai`             |
 
 **例：**
 
 ```bash
-# 特定の設定ファイルで aibhq を実行
+# 特定の設定ファイルで octai を実行
 # ワークスペースパスはその設定ファイル内から読み込まれます
-OCTAI_CONFIG=/etc/aibhq/production.json aibhq gateway
+OCTAI_CONFIG=/etc/octai/production.json octai gateway
 
-# /opt/aibhq にすべてのデータを保存して aibhq を実行
-# 設定はデフォルトの ~/.aibhq/config.json から読み込まれます
-# ワークスペースは /opt/aibhq/workspace に作成されます
-OCTAI_HOME=/opt/aibhq aibhq agent
+# /opt/octai にすべてのデータを保存して octai を実行
+# 設定はデフォルトの ~/.octai/config.json から読み込まれます
+# ワークスペースは /opt/octai/workspace に作成されます
+OCTAI_HOME=/opt/octai octai agent
 
 # 両方を使用して完全にカスタマイズ
-OCTAI_HOME=/srv/aibhq OCTAI_CONFIG=/srv/aibhq/main.json aibhq gateway
+OCTAI_HOME=/srv/octai OCTAI_CONFIG=/srv/octai/main.json octai gateway
 ```
 
 ### ワークスペースレイアウト
 
-OctAi は設定されたワークスペース（デフォルト: `~/.aibhq/workspace`）にデータを保存します：
+OctAi は設定されたワークスペース（デフォルト: `~/.octai/workspace`）にデータを保存します：
 
 ```
-~/.aibhq/workspace/
+~/.octai/workspace/
 ├── sessions/          # 会話セッションと履歴
 ├── memory/           # 長期記憶 (MEMORY.md)
 ├── state/            # 永続化状態 (最後のチャネルなど)
@@ -55,8 +55,8 @@ OctAi は設定されたワークスペース（デフォルト: `~/.aibhq/works
 
 デフォルトでは、スキルは以下の順序で読み込まれます：
 
-1. `~/.aibhq/workspace/skills`（ワークスペース）
-2. `~/.aibhq/skills`（グローバル）
+1. `~/.octai/workspace/skills`（ワークスペース）
+2. `~/.octai/skills`（グローバル）
 3. `<ビルド時埋め込みパス>/skills`（ビルトイン）
 
 高度な/テスト用セットアップでは、以下の環境変数でビルトインスキルのルートを上書きできます：
@@ -82,7 +82,7 @@ OctAi はデフォルトでサンドボックス環境で実行されます。Ag
 {
   "agents": {
     "defaults": {
-      "workspace": "~/.aibhq/workspace",
+      "workspace": "~/.octai/workspace",
       "restrict_to_workspace": true
     }
   }
@@ -91,7 +91,7 @@ OctAi はデフォルトでサンドボックス環境で実行されます。Ag
 
 | オプション              | デフォルト値            | 説明                                  |
 | ----------------------- | ----------------------- | ------------------------------------- |
-| `workspace`             | `~/.aibhq/workspace` | Agent の作業ディレクトリ              |
+| `workspace`             | `~/.octai/workspace` | Agent の作業ディレクトリ              |
 | `restrict_to_workspace` | `true`                  | ファイル/コマンドアクセスをワークスペース内に制限 |
 
 #### 保護されたツール
@@ -352,7 +352,7 @@ OctAi は `cron` ツールを通じて cron スタイルのスケジュールタ
 }
 ```
 
-スケジュールタスクは再起動後も `~/.aibhq/workspace/cron/` に保存されます。
+スケジュールタスクは再起動後も `~/.octai/workspace/cron/` に保存されます。
 
 ### 高度なトピック
 

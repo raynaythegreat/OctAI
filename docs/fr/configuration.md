@@ -4,7 +4,7 @@
 
 ## ⚙️ Configuration
 
-Fichier de configuration : `~/.aibhq/config.json`
+Fichier de configuration : `~/.octai/config.json`
 
 ### Variables d'Environnement
 
@@ -12,31 +12,31 @@ Vous pouvez remplacer les chemins par défaut à l'aide de variables d'environne
 
 | Variable          | Description                                                                                                                             | Chemin par défaut         |
 |-------------------|-----------------------------------------------------------------------------------------------------------------------------------------|---------------------------|
-| `OCTAI_CONFIG` | Remplace le chemin vers le fichier de configuration. Indique directement à OctAi quel `config.json` charger, en ignorant tous les autres emplacements. | `~/.aibhq/config.json` |
-| `OCTAI_HOME`   | Remplace le répertoire racine des données OctAi. Change l'emplacement par défaut du `workspace` et des autres répertoires de données. | `~/.aibhq`             |
+| `OCTAI_CONFIG` | Remplace le chemin vers le fichier de configuration. Indique directement à OctAi quel `config.json` charger, en ignorant tous les autres emplacements. | `~/.octai/config.json` |
+| `OCTAI_HOME`   | Remplace le répertoire racine des données OctAi. Change l'emplacement par défaut du `workspace` et des autres répertoires de données. | `~/.octai`             |
 
 **Exemples :**
 
 ```bash
-# Run aibhq using a specific config file
+# Run octai using a specific config file
 # The workspace path will be read from within that config file
-OCTAI_CONFIG=/etc/aibhq/production.json aibhq gateway
+OCTAI_CONFIG=/etc/octai/production.json octai gateway
 
-# Run aibhq with all its data stored in /opt/aibhq
-# Config will be loaded from the default ~/.aibhq/config.json
-# Workspace will be created at /opt/aibhq/workspace
-OCTAI_HOME=/opt/aibhq aibhq agent
+# Run octai with all its data stored in /opt/octai
+# Config will be loaded from the default ~/.octai/config.json
+# Workspace will be created at /opt/octai/workspace
+OCTAI_HOME=/opt/octai octai agent
 
 # Use both for a fully customized setup
-OCTAI_HOME=/srv/aibhq OCTAI_CONFIG=/srv/aibhq/main.json aibhq gateway
+OCTAI_HOME=/srv/octai OCTAI_CONFIG=/srv/octai/main.json octai gateway
 ```
 
 ### Structure du Workspace
 
-OctAi stocke les données dans votre workspace configuré (par défaut : `~/.aibhq/workspace`) :
+OctAi stocke les données dans votre workspace configuré (par défaut : `~/.octai/workspace`) :
 
 ```
-~/.aibhq/workspace/
+~/.octai/workspace/
 ├── sessions/          # Sessions de conversation et historique
 ├── memory/           # Mémoire à long terme (MEMORY.md)
 ├── state/            # État persistant (dernier canal, etc.)
@@ -54,8 +54,8 @@ OctAi stocke les données dans votre workspace configuré (par défaut : `~/.aib
 
 Par défaut, les compétences sont chargées depuis :
 
-1. `~/.aibhq/workspace/skills` (workspace)
-2. `~/.aibhq/skills` (global)
+1. `~/.octai/workspace/skills` (workspace)
+2. `~/.octai/skills` (global)
 3. `<chemin-intégré-à-la-compilation>/skills` (intégré)
 
 Pour les configurations avancées/de test, vous pouvez remplacer la racine des compétences builtin avec :
@@ -81,7 +81,7 @@ OctAi s'exécute dans un environnement sandboxé par défaut. L'agent ne peut ac
 {
   "agents": {
     "defaults": {
-      "workspace": "~/.aibhq/workspace",
+      "workspace": "~/.octai/workspace",
       "restrict_to_workspace": true
     }
   }
@@ -90,7 +90,7 @@ OctAi s'exécute dans un environnement sandboxé par défaut. L'agent ne peut ac
 
 | Option                  | Par défaut              | Description                                       |
 | ----------------------- | ----------------------- | ------------------------------------------------- |
-| `workspace`             | `~/.aibhq/workspace` | Répertoire de travail de l'agent                  |
+| `workspace`             | `~/.octai/workspace` | Répertoire de travail de l'agent                  |
 | `restrict_to_workspace` | `true`                  | Restreindre l'accès fichiers/commandes au workspace |
 
 #### Outils Protégés
@@ -351,7 +351,7 @@ OctAi supporte les tâches planifiées via l'outil `cron`. L'agent peut définir
 }
 ```
 
-Les tâches planifiées persistent après redémarrage dans `~/.aibhq/workspace/cron/`.
+Les tâches planifiées persistent après redémarrage dans `~/.octai/workspace/cron/`.
 
 ### Sujets Avancés
 

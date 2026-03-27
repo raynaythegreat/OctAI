@@ -180,7 +180,7 @@
 }
 ```
 
-> 运行 `aibhq auth login --provider anthropic` 来设置 OAuth 凭证。
+> 运行 `octai auth login --provider anthropic` 来设置 OAuth 凭证。
 
 **Anthropic Messages API（原生格式）**
 
@@ -326,7 +326,7 @@ OctAi 按协议族路由 Provider：
 {
   "agents": {
     "defaults": {
-      "workspace": "~/.aibhq/workspace",
+      "workspace": "~/.octai/workspace",
       "model_name": "glm-4.7",
       "max_tokens": 8192,
       "temperature": 0.7,
@@ -345,7 +345,7 @@ OctAi 按协议族路由 Provider：
 **3. 运行**
 
 ```bash
-aibhq agent -m "你好"
+octai agent -m "你好"
 ```
 
 </details>

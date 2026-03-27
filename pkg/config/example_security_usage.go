@@ -26,7 +26,7 @@ your config.
 
 ## 1. Create .security.yml
 
-File: ~/.aibhq/.security.yml
+File: ~/.octai/.security.yml
 
 ```yaml
 # Model API Keys
@@ -74,7 +74,7 @@ web:
 
 ## 2. Simplify config.json
 
-File: ~/.aibhq/config.json
+File: ~/.octai/config.json
 
 Note: Sensitive fields are omitted because they're loaded from .security.yml
 
@@ -139,7 +139,7 @@ Note: Sensitive fields are omitted because they're loaded from .security.yml
 ## 3. Set proper permissions
 
 ```bash
-chmod 600 ~/.aibhq/.security.yml
+chmod 600 ~/.octai/.security.yml
 ```
 
 ## 4. Add to .gitignore
@@ -330,19 +330,19 @@ You can also mix security values and direct values:
 
 ## Step 1: Backup your config
 ```bash
-cp ~/.aibhq/config.json ~/.aibhq/config.json.backup
+cp ~/.octai/config.json ~/.octai/config.json.backup
 ```
 
 ## Step 2: Create .security.yml
 ```bash
-cp security.example.yml ~/.aibhq/.security.yml
+cp security.example.yml ~/.octai/.security.yml
 ```
 
 ## Step 3: Fill in your API keys
-Edit ~/.aibhq/.security.yml and replace placeholders with your actual keys.
+Edit ~/.octai/.security.yml and replace placeholders with your actual keys.
 
 ## Step 4: Simplify config.json (Recommended)
-Remove sensitive fields from ~/.aibhq/config.json:
+Remove sensitive fields from ~/.octai/config.json:
 - `api_key` fields from model_list entries
 - `token` fields from channels
 - `api_key` fields from tools.web
@@ -350,7 +350,7 @@ Remove sensitive fields from ~/.aibhq/config.json:
 
 ## Step 5: Set permissions
 ```bash
-chmod 600 ~/.aibhq/.security.yml
+chmod 600 ~/.octai/.security.yml
 ```
 
 ## Step 6: Test
@@ -360,7 +360,7 @@ aibhq --version
 
 If everything works, you can delete the backup:
 ```bash
-rm ~/.aibhq/config.json.backup
+rm ~/.octai/config.json.backup
 ```
 
 # Advanced Features
@@ -514,7 +514,7 @@ even when your config uses indexed model names for load balancing.
 The security file should have restricted permissions:
 
 ```bash
-chmod 600 ~/.aibhq/.security.yml
+chmod 600 ~/.octai/.security.yml
 ```
 
 This ensures only the owner can read and write the file.
@@ -523,7 +523,7 @@ This ensures only the owner can read and write the file.
 
 1. Never commit .security.yml to version control
 2. Add .security.yml to your .gitignore file
-3. Set file permissions: chmod 600 ~/.aibhq/.security.yml
+3. Set file permissions: chmod 600 ~/.octai/.security.yml
 4. Use different keys for different environments (dev, staging, production)
 5. Rotate keys regularly and update .security.yml
 6. Encrypt backups containing .security.yml
@@ -570,7 +570,7 @@ and .security.yml values.
 
 ## Keys Not Being Applied
 - Check that .security.yml is in the same directory as config.json
-- Verify the file permissions allow reading (chmod 600 ~/.aibhq/.security.yml)
+- Verify the file permissions allow reading (chmod 600 ~/.octai/.security.yml)
 - Ensure the YAML structure matches the expected format
 - Check for typos in field names (case-sensitive)
 - Verify the model/channel names match exactly (case-sensitive)

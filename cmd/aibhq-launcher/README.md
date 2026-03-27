@@ -1,7 +1,7 @@
 # Picoclaw Launcher TUI
 
-This directory contains the terminal-based TUI launcher for `aibhq`.
-It provides a lightweight, terminal-native user interface for managing, configuring, and interacting with the core `aibhq` engine, without requiring a web browser or graphical environment.
+This directory contains the terminal-based TUI launcher for `octai`.
+It provides a lightweight, terminal-native user interface for managing, configuring, and interacting with the core `octai` engine, without requiring a web browser or graphical environment.
 
 ## Architecture
 
@@ -15,7 +15,7 @@ The TUI launcher is implemented purely in Go with no external runtime dependenci
   - `gateway.go`: AI Business HQ gateway daemon lifecycle management (start/stop/status)
   - `app.go`: Core TUI application framework and navigation logic
   - `models.go`: Data structures and state management
-* **`config/`**: Configuration management layer, integrates with the core aibhq configuration system
+* **`config/`**: Configuration management layer, integrates with the core octai configuration system
 
 ## Getting Started
 
