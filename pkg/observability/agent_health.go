@@ -1,4 +1,4 @@
-// AI Business HQ - Agent Health Observability
+// OctAi - Agent Health Observability
 // Tracks per-agent health metrics by subscribing to the EventBus.
 package observability
 

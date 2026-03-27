@@ -1,4 +1,4 @@
-// AI Business HQ - Ultra-lightweight personal AI agent
+// OctAi - Ultra-lightweight personal AI agent
 // DingTalk channel implementation using Stream Mode
 
 package dingtalk
@@ -214,7 +214,7 @@ func (c *DingTalkChannel) SendDirectReply(ctx context.Context, sessionWebhook, c
 
 	// Convert string content to []byte for the API
 	contentBytes := []byte(content)
-	titleBytes := []byte("AI Business HQ")
+	titleBytes := []byte("OctAi")
 
 	// Send markdown formatted reply
 	err := replier.SimpleReplyMarkdown(

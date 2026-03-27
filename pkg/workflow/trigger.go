@@ -1,4 +1,4 @@
-// AI Business HQ - Workflow Trigger System
+// OctAi - Workflow Trigger System
 // Defines trigger types and a trigger manager that starts workflow runs.
 package workflow
 

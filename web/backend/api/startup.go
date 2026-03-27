@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	autoStartEntryName = "AI Business HQLauncher"
+	autoStartEntryName = "OctAiLauncher"
 	launchAgentLabel   = "io.aibhq.launcher"
 )
 
@@ -247,8 +247,8 @@ func setLinuxAutoStart(enabled bool, exePath string, args []string) error {
 			"[Desktop Entry]",
 			"Type=Application",
 			"Version=1.0",
-			"Name=AI Business HQ Web",
-			"Comment=Start AI Business HQ Web on login",
+			"Name=OctAi Web",
+			"Comment=Start OctAi Web on login",
 			"Exec=" + buildLinuxExecLine(exePath, args),
 			"Terminal=false",
 			"X-GNOME-Autostart-enabled=true",

@@ -1,7 +1,7 @@
-// AI Business HQ - Ultra-lightweight personal AI agent
+// OctAi - Ultra-lightweight personal AI agent
 // License: MIT
 //
-// Copyright (c) 2026 AI Business HQ contributors
+// Copyright (c) 2026 OctAi contributors
 
 package config
 
@@ -13,10 +13,10 @@ import (
 	"github.com/raynaythegreat/ai-business-hq/pkg"
 )
 
-// DefaultConfig returns the default configuration for AI Business HQ.
+// DefaultConfig returns the default configuration for OctAi.
 func DefaultConfig() *Config {
 	// Determine the base path for the workspace.
-	// Priority: $PICOCLAW_HOME > ~/.aibhq
+	// Priority: $OCTAI_HOME > ~/.aibhq
 	var homePath string
 	if aibhqHome := os.Getenv(EnvHome); aibhqHome != "" {
 		homePath = aibhqHome

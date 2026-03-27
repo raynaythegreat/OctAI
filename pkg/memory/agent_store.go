@@ -1,4 +1,4 @@
-// AI Business HQ - Agent Memory Store
+// OctAi - Agent Memory Store
 // Persistent key-value store backed by SQLite that allows agents to remember
 // information across sessions.
 package memory

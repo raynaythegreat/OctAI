@@ -1,6 +1,6 @@
-// AI Business HQ Web Console - Web-based chat and management interface
+// OctAi Web Console - Web-based chat and management interface
 //
-// Provides a web UI for chatting with AI Business HQ via the Pico Channel WebSocket,
+// Provides a web UI for chatting with OctAi via the Pico Channel WebSocket,
 // with configuration management and gateway process control.
 
 package webconsole
@@ -25,7 +25,7 @@ import (
 )
 
 const (
-	appName = "AI Business HQ"
+	appName = "OctAi"
 
 	logPath   = "logs"
 	panicFile = "launcher_panic.log"
@@ -55,7 +55,7 @@ type Options struct {
 	ExplicitPublic bool // true when the caller explicitly set Public
 }
 
-// Run starts the AI Business HQ web console with the given options.
+// Run starts the OctAi web console with the given options.
 func Run(opts Options) error {
 	noBrowserFlag = opts.NoBrowser
 
@@ -81,7 +81,7 @@ func Run(opts Options) error {
 	}
 
 	logger.InfoC("web", fmt.Sprintf("%s Launcher %s starting...", appName, appVersion))
-	logger.InfoC("web", fmt.Sprintf("AI Business HQ Home: %s", picoHome))
+	logger.InfoC("web", fmt.Sprintf("OctAi Home: %s", picoHome))
 
 	if opts.Lang != "" {
 		SetLanguage(opts.Lang)
@@ -98,7 +98,7 @@ func Run(opts Options) error {
 		return fmt.Errorf("failed to resolve config path: %w", err)
 	}
 	if err = utils.EnsureOnboarded(absPath); err != nil {
-		logger.Errorf("Warning: Failed to initialize AI Business HQ config automatically: %v", err)
+		logger.Errorf("Warning: Failed to initialize OctAi config automatically: %v", err)
 	}
 
 	launcherPath := launcherconfig.PathForAppConfig(absPath)

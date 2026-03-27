@@ -1,8 +1,8 @@
 //go:build ignore
 
-// AI Business HQ Web Console - Web-based chat and management interface
+// OctAi Web Console - Web-based chat and management interface
 //
-// Provides a web UI for chatting with AI Business HQ via the Pico Channel WebSocket,
+// Provides a web UI for chatting with OctAi via the Pico Channel WebSocket,
 // with configuration management and gateway process control.
 //
 // Usage:

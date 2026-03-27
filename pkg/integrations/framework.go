@@ -1,4 +1,4 @@
-// AI Business HQ - Integration Framework
+// OctAi - Integration Framework
 // Defines the unified interface all integrations must implement.
 // Each integration can provide tools that are automatically registered to agents by role.
 package integrations

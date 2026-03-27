@@ -1,7 +1,7 @@
-// AI Business HQ - Ultra-lightweight personal AI agent
+// OctAi - Ultra-lightweight personal AI agent
 // License: MIT
 //
-// Copyright (c) 2026 AI Business HQ contributors
+// Copyright (c) 2026 OctAi contributors
 
 // Package config provides types and I/O for ~/.aibhq/tui.toml.
 package config

@@ -1,4 +1,4 @@
-// AI Business HQ - Knowledge Base Utilities
+// OctAi - Knowledge Base Utilities
 package knowledge
 
 import (

@@ -1,4 +1,4 @@
-// AI Business HQ - Team Task Protocol
+// OctAi - Team Task Protocol
 // Defines structured task schemas for each agent role.
 package tools
 

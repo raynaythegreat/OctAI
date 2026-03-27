@@ -1,4 +1,4 @@
-// AI Business HQ - Team Event Bus
+// OctAi - Team Event Bus
 // Provides team-scoped event broadcasting built on the agent EventBus.
 package teambus
 

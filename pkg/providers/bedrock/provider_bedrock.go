@@ -1,9 +1,9 @@
 //go:build bedrock
 
-// AI Business HQ - Ultra-lightweight personal AI agent
+// OctAi - Ultra-lightweight personal AI agent
 // License: MIT
 //
-// Copyright (c) 2026 AI Business HQ contributors
+// Copyright (c) 2026 OctAi contributors
 
 // Package bedrock implements the LLM provider interface for AWS Bedrock.
 // It uses the Bedrock Runtime Converse API for unified access to multiple

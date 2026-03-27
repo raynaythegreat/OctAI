@@ -1,4 +1,4 @@
-// AI Business HQ - Per-Agent Analytics Metrics
+// OctAi - Per-Agent Analytics Metrics
 // Extends the analytics package with agent-level and team-level performance tracking.
 package analytics
 

@@ -1,4 +1,4 @@
-// AI Business HQ - Team Registry
+// OctAi - Team Registry
 // Tracks team membership and provides role-based agent lookup.
 package agent
 

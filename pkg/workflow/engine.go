@@ -1,4 +1,4 @@
-// AI Business HQ - Workflow Engine
+// OctAi - Workflow Engine
 // Executes workflow DAGs by dispatching agent tasks through the SubTurnSpawner.
 package workflow
 

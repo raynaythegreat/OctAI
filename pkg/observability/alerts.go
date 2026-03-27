@@ -1,4 +1,4 @@
-// AI Business HQ - Observability Alerts
+// OctAi - Observability Alerts
 // Defines alert rules that fire when thresholds are breached.
 package observability
 

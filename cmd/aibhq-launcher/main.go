@@ -1,7 +1,7 @@
-// AI Business HQ - Ultra-lightweight personal AI agent
+// OctAi - Ultra-lightweight personal AI agent
 // License: MIT
 //
-// Copyright (c) 2026 AI Business HQ contributors
+// Copyright (c) 2026 OctAi contributors
 
 package main
 

@@ -1,4 +1,4 @@
-// AI Business HQ - Knowledge Base Ingestion Pipeline
+// OctAi - Knowledge Base Ingestion Pipeline
 // Provides helpers for ingesting content from different sources into the store.
 package knowledge
 

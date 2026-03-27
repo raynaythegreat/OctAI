@@ -1,4 +1,4 @@
-// AI Business HQ - Workflow Engine: Definitions
+// OctAi - Workflow Engine: Definitions
 // Defines the serializable data structures for workflow DAGs.
 package workflow
 

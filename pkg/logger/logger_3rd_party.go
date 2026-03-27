@@ -1,4 +1,4 @@
-// this file is for compatible with 3rd party loggers, should not be called in AI Business HQ project
+// this file is for compatible with 3rd party loggers, should not be called in OctAi project
 
 package logger
 

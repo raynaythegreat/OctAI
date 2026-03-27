@@ -1,4 +1,4 @@
-// AI Business HQ - Team Tool
+// OctAi - Team Tool
 // Allows an orchestrator agent to delegate tasks to specialist team members.
 // Builds on the existing SubTurnSpawner infrastructure — no parallel systems.
 package tools

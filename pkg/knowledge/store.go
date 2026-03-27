@@ -1,4 +1,4 @@
-// AI Business HQ - Knowledge Base Store
+// OctAi - Knowledge Base Store
 // Provides team-shared RAG-powered knowledge management.
 // Local mode: SQLite with BM25 text search.
 // SaaS mode: PostgreSQL + pgvector (configured externally).

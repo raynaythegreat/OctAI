@@ -1,4 +1,4 @@
-// AI Business HQ - Integration Registry
+// OctAi - Integration Registry
 // Manages active integrations and provides role-based tool registration.
 package integrations
 

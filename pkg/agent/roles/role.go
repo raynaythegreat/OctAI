@@ -1,4 +1,4 @@
-// AI Business HQ - Agent Role System
+// OctAi - Agent Role System
 // Defines built-in agent roles with default tool sets and metadata.
 package roles
 

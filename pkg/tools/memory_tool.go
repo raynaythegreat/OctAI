@@ -1,4 +1,4 @@
-// AI Business HQ - Agent Memory Tools
+// OctAi - Agent Memory Tools
 // Provides save_memory and recall_memory tools backed by SQLiteAgentMemoryStore.
 package tools
 

@@ -1,4 +1,4 @@
-// AI Business HQ - Cost Tracker
+// OctAi - Cost Tracker
 // Tracks real-time LLM token costs per agent and team.
 package observability
 

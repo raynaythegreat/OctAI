@@ -1,37 +1,37 @@
-// AI Business HQ - Ultra-lightweight personal AI agent
+// OctAi - Ultra-lightweight personal AI agent
 // License: MIT
 //
-// Copyright (c) 2026 AI Business HQ contributors
+// Copyright (c) 2026 OctAi contributors
 
 package config
 
 // Runtime environment variable keys for the aibhq process.
 // These control the location of files and binaries at runtime and are read
 // directly via os.Getenv / os.LookupEnv. All aibhq-specific keys use the
-// PICOCLAW_ prefix. Reference these constants instead of inline string
+// OCTAI_ prefix. Reference these constants instead of inline string
 // literals to keep all supported knobs visible in one place and to prevent
 // typos.
 const (
 	// EnvHome overrides the base directory for all aibhq data
 	// (config, workspace, skills, auth store, …).
 	// Default: ~/.aibhq
-	EnvHome = "PICOCLAW_HOME"
+	EnvHome = "OCTAI_HOME"
 
 	// EnvConfig overrides the full path to the JSON config file.
-	// Default: $PICOCLAW_HOME/config.json
-	EnvConfig = "PICOCLAW_CONFIG"
+	// Default: $OCTAI_HOME/config.json
+	EnvConfig = "OCTAI_CONFIG"
 
 	// EnvBuiltinSkills overrides the directory from which built-in
 	// skills are loaded.
 	// Default: <cwd>/skills
-	EnvBuiltinSkills = "PICOCLAW_BUILTIN_SKILLS"
+	EnvBuiltinSkills = "OCTAI_BUILTIN_SKILLS"
 
 	// EnvBinary overrides the path to the aibhq executable.
 	// Used by the web launcher when spawning the gateway subprocess.
 	// Default: resolved from the same directory as the current executable.
-	EnvBinary = "PICOCLAW_BINARY"
+	EnvBinary = "OCTAI_BINARY"
 
 	// EnvGatewayHost overrides the host address for the gateway server.
 	// Default: "127.0.0.1"
-	EnvGatewayHost = "PICOCLAW_GATEWAY_HOST"
+	EnvGatewayHost = "OCTAI_GATEWAY_HOST"
 )

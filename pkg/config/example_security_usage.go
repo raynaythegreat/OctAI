@@ -1,7 +1,7 @@
-// AI Business HQ - Ultra-lightweight personal AI agent
+// OctAi - Ultra-lightweight personal AI agent
 // License: MIT
 //
-// Copyright (c) 2026 AI Business HQ contributors
+// Copyright (c) 2026 OctAi contributors
 
 // This file demonstrates how to use the security configuration feature
 // It's not meant to be compiled, just for documentation purposes
@@ -535,15 +535,15 @@ You can override any security value using environment variables:
 
 ```bash
 # Channels
-export PICOCLAW_CHANNELS_TELEGRAM_TOKEN="token-from-env"
-export PICOCLAW_CHANNELS_DISCORD_TOKEN="discord-token-from-env"
+export OCTAI_CHANNELS_TELEGRAM_TOKEN="token-from-env"
+export OCTAI_CHANNELS_DISCORD_TOKEN="discord-token-from-env"
 
 # Web Tools
-export PICOCLAW_TOOLS_WEB_BRAVE_API_KEY="brave-key-from-env"
-export PICOCLAW_TOOLS_WEB_BAIDU_API_KEY="baidu-key-from-env"
+export OCTAI_TOOLS_WEB_BRAVE_API_KEY="brave-key-from-env"
+export OCTAI_TOOLS_WEB_BAIDU_API_KEY="baidu-key-from-env"
 
 # Skills
-export PICOCLAW_TOOLS_SKILLS_GITHUB_TOKEN="github-token-from-env"
+export OCTAI_TOOLS_SKILLS_GITHUB_TOKEN="github-token-from-env"
 ```
 
 Environment variables have the highest priority and will override both config.json

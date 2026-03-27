@@ -1,4 +1,4 @@
-// AI Business HQ - Workflow Store
+// OctAi - Workflow Store
 // Persists workflow definitions and run history to SQLite.
 package workflow
 

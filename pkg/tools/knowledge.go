@@ -1,4 +1,4 @@
-// AI Business HQ - Knowledge Base Tools
+// OctAi - Knowledge Base Tools
 // Provides agents with access to the team's shared knowledge base.
 package tools
 

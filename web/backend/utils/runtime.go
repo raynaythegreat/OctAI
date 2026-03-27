@@ -12,7 +12,7 @@ import (
 )
 
 // GetPicoclawHome returns the aibhq home directory.
-// Priority: $PICOCLAW_HOME > ~/.aibhq
+// Priority: $OCTAI_HOME > ~/.aibhq
 func GetPicoclawHome() string {
 	if home := os.Getenv(config.EnvHome); home != "" {
 		return home
@@ -36,7 +36,7 @@ func GetDefaultConfigPath() string {
 
 // FindPicoclawBinary locates the aibhq executable.
 // Search order:
-//  1. PICOCLAW_BINARY environment variable (explicit override)
+//  1. OCTAI_BINARY environment variable (explicit override)
 //  2. Same directory as the current executable
 //  3. Falls back to "aibhq" and relies on $PATH
 func FindPicoclawBinary() string {

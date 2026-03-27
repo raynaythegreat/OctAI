@@ -760,7 +760,7 @@ func TestGatewayRestartReturnsErrorStatusWhenReplacementFailsToStart(t *testing.
 	if err := os.WriteFile(invalidBinaryPath, []byte("#!/bin/sh\n"), 0o644); err != nil {
 		t.Fatalf("WriteFile() error = %v", err)
 	}
-	t.Setenv("PICOCLAW_BINARY", invalidBinaryPath)
+	t.Setenv("OCTAI_BINARY", invalidBinaryPath)
 
 	h := NewHandler(configPath)
 	mux := http.NewServeMux()
@@ -941,7 +941,7 @@ func TestFindPicoclawBinary_EnvOverride(t *testing.T) {
 		t.Fatalf("WriteFile() error = %v", err)
 	}
 
-	t.Setenv("PICOCLAW_BINARY", mockBinary)
+	t.Setenv("OCTAI_BINARY", mockBinary)
 
 	got := utils.FindPicoclawBinary()
 	if got != mockBinary {
@@ -950,8 +950,8 @@ func TestFindPicoclawBinary_EnvOverride(t *testing.T) {
 }
 
 func TestFindPicoclawBinary_EnvOverride_InvalidPath(t *testing.T) {
-	// When PICOCLAW_BINARY points to a non-existent path, fall through to next strategy
-	t.Setenv("PICOCLAW_BINARY", "/nonexistent/aibhq-binary")
+	// When OCTAI_BINARY points to a non-existent path, fall through to next strategy
+	t.Setenv("OCTAI_BINARY", "/nonexistent/aibhq-binary")
 
 	got := utils.FindPicoclawBinary()
 	// Should not return the invalid path; falls back to "aibhq" or another found path
