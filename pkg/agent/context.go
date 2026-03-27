@@ -60,7 +60,7 @@ func getGlobalConfigDir() string {
 	if err != nil {
 		return ""
 	}
-	return filepath.Join(home, pkg.DefaultAI Business HQHome)
+	return filepath.Join(home, pkg.DefaultAIBusinessHQHome)
 }
 
 func NewContextBuilder(workspace string) *ContextBuilder {
@@ -608,6 +608,26 @@ func (cb *ContextBuilder) BuildMessages(
 		messages = append(messages, msg)
 	}
 
+	// Add a cache breakpoint on the last user message when the conversation is
+	// long enough to make caching worthwhile (Anthropic supports up to 4 cache
+	// breakpoints; the static system prompt already uses one). Marking the last
+	// user turn caches the full conversation context up to that point, reducing
+	// input token charges on follow-up turns.
+	if len(messages) > 3 {
+		for i := len(messages) - 1; i >= 0; i-- {
+			if messages[i].Role == "user" && len(messages[i].SystemParts) == 0 {
+				messages[i].SystemParts = []providers.ContentBlock{
+					{
+						Type:         "text",
+						Text:         messages[i].Content,
+						CacheControl: &providers.CacheControl{Type: "ephemeral"},
+					},
+				}
+				break
+			}
+		}
+	}
+
 	return messages
 }
 
@@ -740,6 +760,19 @@ func sanitizeHistoryForProvider(history []providers.Message) []providers.Message
 	}
 
 	return final
+}
+
+// AttachMedia adds media URLs to the last user message in a message slice.
+// Used by channels that receive images (Telegram photo messages, Discord attachments).
+func AttachMedia(messages []providers.Message, mediaURLs []string) []providers.Message {
+	if len(messages) == 0 || len(mediaURLs) == 0 {
+		return messages
+	}
+	last := &messages[len(messages)-1]
+	if last.Role == "user" {
+		last.Media = append(last.Media, mediaURLs...)
+	}
+	return messages
 }
 
 func (cb *ContextBuilder) AddToolResult(

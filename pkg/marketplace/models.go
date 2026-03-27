@@ -104,6 +104,44 @@ var (
 	ErrVersionExists       = errors.New("version already exists")
 )
 
+// AgentSpec describes an agent member within a team template.
+type AgentSpec struct {
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	Role        string `json:"role,omitempty"`
+	Description string `json:"description,omitempty"`
+}
+
+// WorkflowSpec describes a workflow step within a team template.
+type WorkflowSpec struct {
+	ID          string   `json:"id"`
+	Name        string   `json:"name"`
+	Description string   `json:"description,omitempty"`
+	Steps       []string `json:"steps,omitempty"`
+}
+
+// TeamTemplate is a pre-built multi-agent team configuration available in the marketplace.
+type TeamTemplate struct {
+	ID          string        `json:"id"`
+	Name        string        `json:"name"`
+	Description string        `json:"description"`
+	Category    SkillCategory `json:"category"`
+	Agents      []AgentSpec   `json:"agents"`
+	Workflows   []WorkflowSpec `json:"workflows,omitempty"`
+	Author      string        `json:"author"`
+	Price       float64       `json:"price"`
+	Rating      float64       `json:"rating"`
+	Downloads   int64         `json:"downloads"`
+	Tags        []string      `json:"tags,omitempty"`
+	CreatedAt   time.Time     `json:"created_at"`
+	UpdatedAt   time.Time     `json:"updated_at"`
+}
+
+// BuiltinTeamTemplates returns a set of pre-built team templates.
+func BuiltinTeamTemplates() []TeamTemplate {
+	return []TeamTemplate{}
+}
+
 func (s *SkillListing) IsFree() bool {
 	return s.Price == 0
 }

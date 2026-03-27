@@ -48,6 +48,8 @@ type AgentInstance struct {
 	// LightCandidates holds the resolved provider candidates for the light model.
 	// Pre-computed at agent creation to avoid repeated model_list lookups at runtime.
 	LightCandidates []providers.FallbackCandidate
+	// FastMode enables provider-specific fast-path optimizations (e.g. service_tier=priority).
+	FastMode bool
 }
 
 // NewAgentInstance creates an agent instance from config.

@@ -96,7 +96,7 @@ func (o *OpenclawHandler) ExecuteConfigMigration(srcConfigPath, dstConfigPath st
 		return err
 	}
 
-	picoCfg, warnings, err := openclawCfg.ConvertToAI Business HQ(o.opts.SourceHome)
+	picoCfg, warnings, err := openclawCfg.ConvertToAIBusinessHQ(o.opts.SourceHome)
 	if err != nil {
 		return err
 	}

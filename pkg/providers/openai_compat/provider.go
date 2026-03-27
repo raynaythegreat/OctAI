@@ -147,6 +147,12 @@ func (p *Provider) buildRequestBody(
 		}
 	}
 
+	// Fast mode: inject service_tier for provider-specific routing optimizations.
+	// OpenAI uses "flex" (or "auto"), other providers may vary.
+	if fast, _ := options["fast_mode"].(bool); fast {
+		requestBody["service_tier"] = "flex"
+	}
+
 	// Merge extra body fields configured per-provider/model.
 	// These are injected last so they take precedence over defaults.
 	for k, v := range p.extraBody {

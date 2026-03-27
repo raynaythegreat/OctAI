@@ -2,12 +2,10 @@ package api
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 	"time"
 
-	"github.com/raynaythegreat/ai-business-hq/pkg/logger"
 	"github.com/raynaythegreat/ai-business-hq/pkg/tenant"
 )
 

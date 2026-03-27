@@ -1831,6 +1831,9 @@ turnLoop:
 					map[string]any{"agent_id": ts.agent.ID, "thinking_level": string(ts.agent.ThinkingLevel)})
 			}
 		}
+		if ts.agent.FastMode {
+			llmOpts["fast_mode"] = true
+		}
 
 		llmModel := activeModel
 		if al.hooks != nil {
@@ -3430,6 +3433,67 @@ func (al *AgentLoop) buildCommandsRuntime(agent *AgentInstance, opts *processOpt
 			agent.Sessions.SetSummary(opts.SessionKey, "")
 			agent.Sessions.Save(opts.SessionKey)
 			return nil
+		}
+
+		rt.SetThinkingLevel = func(level string) error {
+			agent.ThinkingLevel = parseThinkingLevel(level)
+			return nil
+		}
+
+		rt.ToggleFastMode = func() (bool, error) {
+			agent.FastMode = !agent.FastMode
+			return agent.FastMode, nil
+		}
+
+		rt.SearchMemory = func(query string) (string, error) {
+			ms := NewMemoryStore(agent.Workspace)
+			longTerm := ms.ReadLongTerm()
+			recent := ms.GetRecentDailyNotes(7)
+			combined := longTerm + "\n\n" + recent
+			if strings.TrimSpace(combined) == "" {
+				return "", nil
+			}
+			// Simple keyword filter: return lines containing any query term.
+			terms := strings.Fields(strings.ToLower(query))
+			if len(terms) == 0 {
+				return combined, nil
+			}
+			var matched []string
+			for _, line := range strings.Split(combined, "\n") {
+				lower := strings.ToLower(line)
+				for _, term := range terms {
+					if strings.Contains(lower, term) {
+						matched = append(matched, line)
+						break
+					}
+				}
+			}
+			if len(matched) == 0 {
+				return "", nil
+			}
+			return strings.Join(matched, "\n"), nil
+		}
+
+		rt.ListModels = func() []commands.ModelStatus {
+			cfg := al.GetConfig()
+			if cfg == nil {
+				return nil
+			}
+			var result []commands.ModelStatus
+			for _, m := range cfg.ModelList {
+				// Protocol is the prefix before "/" in the Model field (e.g. "openai" from "openai/gpt-4o").
+				protocol := m.Model
+				if idx := strings.Index(m.Model, "/"); idx >= 0 {
+					protocol = m.Model[:idx]
+				}
+				result = append(result, commands.ModelStatus{
+					Name:      m.ModelName,
+					ModelID:   m.Model,
+					Provider:  protocol,
+					HasAPIKey: m.APIKey() != "",
+				})
+			}
+			return result
 		}
 	}
 	return rt

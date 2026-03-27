@@ -9,7 +9,11 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WorkflowsRouteImport } from './routes/workflows'
+import { Route as TeamsRouteImport } from './routes/teams'
+import { Route as ScheduleRouteImport } from './routes/schedule'
 import { Route as ModelsRouteImport } from './routes/models'
+import { Route as LoopsRouteImport } from './routes/loops'
 import { Route as LogsRouteImport } from './routes/logs'
 import { Route as CredentialsRouteImport } from './routes/credentials'
 import { Route as ConfigRouteImport } from './routes/config'
@@ -21,9 +25,29 @@ import { Route as ChannelsNameRouteImport } from './routes/channels/$name'
 import { Route as AgentToolsRouteImport } from './routes/agent/tools'
 import { Route as AgentSkillsRouteImport } from './routes/agent/skills'
 
+const WorkflowsRoute = WorkflowsRouteImport.update({
+  id: '/workflows',
+  path: '/workflows',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TeamsRoute = TeamsRouteImport.update({
+  id: '/teams',
+  path: '/teams',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ScheduleRoute = ScheduleRouteImport.update({
+  id: '/schedule',
+  path: '/schedule',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ModelsRoute = ModelsRouteImport.update({
   id: '/models',
   path: '/models',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoopsRoute = LoopsRouteImport.update({
+  id: '/loops',
+  path: '/loops',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LogsRoute = LogsRouteImport.update({
@@ -84,7 +108,11 @@ export interface FileRoutesByFullPath {
   '/config': typeof ConfigRouteWithChildren
   '/credentials': typeof CredentialsRoute
   '/logs': typeof LogsRoute
+  '/loops': typeof LoopsRoute
   '/models': typeof ModelsRoute
+  '/schedule': typeof ScheduleRoute
+  '/teams': typeof TeamsRoute
+  '/workflows': typeof WorkflowsRoute
   '/agent/skills': typeof AgentSkillsRoute
   '/agent/tools': typeof AgentToolsRoute
   '/channels/$name': typeof ChannelsNameRoute
@@ -97,7 +125,11 @@ export interface FileRoutesByTo {
   '/config': typeof ConfigRouteWithChildren
   '/credentials': typeof CredentialsRoute
   '/logs': typeof LogsRoute
+  '/loops': typeof LoopsRoute
   '/models': typeof ModelsRoute
+  '/schedule': typeof ScheduleRoute
+  '/teams': typeof TeamsRoute
+  '/workflows': typeof WorkflowsRoute
   '/agent/skills': typeof AgentSkillsRoute
   '/agent/tools': typeof AgentToolsRoute
   '/channels/$name': typeof ChannelsNameRoute
@@ -111,7 +143,11 @@ export interface FileRoutesById {
   '/config': typeof ConfigRouteWithChildren
   '/credentials': typeof CredentialsRoute
   '/logs': typeof LogsRoute
+  '/loops': typeof LoopsRoute
   '/models': typeof ModelsRoute
+  '/schedule': typeof ScheduleRoute
+  '/teams': typeof TeamsRoute
+  '/workflows': typeof WorkflowsRoute
   '/agent/skills': typeof AgentSkillsRoute
   '/agent/tools': typeof AgentToolsRoute
   '/channels/$name': typeof ChannelsNameRoute
@@ -126,7 +162,11 @@ export interface FileRouteTypes {
     | '/config'
     | '/credentials'
     | '/logs'
+    | '/loops'
     | '/models'
+    | '/schedule'
+    | '/teams'
+    | '/workflows'
     | '/agent/skills'
     | '/agent/tools'
     | '/channels/$name'
@@ -139,7 +179,11 @@ export interface FileRouteTypes {
     | '/config'
     | '/credentials'
     | '/logs'
+    | '/loops'
     | '/models'
+    | '/schedule'
+    | '/teams'
+    | '/workflows'
     | '/agent/skills'
     | '/agent/tools'
     | '/channels/$name'
@@ -152,7 +196,11 @@ export interface FileRouteTypes {
     | '/config'
     | '/credentials'
     | '/logs'
+    | '/loops'
     | '/models'
+    | '/schedule'
+    | '/teams'
+    | '/workflows'
     | '/agent/skills'
     | '/agent/tools'
     | '/channels/$name'
@@ -166,16 +214,48 @@ export interface RootRouteChildren {
   ConfigRoute: typeof ConfigRouteWithChildren
   CredentialsRoute: typeof CredentialsRoute
   LogsRoute: typeof LogsRoute
+  LoopsRoute: typeof LoopsRoute
   ModelsRoute: typeof ModelsRoute
+  ScheduleRoute: typeof ScheduleRoute
+  TeamsRoute: typeof TeamsRoute
+  WorkflowsRoute: typeof WorkflowsRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/workflows': {
+      id: '/workflows'
+      path: '/workflows'
+      fullPath: '/workflows'
+      preLoaderRoute: typeof WorkflowsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/teams': {
+      id: '/teams'
+      path: '/teams'
+      fullPath: '/teams'
+      preLoaderRoute: typeof TeamsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/schedule': {
+      id: '/schedule'
+      path: '/schedule'
+      fullPath: '/schedule'
+      preLoaderRoute: typeof ScheduleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/models': {
       id: '/models'
       path: '/models'
       fullPath: '/models'
       preLoaderRoute: typeof ModelsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/loops': {
+      id: '/loops'
+      path: '/loops'
+      fullPath: '/loops'
+      preLoaderRoute: typeof LoopsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/logs': {
@@ -293,7 +373,11 @@ const rootRouteChildren: RootRouteChildren = {
   ConfigRoute: ConfigRouteWithChildren,
   CredentialsRoute: CredentialsRoute,
   LogsRoute: LogsRoute,
+  LoopsRoute: LoopsRoute,
   ModelsRoute: ModelsRoute,
+  ScheduleRoute: ScheduleRoute,
+  TeamsRoute: TeamsRoute,
+  WorkflowsRoute: WorkflowsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

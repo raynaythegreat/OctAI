@@ -1,11 +1,13 @@
 import { IconChevronRight } from "@tabler/icons-react"
 import {
   IconAtom,
+  IconCalendarClock,
   IconChevronsDown,
   IconChevronsUp,
   IconKey,
   IconListDetails,
   IconMessageCircle,
+  IconRefresh,
   IconSettings,
   IconSparkles,
   IconTools,
@@ -134,6 +136,18 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             url: "/agent/tools",
             icon: IconTools,
             translateTitle: true,
+          },
+          {
+            title: "Loops",
+            url: "/loops",
+            icon: IconRefresh,
+            translateTitle: false,
+          },
+          {
+            title: "Schedule",
+            url: "/schedule",
+            icon: IconCalendarClock,
+            translateTitle: false,
           },
         ],
       },

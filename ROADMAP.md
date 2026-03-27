@@ -1,5 +1,5 @@
 
-# AI Business HQ Roadmap
+# OctAi Roadmap
 
 > **Vision**: The all-in-one AI-powered business operations platform — automate operations, enhance productivity, and scale intelligently.
 

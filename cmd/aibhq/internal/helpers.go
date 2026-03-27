@@ -18,7 +18,7 @@ func GetPicoclawHome() string {
 		return home
 	}
 	home, _ := os.UserHomeDir()
-	return filepath.Join(home, pkg.DefaultAI Business HQHome)
+	return filepath.Join(home, pkg.DefaultAIBusinessHQHome)
 }
 
 func GetConfigPath() string {

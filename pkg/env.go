@@ -3,10 +3,10 @@
 package pkg
 
 const (
-	Logo = "🦞"
+	Logo = "🐙"
 	// AppName is the name of the app
-	AppName = "AI Business HQ"
+	AppName = "OctAi"
 
-	DefaultAI Business HQHome = ".aibhq"
+	DefaultAIBusinessHQHome = ".octai"
 	WorkspaceName       = "workspace"
 )

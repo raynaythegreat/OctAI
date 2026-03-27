@@ -1,15 +1,8 @@
 package agent
 
 import (
-	"bufio"
 	"context"
 	"fmt"
-	"io"
-	"os"
-	"path/filepath"
-	"strings"
-
-	"github.com/ergochat/readline"
 
 	"github.com/raynaythegreat/ai-business-hq/cmd/aibhq/internal"
 	"github.com/raynaythegreat/ai-business-hq/pkg/agent"
@@ -73,93 +66,15 @@ func agentCmd(message, sessionKey, model string, debug bool) error {
 		return nil
 	}
 
-	fmt.Printf("%s Interactive mode (Ctrl+C to exit)\n\n", internal.Logo)
-	interactiveMode(agentLoop, sessionKey)
-
-	return nil
+	return interactiveMode(agentLoop, sessionKey, cfg.Agents.Defaults.ModelName)
 }
 
-func interactiveMode(agentLoop *agent.AgentLoop, sessionKey string) {
-	prompt := fmt.Sprintf("%s You: ", internal.Logo)
-
-	rl, err := readline.NewEx(&readline.Config{
-		Prompt:          prompt,
-		HistoryFile:     filepath.Join(os.TempDir(), ".aibhq_history"),
-		HistoryLimit:    100,
-		InterruptPrompt: "^C",
-		EOFPrompt:       "exit",
-	})
-	if err != nil {
-		fmt.Printf("Error initializing readline: %v\n", err)
-		fmt.Println("Falling back to simple input mode...")
-		simpleInteractiveMode(agentLoop, sessionKey)
-		return
-	}
-	defer rl.Close()
-
-	for {
-		line, err := rl.Readline()
-		if err != nil {
-			if err == readline.ErrInterrupt || err == io.EOF {
-				fmt.Println("\nGoodbye!")
-				return
-			}
-			fmt.Printf("Error reading input: %v\n", err)
-			continue
-		}
-
-		input := strings.TrimSpace(line)
-		if input == "" {
-			continue
-		}
-
-		if input == "exit" || input == "quit" {
-			fmt.Println("Goodbye!")
-			return
-		}
-
-		ctx := context.Background()
-		response, err := agentLoop.ProcessDirect(ctx, input, sessionKey)
-		if err != nil {
-			fmt.Printf("Error: %v\n", err)
-			continue
-		}
-
-		fmt.Printf("\n%s %s\n\n", internal.Logo, response)
-	}
+func interactiveMode(agentLoop *agent.AgentLoop, sessionKey string, modelName string) error {
+	ctx := context.Background()
+	ui := newChatUI(modelName, sessionKey, agentLoop)
+	return ui.run(ctx, agentLoop)
 }
 
-func simpleInteractiveMode(agentLoop *agent.AgentLoop, sessionKey string) {
-	reader := bufio.NewReader(os.Stdin)
-	for {
-		fmt.Print(fmt.Sprintf("%s You: ", internal.Logo))
-		line, err := reader.ReadString('\n')
-		if err != nil {
-			if err == io.EOF {
-				fmt.Println("\nGoodbye!")
-				return
-			}
-			fmt.Printf("Error reading input: %v\n", err)
-			continue
-		}
-
-		input := strings.TrimSpace(line)
-		if input == "" {
-			continue
-		}
-
-		if input == "exit" || input == "quit" {
-			fmt.Println("Goodbye!")
-			return
-		}
-
-		ctx := context.Background()
-		response, err := agentLoop.ProcessDirect(ctx, input, sessionKey)
-		if err != nil {
-			fmt.Printf("Error: %v\n", err)
-			continue
-		}
-
-		fmt.Printf("\n%s %s\n\n", internal.Logo, response)
-	}
+func simpleInteractiveMode(agentLoop *agent.AgentLoop, sessionKey string) error {
+	return interactiveMode(agentLoop, sessionKey, "ai-business-hq")
 }

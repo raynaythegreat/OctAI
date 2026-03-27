@@ -1,8 +1,8 @@
-# AI Business HQ Brand Guidelines
+# OctAi Brand Guidelines
 
 ## Brand Overview
 
-AI Business HQ is the centralized platform for AI-powered business operations. We empower organizations to harness artificial intelligence through a unified, professional hub.
+OctAi is the centralized platform for AI-powered business operations. We empower organizations to harness artificial intelligence through a unified, professional hub.
 
 ---
 
@@ -170,7 +170,7 @@ Maintain minimum clear space equal to the height of the "H" in "HQ" around all s
 
 | Term | Usage |
 |------|-------|
-| AI Business HQ | Full product name (first mention) |
+| OctAi | Full product name (first mention) |
 | HQ | Acceptable abbreviation after first use |
 | AI-powered | Hyphenated as adjective |
 | Business intelligence | Two words |

@@ -16,5 +16,10 @@ func BuiltinDefinitions() []Definition {
 		clearCommand(),
 		subagentsCommand(),
 		reloadCommand(),
+		thinkCommand(),
+		fastCommand(),
+		modelInfoCommand(),
+		statusCommand(),
+		memorySearchCommand(),
 	}
 }

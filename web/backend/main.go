@@ -1,3 +1,5 @@
+//go:build ignore
+
 // AI Business HQ Web Console - Web-based chat and management interface
 //
 // Provides a web UI for chatting with AI Business HQ via the Pico Channel WebSocket,
@@ -32,7 +34,7 @@ import (
 )
 
 const (
-	appName = "AI Business HQ"
+	appName = "OctAi"
 
 	logPath   = "logs"
 	panicFile = "launcher_panic.log"
@@ -57,10 +59,10 @@ func main() {
 	console := flag.Bool("console", false, "Console mode, no GUI")
 
 	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, "AI Business HQ Launcher - A web-based configuration editor\n\n")
+		fmt.Fprintf(os.Stderr, "OctAi Launcher - A web-based configuration editor\n\n")
 		fmt.Fprintf(os.Stderr, "Usage: %s [options] [config.json]\n\n", os.Args[0])
 		fmt.Fprintf(os.Stderr, "Arguments:\n")
-		fmt.Fprintf(os.Stderr, "  config.json    Path to the configuration file (default: ~/.aibhq/config.json)\n\n")
+		fmt.Fprintf(os.Stderr, "  config.json    Path to the configuration file (default: ~/.octai/config.json)\n\n")
 		fmt.Fprintf(os.Stderr, "Options:\n")
 		flag.PrintDefaults()
 		fmt.Fprintf(os.Stderr, "\nExamples:\n")
@@ -99,7 +101,7 @@ func main() {
 	}
 
 	logger.InfoC("web", fmt.Sprintf("%s Launcher %s starting...", appName, appVersion))
-	logger.InfoC("web", fmt.Sprintf("AI Business HQ Home: %s", picoHome))
+	logger.InfoC("web", fmt.Sprintf("OctAi Home: %s", picoHome))
 
 	// Set language from command line or auto-detect
 	if *lang != "" {
@@ -118,7 +120,7 @@ func main() {
 	}
 	err = utils.EnsureOnboarded(absPath)
 	if err != nil {
-		logger.Errorf("Warning: Failed to initialize AI Business HQ config automatically: %v", err)
+		logger.Errorf("Warning: Failed to initialize OctAi config automatically: %v", err)
 	}
 
 	var explicitPort bool

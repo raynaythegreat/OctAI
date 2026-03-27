@@ -1,6 +1,6 @@
 //go:build (!darwin && !freebsd) || cgo
 
-package main
+package webconsole
 
 import (
 	"fmt"
@@ -79,9 +79,8 @@ func onReady() {
 		}
 	}()
 
-	if !*noBrowser {
+	if !noBrowserFlag {
 		// Auto-open browser after systray is ready (if not disabled)
-		// Check no-browser flag via environment or pass as parameter if needed
 		if err := openBrowser(); err != nil {
 			logger.Errorf("Warning: Failed to auto-open browser: %v", err)
 		}

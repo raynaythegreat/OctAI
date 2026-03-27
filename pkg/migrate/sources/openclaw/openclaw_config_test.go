@@ -160,7 +160,7 @@ func TestGetProviderConfig(t *testing.T) {
 	}
 }
 
-func TestConvertToAI Business HQ(t *testing.T) {
+func TestConvertToAIBusinessHQ(t *testing.T) {
 	tmpDir := t.TempDir()
 	configPath := filepath.Join(tmpDir, "openclaw.json")
 
@@ -237,7 +237,7 @@ func TestConvertToAI Business HQ(t *testing.T) {
 		t.Fatalf("failed to load config: %v", err)
 	}
 
-	picoCfg, warnings, err := cfg.ConvertToAI Business HQ("")
+	picoCfg, warnings, err := cfg.ConvertToAIBusinessHQ("")
 	if err != nil {
 		t.Fatalf("failed to convert config: %v", err)
 	}
@@ -291,7 +291,7 @@ func TestConvertToAI Business HQ(t *testing.T) {
 }
 
 func TestToStandardConfig_ExecAllowRemoteDefaultsTrue(t *testing.T) {
-	cfg := (&AI Business HQConfig{
+	cfg := (&AIBusinessHQConfig{
 		Tools: ToolsConfig{
 			Exec: ExecConfig{
 				EnableDenyPatterns: true,
@@ -304,7 +304,7 @@ func TestToStandardConfig_ExecAllowRemoteDefaultsTrue(t *testing.T) {
 	}
 }
 
-func TestConvertToAI Business HQWithQQAndDingTalk(t *testing.T) {
+func TestConvertToAIBusinessHQWithQQAndDingTalk(t *testing.T) {
 	tmpDir := t.TempDir()
 	configPath := filepath.Join(tmpDir, "openclaw.json")
 
@@ -350,7 +350,7 @@ func TestConvertToAI Business HQWithQQAndDingTalk(t *testing.T) {
 		t.Fatalf("failed to load config: %v", err)
 	}
 
-	picoCfg, _, err := cfg.ConvertToAI Business HQ("")
+	picoCfg, _, err := cfg.ConvertToAIBusinessHQ("")
 	if err != nil {
 		t.Fatalf("failed to convert config: %v", err)
 	}
@@ -390,7 +390,7 @@ func TestConvertToAI Business HQWithQQAndDingTalk(t *testing.T) {
 	}
 }
 
-func TestConvertToAI Business HQWithMatrix(t *testing.T) {
+func TestConvertToAIBusinessHQWithMatrix(t *testing.T) {
 	tmpDir := t.TempDir()
 	configPath := filepath.Join(tmpDir, "openclaw.json")
 
@@ -416,7 +416,7 @@ func TestConvertToAI Business HQWithMatrix(t *testing.T) {
 		t.Fatalf("failed to load config: %v", err)
 	}
 
-	picoCfg, warnings, err := cfg.ConvertToAI Business HQ("")
+	picoCfg, warnings, err := cfg.ConvertToAIBusinessHQ("")
 	if err != nil {
 		t.Fatalf("failed to convert config: %v", err)
 	}
@@ -445,7 +445,7 @@ func TestConvertToAI Business HQWithMatrix(t *testing.T) {
 	}
 }
 
-func TestConvertToAI Business HQWithMatrixDisabled(t *testing.T) {
+func TestConvertToAIBusinessHQWithMatrixDisabled(t *testing.T) {
 	tmpDir := t.TempDir()
 	configPath := filepath.Join(tmpDir, "openclaw.json")
 
@@ -470,7 +470,7 @@ func TestConvertToAI Business HQWithMatrixDisabled(t *testing.T) {
 		t.Fatalf("failed to load config: %v", err)
 	}
 
-	picoCfg, _, err := cfg.ConvertToAI Business HQ("")
+	picoCfg, _, err := cfg.ConvertToAIBusinessHQ("")
 	if err != nil {
 		t.Fatalf("failed to convert config: %v", err)
 	}
@@ -634,7 +634,7 @@ func TestLoadOpenClawConfigFromDir(t *testing.T) {
 }
 
 func TestToStandardConfig(t *testing.T) {
-	picoCfg := &AI Business HQConfig{
+	picoCfg := &AIBusinessHQConfig{
 		Agents: AgentsConfig{
 			Defaults: AgentDefaults{
 				Provider:  "anthropic",

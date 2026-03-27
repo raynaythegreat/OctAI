@@ -8,6 +8,7 @@ package config
 import (
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/raynaythegreat/ai-business-hq/pkg"
 )
@@ -21,7 +22,7 @@ func DefaultConfig() *Config {
 		homePath = aibhqHome
 	} else {
 		userHome, _ := os.UserHomeDir()
-		homePath = filepath.Join(userHome, pkg.DefaultAI Business HQHome)
+		homePath = filepath.Join(userHome, pkg.DefaultAIBusinessHQHome)
 	}
 	workspacePath := filepath.Join(homePath, pkg.WorkspaceName)
 
@@ -179,6 +180,21 @@ func DefaultConfig() *Config {
 				Model:     "openai/gpt-5.4",
 				APIBase:   "https://api.openai.com/v1",
 			},
+			{
+				ModelName: "gpt-5",
+				Model:     "openai/gpt-5",
+				APIBase:   "https://api.openai.com/v1",
+			},
+			{
+				ModelName: "gpt-5.4-mini",
+				Model:     "openai/gpt-5.4-mini",
+				APIBase:   "https://api.openai.com/v1",
+			},
+			{
+				ModelName: "gpt-5.4-nano",
+				Model:     "openai/gpt-5.4-nano",
+				APIBase:   "https://api.openai.com/v1",
+			},
 
 			// Anthropic Claude - https://console.anthropic.com/settings/keys
 			{
@@ -195,11 +211,6 @@ func DefaultConfig() *Config {
 			},
 
 			// Google Gemini - https://ai.google.dev/
-			{
-				ModelName: "gemini-2.0-flash",
-				Model:     "gemini/gemini-2.0-flash-exp",
-				APIBase:   "https://generativelanguage.googleapis.com/v1beta",
-			},
 
 			// Qwen (通义千问) - https://dashscope.console.aliyun.com/apiKey
 			{
@@ -209,15 +220,10 @@ func DefaultConfig() *Config {
 			},
 
 			// Moonshot (月之暗面) - https://platform.moonshot.cn/console/api-keys
-			{
-				ModelName: "moonshot-v1-8k",
-				Model:     "moonshot/moonshot-v1-8k",
-				APIBase:   "https://api.moonshot.cn/v1",
-			},
 
 			// Groq - https://console.groq.com/keys
 			{
-				ModelName: "llama-3.3-70b",
+				ModelName: "llama-3.3-70b-versatile",
 				Model:     "groq/llama-3.3-70b-versatile",
 				APIBase:   "https://api.groq.com/openai/v1",
 			},
@@ -242,11 +248,6 @@ func DefaultConfig() *Config {
 			},
 
 			// Cerebras - https://inference.cerebras.ai/
-			{
-				ModelName: "cerebras-llama-3.3-70b",
-				Model:     "cerebras/llama-3.3-70b",
-				APIBase:   "https://api.cerebras.ai/v1",
-			},
 
 			// Vivgrid - https://vivgrid.com
 			{
@@ -268,11 +269,6 @@ func DefaultConfig() *Config {
 			},
 
 			// ShengsuanYun (神算云)
-			{
-				ModelName: "deepseek-v3",
-				Model:     "shengsuanyun/deepseek-v3",
-				APIBase:   "https://api.shengsuanyun.com/v1",
-			},
 
 			// Antigravity (Google Cloud Code Assist) - OAuth only
 			{
@@ -351,6 +347,79 @@ func DefaultConfig() *Config {
 				Model:     "azure/my-gpt5-deployment",
 				APIBase:   "https://your-resource.openai.azure.com",
 			},
+
+			// Anthropic family
+			{ModelName: "claude-opus-4-6", Model: "anthropic/claude-opus-4-6", APIBase: "https://api.anthropic.com/v1"},
+			{ModelName: "claude-haiku-4-5", Model: "anthropic/claude-haiku-4-5-20251001", APIBase: "https://api.anthropic.com/v1"},
+			{ModelName: "claude-opus-4-5", Model: "anthropic/claude-opus-4-5", APIBase: "https://api.anthropic.com/v1"},
+			{ModelName: "claude-sonnet-4-5", Model: "anthropic/claude-sonnet-4-5", APIBase: "https://api.anthropic.com/v1"},
+
+			// OpenAI family
+			{ModelName: "o3", Model: "openai/o3", APIBase: "https://api.openai.com/v1"},
+			{ModelName: "o4-mini", Model: "openai/o4-mini", APIBase: "https://api.openai.com/v1"},
+
+			// Groq family
+			{ModelName: "llama-3.1-8b-instant", Model: "groq/llama-3.1-8b-instant", APIBase: "https://api.groq.com/openai/v1"},
+			{ModelName: "llama-4-scout-17b", Model: "groq/meta-llama/llama-4-scout-17b-16e-instruct", APIBase: "https://api.groq.com/openai/v1"},
+			{ModelName: "qwen3-32b", Model: "groq/qwen/qwen3-32b", APIBase: "https://api.groq.com/openai/v1"},
+
+			// Cerebras
+			{ModelName: "cerebras-gpt-oss-120b", Model: "cerebras/gpt-oss-120b", APIBase: "https://api.cerebras.ai/v1"},
+			{ModelName: "cerebras-llama-3.1-8b", Model: "cerebras/llama3.1-8b", APIBase: "https://api.cerebras.ai/v1"},
+
+			// DeepSeek
+			{ModelName: "deepseek-reasoner", Model: "deepseek/deepseek-reasoner", APIBase: "https://api.deepseek.com/v1"},
+
+			// xAI Grok
+			{ModelName: "grok-4-reasoning", Model: "grok/grok-4.20-0309-reasoning", APIBase: "https://api.x.ai/v1"},
+			{ModelName: "grok-4-non-reasoning", Model: "grok/grok-4.20-0309-non-reasoning", APIBase: "https://api.x.ai/v1"},
+			{ModelName: "grok-4-fast", Model: "grok/grok-4-1-fast-reasoning", APIBase: "https://api.x.ai/v1"},
+
+			// Google Gemini (more models)
+			{ModelName: "gemini-2.5-pro", Model: "gemini/gemini-2.5-pro", APIBase: "https://generativelanguage.googleapis.com/v1beta"},
+			{ModelName: "gemini-2.5-flash", Model: "gemini/gemini-2.5-flash", APIBase: "https://generativelanguage.googleapis.com/v1beta"},
+			{ModelName: "gemini-2.5-flash-lite", Model: "gemini/gemini-2.5-flash-lite", APIBase: "https://generativelanguage.googleapis.com/v1beta"},
+			{ModelName: "gemini-3-flash-preview", Model: "gemini/gemini-3-flash-preview", APIBase: "https://generativelanguage.googleapis.com/v1beta"},
+
+			// Mistral AI (more models)
+			{ModelName: "mistral-large", Model: "mistral/mistral-large-latest", APIBase: "https://api.mistral.ai/v1"},
+			{ModelName: "mistral-medium", Model: "mistral/mistral-medium-latest", APIBase: "https://api.mistral.ai/v1"},
+			{ModelName: "codestral", Model: "mistral/codestral-latest", APIBase: "https://api.mistral.ai/v1"},
+			{ModelName: "devstral-small", Model: "mistral/devstral-small-2-25-12", APIBase: "https://api.mistral.ai/v1"},
+
+			// Moonshot / Kimi
+			{ModelName: "kimi-k2-thinking", Model: "moonshot/kimi-k2-thinking", APIBase: "https://api.moonshot.cn/v1"},
+			{ModelName: "kimi-k2-turbo", Model: "moonshot/kimi-k2-turbo-preview", APIBase: "https://api.moonshot.cn/v1"},
+
+			// Together AI
+			{ModelName: "together-llama-4-maverick", Model: "together/meta-llama/Llama-4-Maverick-17B-128E-Instruct", APIBase: "https://api.together.xyz/v1"},
+			{ModelName: "together-qwen3", Model: "together/Qwen/Qwen3-235B-A22B-Instruct-2507-FP8", APIBase: "https://api.together.xyz/v1"},
+			{ModelName: "together-deepseek-r1", Model: "together/deepseek-ai/DeepSeek-R1", APIBase: "https://api.together.xyz/v1"},
+			{ModelName: "together-kimi-k2", Model: "together/moonshotai/Kimi-K2-Instruct", APIBase: "https://api.together.xyz/v1"},
+
+			// Perplexity (web-search augmented)
+			{ModelName: "sonar", Model: "perplexity/sonar", APIBase: "https://api.perplexity.ai"},
+			{ModelName: "sonar-pro", Model: "perplexity/sonar-pro", APIBase: "https://api.perplexity.ai"},
+			{ModelName: "sonar-reasoning", Model: "perplexity/sonar-reasoning", APIBase: "https://api.perplexity.ai"},
+			{ModelName: "sonar-reasoning-pro", Model: "perplexity/sonar-reasoning-pro", APIBase: "https://api.perplexity.ai"},
+
+			// Ollama (more common models)
+			{ModelName: "llama4", Model: "ollama/llama4", APIBase: "http://localhost:11434/v1"},
+			{ModelName: "llama3.2", Model: "ollama/llama3.2", APIBase: "http://localhost:11434/v1"},
+			{ModelName: "llama3.1", Model: "ollama/llama3.1", APIBase: "http://localhost:11434/v1"},
+			{ModelName: "qwen3", Model: "ollama/qwen3", APIBase: "http://localhost:11434/v1"},
+			{ModelName: "qwen2.5", Model: "ollama/qwen2.5", APIBase: "http://localhost:11434/v1"},
+			{ModelName: "mistral", Model: "ollama/mistral", APIBase: "http://localhost:11434/v1"},
+			{ModelName: "codellama", Model: "ollama/codellama", APIBase: "http://localhost:11434/v1"},
+			{ModelName: "phi3", Model: "ollama/phi3", APIBase: "http://localhost:11434/v1"},
+			{ModelName: "gemma2", Model: "ollama/gemma2", APIBase: "http://localhost:11434/v1"},
+
+			// OpenRouter (more specific models)
+			{ModelName: "openrouter-claude-sonnet", Model: "openrouter/anthropic/claude-sonnet-4-6", APIBase: "https://openrouter.ai/api/v1"},
+			{ModelName: "openrouter-deepseek-v3", Model: "openrouter/deepseek/deepseek-chat", APIBase: "https://openrouter.ai/api/v1"},
+
+			// LiteLLM proxy
+			{ModelName: "litellm-auto", Model: "litellm/auto", APIBase: "http://localhost:4000/v1"},
 		},
 		Gateway: GatewayConfig{
 			Host:      "127.0.0.1",
@@ -525,4 +594,17 @@ func DefaultConfig() *Config {
 			Skills:    &SkillsSecurity{},
 		},
 	}
+}
+
+// ModelNamesForProvider returns the ordered list of model names from DefaultModelConfigs
+// whose Model field starts with the given schemePrefix (e.g. "openai", "gemini").
+func ModelNamesForProvider(schemePrefix string) []string {
+	var names []string
+	prefix := schemePrefix + "/"
+	for _, m := range DefaultConfig().ModelList {
+		if strings.HasPrefix(m.Model, prefix) {
+			names = append(names, m.ModelName)
+		}
+	}
+	return names
 }

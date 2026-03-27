@@ -114,7 +114,6 @@ func (h *Handler) handleListOrganizations(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	svc := h.getTenantService()
 	store := h.tenantStore
 
 	memStore, ok := store.(*tenant.MemoryTenantStore)

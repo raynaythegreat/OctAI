@@ -88,6 +88,9 @@ func (p *Provider) Chat(
 			option.WithHeader("anthropic-beta", anthropicBetaHeader),
 		)
 	}
+	if fast, _ := options["fast_mode"].(bool); fast {
+		opts = append(opts, option.WithJSONSet("service_tier", "priority"))
+	}
 
 	params, err := buildParams(messages, tools, model, options)
 	if err != nil {

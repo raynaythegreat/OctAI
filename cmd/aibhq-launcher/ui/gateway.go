@@ -162,27 +162,31 @@ func stopGateway() error {
 func (a *App) newGatewayPage() tview.Primitive {
 	flex := tview.NewFlex().SetDirection(tview.FlexRow)
 	flex.SetBorder(true).
-		SetTitle(" [#00f0ff::b] GATEWAY MANAGEMENT ").
-		SetTitleColor(tcell.NewHexColor(0x00f0ff)).
-		SetBorderColor(tcell.NewHexColor(0x00f0ff))
-	flex.SetBackgroundColor(tcell.NewHexColor(0x050510))
+		SetTitle(" [#A855F7::b] GATEWAY MANAGEMENT ").
+		SetTitleColor(tcell.NewHexColor(0xA855F7)).
+		SetBorderColor(tcell.NewHexColor(0x2D1B4E))
+	flex.SetBackgroundColor(tcell.NewHexColor(0x0A0A12))
 
 	statusTV := tview.NewTextView().
 		SetDynamicColors(true).
 		SetTextAlign(tview.AlignCenter).
 		SetText("Checking status...")
-	statusTV.SetBackgroundColor(tcell.NewHexColor(0x050510))
+	statusTV.SetBackgroundColor(tcell.NewHexColor(0x0A0A12))
 
 	var updateStatus func()
 
 	// 使用List作为按钮，保证显示和交互正常
 	buttons := tview.NewList()
-	buttons.SetBackgroundColor(tcell.NewHexColor(0x050510))
-	buttons.SetMainTextColor(tcell.ColorWhite)
-	buttons.SetSelectedBackgroundColor(tcell.NewHexColor(0xff00ff))
-	buttons.SetSelectedTextColor(tcell.ColorBlack)
+	buttons.SetBackgroundColor(tcell.NewHexColor(0x0A0A12))
+	buttons.SetMainTextColor(tcell.NewHexColor(0xA855F7))
+	buttons.SetSelectedBackgroundColor(tcell.NewHexColor(0x1E0F3D))
+	buttons.SetSelectedTextColor(tcell.NewHexColor(0xA855F7))
 
-	buttons.AddItem(" [lime]START[white]   ", "", 0, func() {
+	buttons.AddItem(" [#34D399]START[#E8E0F0]   ", "", 0, func() {
+		if a.currentMode == ModePlan {
+			a.showError("[#A855F7::b]PLAN MODE[-]\n\nSwitch to [#F87171::b]BUILD[-] mode (Tab) to start/stop the gateway.")
+			return
+		}
 		if !getGatewayStatus().running {
 			err := startGateway()
 			if err != nil {
@@ -191,7 +195,11 @@ func (a *App) newGatewayPage() tview.Primitive {
 			updateStatus()
 		}
 	})
-	buttons.AddItem(" [red]STOP[white]    ", "", 0, func() {
+	buttons.AddItem(" [#F87171]STOP[#E8E0F0]    ", "", 0, func() {
+		if a.currentMode == ModePlan {
+			a.showError("[#A855F7::b]PLAN MODE[-]\n\nSwitch to [#F87171::b]BUILD[-] mode (Tab) to start/stop the gateway.")
+			return
+		}
 		if getGatewayStatus().running {
 			err := stopGateway()
 			if err != nil {
@@ -217,13 +225,13 @@ func (a *App) newGatewayPage() tview.Primitive {
 	updateStatus = func() {
 		status := getGatewayStatus()
 		if status.running {
-			statusTV.SetText(fmt.Sprintf("[#39ff14::b]GATEWAY RUNNING[-]\n\nPID: %d", status.pid))
-			buttons.SetItemText(0, " [gray]START[white]   ", "")
-			buttons.SetItemText(1, " [red]STOP[white]    ", "")
+			statusTV.SetText(fmt.Sprintf("[#34D399::b]GATEWAY RUNNING[-]\n\nPID: %d", status.pid))
+			buttons.SetItemText(0, " [#7B6F8E]START[#E8E0F0]   ", "")
+			buttons.SetItemText(1, " [#F87171]STOP[#E8E0F0]    ", "")
 		} else {
-			statusTV.SetText("[#ff2a2a::b]GATEWAY STOPPED[-]\n\nPID: N/A")
-			buttons.SetItemText(0, " [lime]START[white]   ", "")
-			buttons.SetItemText(1, " [gray]STOP[white]    ", "")
+			statusTV.SetText("[#F87171::b]GATEWAY STOPPED[-]\n\nPID: N/A")
+			buttons.SetItemText(0, " [#34D399]START[#E8E0F0]   ", "")
+			buttons.SetItemText(1, " [#7B6F8E]STOP[#E8E0F0]    ", "")
 		}
 	}
 
@@ -257,5 +265,5 @@ func (a *App) newGatewayPage() tview.Primitive {
 
 	a.pageRefreshFns["gateway"] = updateStatus
 
-	return a.buildShell("gateway", flex, " [#39ff14]Enter:[-] select  [#ff2a2a]ESC:[-] back ")
+	return a.buildShell("gateway", flex, " [#7B6F8E]Enter:[-] select  [#F87171]ESC:[-] back ")
 }

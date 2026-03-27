@@ -191,9 +191,24 @@ func (c *Config) MarshalJSON() ([]byte, error) {
 	return json.Marshal(aux)
 }
 
+// TeamConfig defines a named group of agents led by an orchestrator.
+// The orchestrator delegates subtasks to member agents by role or ID.
+type TeamConfig struct {
+	ID             string   `json:"id"`
+	Name           string   `json:"name,omitempty"`
+	OrchestratorID string   `json:"orchestrator_id"`
+	MemberIDs      []string `json:"member_ids,omitempty"`
+	SharedKBPath   string   `json:"shared_kb_path,omitempty"`
+	// TokenBudget is the maximum number of tokens the entire team may consume
+	// across all agents for a single request. 0 means no limit.
+	TokenBudget   int `json:"token_budget,omitempty"`
+	MaxConcurrent int `json:"max_concurrent,omitempty"`
+}
+
 type AgentsConfig struct {
 	Defaults AgentDefaults `json:"defaults"`
 	List     []AgentConfig `json:"list,omitempty"`
+	Teams    []TeamConfig  `json:"teams,omitempty"`
 }
 
 // AgentModelConfig supports both string and structured model config.
@@ -235,14 +250,51 @@ func (m AgentModelConfig) MarshalJSON() ([]byte, error) {
 	return json.Marshal(raw{Primary: m.Primary, Fallbacks: m.Fallbacks})
 }
 
+// AgentHookConfig configures a lifecycle hook for the agent loop (shell script or HTTP webhook).
+type AgentHookConfig struct {
+	Event   string            `json:"event"`
+	Type    string            `json:"type"`
+	Command string            `json:"command,omitempty"`
+	URL     string            `json:"url,omitempty"`
+	Timeout int               `json:"timeout,omitempty"`
+	Match   map[string]string `json:"match,omitempty"`
+}
+
+// AgentAutoModeConfig configures the auto mode safety classifier.
+type AgentAutoModeConfig struct {
+	Enabled         bool     `json:"enabled,omitempty"`
+	Sensitivity     string   `json:"sensitivity,omitempty"` // strict|balanced|permissive
+	BlockedPatterns []string `json:"blocked_patterns,omitempty"`
+	AllowedPatterns []string `json:"allowed_patterns,omitempty"`
+}
+
+// AgentBudgetConfig controls spending limits for the agent.
+type AgentBudgetConfig struct {
+	MaxBudgetUSD    float64 `json:"max_budget_usd,omitempty"`
+	MaxTurns        int     `json:"max_turns,omitempty"`
+	MaxInputTokens  int     `json:"max_input_tokens,omitempty"`
+	MaxOutputTokens int     `json:"max_output_tokens,omitempty"`
+	WarnAtPercent   int     `json:"warn_at_percent,omitempty"`
+}
+
 type AgentConfig struct {
-	ID        string            `json:"id"`
-	Default   bool              `json:"default,omitempty"`
-	Name      string            `json:"name,omitempty"`
-	Workspace string            `json:"workspace,omitempty"`
-	Model     *AgentModelConfig `json:"model,omitempty"`
-	Skills    []string          `json:"skills,omitempty"`
-	Subagents *SubagentsConfig  `json:"subagents,omitempty"`
+	ID           string               `json:"id"`
+	Default      bool                 `json:"default,omitempty"`
+	Name         string               `json:"name,omitempty"`
+	// Role specifies the agent's specialization within a team.
+	// Built-in values: orchestrator, sales, support, research, content, analytics, admin, custom.
+	Role         string               `json:"role,omitempty"`
+	// TeamID links this agent to a TeamConfig by ID.
+	TeamID       string               `json:"team_id,omitempty"`
+	Workspace    string               `json:"workspace,omitempty"`
+	Model        *AgentModelConfig    `json:"model,omitempty"`
+	Skills       []string             `json:"skills,omitempty"`
+	Subagents    *SubagentsConfig     `json:"subagents,omitempty"`
+	Hooks        []AgentHookConfig    `json:"hooks,omitempty"`
+	AutoMode     *AgentAutoModeConfig `json:"auto_mode,omitempty"` // pointer so nil means "use defaults"
+	Budget       *AgentBudgetConfig   `json:"budget,omitempty"`
+	LLMStreaming *bool                `json:"llm_streaming,omitempty"`
+	Session      *AgentSessionConfig  `json:"session,omitempty"` // pointer so nil means "use defaults"
 }
 
 type SubagentsConfig struct {
@@ -299,26 +351,46 @@ type ToolFeedbackConfig struct {
 	MaxArgsLength int  `json:"max_args_length" env:"PICOCLAW_AGENTS_DEFAULTS_TOOL_FEEDBACK_MAX_ARGS_LENGTH"`
 }
 
+// AgentSessionConfig controls agent session lifecycle management.
+// Inspired by OpenClaw session management patterns.
+type AgentSessionConfig struct {
+	// ResetOnHour is the hour (0-23 UTC) to auto-reset sessions daily. -1 = disabled.
+	ResetOnHour int `json:"reset_on_hour,omitempty"`
+	// IdleTimeoutMinutes resets a session after N minutes of inactivity. 0 = disabled.
+	IdleTimeoutMinutes int `json:"idle_timeout_minutes,omitempty"`
+	// MaxAgeDays prunes sessions older than N days. 0 = disabled (default 30).
+	MaxAgeDays int `json:"max_age_days,omitempty"`
+	// MaxEntries caps conversation history to N entries per session.
+	MaxEntries int `json:"max_entries,omitempty"`
+	// IsolationMode controls session scoping: "none", "per-user", "per-channel".
+	IsolationMode string `json:"isolation_mode,omitempty"`
+}
+
 type AgentDefaults struct {
-	Workspace                 string             `json:"workspace"                       env:"PICOCLAW_AGENTS_DEFAULTS_WORKSPACE"`
-	RestrictToWorkspace       bool               `json:"restrict_to_workspace"           env:"PICOCLAW_AGENTS_DEFAULTS_RESTRICT_TO_WORKSPACE"`
-	AllowReadOutsideWorkspace bool               `json:"allow_read_outside_workspace"    env:"PICOCLAW_AGENTS_DEFAULTS_ALLOW_READ_OUTSIDE_WORKSPACE"`
-	Provider                  string             `json:"provider"                        env:"PICOCLAW_AGENTS_DEFAULTS_PROVIDER"`
-	ModelName                 string             `json:"model_name"                      env:"PICOCLAW_AGENTS_DEFAULTS_MODEL_NAME"`
-	ModelFallbacks            []string           `json:"model_fallbacks,omitempty"`
-	ImageModel                string             `json:"image_model,omitempty"           env:"PICOCLAW_AGENTS_DEFAULTS_IMAGE_MODEL"`
-	ImageModelFallbacks       []string           `json:"image_model_fallbacks,omitempty"`
-	MaxTokens                 int                `json:"max_tokens"                      env:"PICOCLAW_AGENTS_DEFAULTS_MAX_TOKENS"`
-	ContextWindow             int                `json:"context_window,omitempty"        env:"PICOCLAW_AGENTS_DEFAULTS_CONTEXT_WINDOW"`
-	Temperature               *float64           `json:"temperature,omitempty"           env:"PICOCLAW_AGENTS_DEFAULTS_TEMPERATURE"`
-	MaxToolIterations         int                `json:"max_tool_iterations"             env:"PICOCLAW_AGENTS_DEFAULTS_MAX_TOOL_ITERATIONS"`
-	SummarizeMessageThreshold int                `json:"summarize_message_threshold"     env:"PICOCLAW_AGENTS_DEFAULTS_SUMMARIZE_MESSAGE_THRESHOLD"`
-	SummarizeTokenPercent     int                `json:"summarize_token_percent"         env:"PICOCLAW_AGENTS_DEFAULTS_SUMMARIZE_TOKEN_PERCENT"`
-	MaxMediaSize              int                `json:"max_media_size,omitempty"        env:"PICOCLAW_AGENTS_DEFAULTS_MAX_MEDIA_SIZE"`
-	Routing                   *RoutingConfig     `json:"routing,omitempty"`
-	SteeringMode              string             `json:"steering_mode,omitempty"         env:"PICOCLAW_AGENTS_DEFAULTS_STEERING_MODE"` // "one-at-a-time" (default) or "all"
-	SubTurn                   SubTurnConfig      `json:"subturn"                                                                                     envPrefix:"PICOCLAW_AGENTS_DEFAULTS_SUBTURN_"`
-	ToolFeedback              ToolFeedbackConfig `json:"tool_feedback,omitempty"`
+	Workspace                 string              `json:"workspace"                       env:"PICOCLAW_AGENTS_DEFAULTS_WORKSPACE"`
+	RestrictToWorkspace       bool                `json:"restrict_to_workspace"           env:"PICOCLAW_AGENTS_DEFAULTS_RESTRICT_TO_WORKSPACE"`
+	AllowReadOutsideWorkspace bool                `json:"allow_read_outside_workspace"    env:"PICOCLAW_AGENTS_DEFAULTS_ALLOW_READ_OUTSIDE_WORKSPACE"`
+	Provider                  string              `json:"provider"                        env:"PICOCLAW_AGENTS_DEFAULTS_PROVIDER"`
+	ModelName                 string              `json:"model_name"                      env:"PICOCLAW_AGENTS_DEFAULTS_MODEL_NAME"`
+	ModelFallbacks            []string            `json:"model_fallbacks,omitempty"`
+	ImageModel                string              `json:"image_model,omitempty"           env:"PICOCLAW_AGENTS_DEFAULTS_IMAGE_MODEL"`
+	ImageModelFallbacks       []string            `json:"image_model_fallbacks,omitempty"`
+	MaxTokens                 int                 `json:"max_tokens"                      env:"PICOCLAW_AGENTS_DEFAULTS_MAX_TOKENS"`
+	ContextWindow             int                 `json:"context_window,omitempty"        env:"PICOCLAW_AGENTS_DEFAULTS_CONTEXT_WINDOW"`
+	Temperature               *float64            `json:"temperature,omitempty"           env:"PICOCLAW_AGENTS_DEFAULTS_TEMPERATURE"`
+	MaxToolIterations         int                 `json:"max_tool_iterations"             env:"PICOCLAW_AGENTS_DEFAULTS_MAX_TOOL_ITERATIONS"`
+	SummarizeMessageThreshold int                 `json:"summarize_message_threshold"     env:"PICOCLAW_AGENTS_DEFAULTS_SUMMARIZE_MESSAGE_THRESHOLD"`
+	SummarizeTokenPercent     int                 `json:"summarize_token_percent"         env:"PICOCLAW_AGENTS_DEFAULTS_SUMMARIZE_TOKEN_PERCENT"`
+	MaxMediaSize              int                 `json:"max_media_size,omitempty"        env:"PICOCLAW_AGENTS_DEFAULTS_MAX_MEDIA_SIZE"`
+	Routing                   *RoutingConfig      `json:"routing,omitempty"`
+	SteeringMode              string              `json:"steering_mode,omitempty"         env:"PICOCLAW_AGENTS_DEFAULTS_STEERING_MODE"` // "one-at-a-time" (default) or "all"
+	SubTurn                   SubTurnConfig       `json:"subturn"                                                                                      envPrefix:"PICOCLAW_AGENTS_DEFAULTS_SUBTURN_"`
+	ToolFeedback              ToolFeedbackConfig  `json:"tool_feedback,omitempty"`
+	Hooks                     []AgentHookConfig   `json:"hooks,omitempty"`
+	AutoMode                  AgentAutoModeConfig `json:"auto_mode,omitempty"`
+	Budget                    AgentBudgetConfig   `json:"budget,omitempty"`
+	LLMStreaming               bool               `json:"llm_streaming,omitempty"`
+	Session                   AgentSessionConfig  `json:"session,omitempty"`
 }
 
 const DefaultMaxMediaSize = 20 * 1024 * 1024 // 20 MB
@@ -1385,7 +1457,7 @@ func LoadConfig(path string) (*Config, error) {
 		if aibhqHome := os.Getenv(EnvHome); aibhqHome != "" {
 			homePath = aibhqHome
 		} else if homePath != "" {
-			homePath = filepath.Join(homePath, pkg.DefaultAI Business HQHome)
+			homePath = filepath.Join(homePath, pkg.DefaultAIBusinessHQHome)
 		}
 		cfg.Agents.Defaults.Workspace = filepath.Join(homePath, pkg.WorkspaceName)
 	}

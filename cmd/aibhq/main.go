@@ -17,17 +17,21 @@ import (
 	"github.com/raynaythegreat/ai-business-hq/cmd/aibhq/internal/auth"
 	"github.com/raynaythegreat/ai-business-hq/cmd/aibhq/internal/cron"
 	"github.com/raynaythegreat/ai-business-hq/cmd/aibhq/internal/gateway"
+	"github.com/raynaythegreat/ai-business-hq/cmd/aibhq/internal/loop"
 	"github.com/raynaythegreat/ai-business-hq/cmd/aibhq/internal/migrate"
 	"github.com/raynaythegreat/ai-business-hq/cmd/aibhq/internal/model"
+	"github.com/raynaythegreat/ai-business-hq/cmd/aibhq/internal/models"
 	"github.com/raynaythegreat/ai-business-hq/cmd/aibhq/internal/onboard"
 	"github.com/raynaythegreat/ai-business-hq/cmd/aibhq/internal/skills"
 	"github.com/raynaythegreat/ai-business-hq/cmd/aibhq/internal/status"
+	"github.com/raynaythegreat/ai-business-hq/cmd/aibhq/internal/tui"
 	"github.com/raynaythegreat/ai-business-hq/cmd/aibhq/internal/version"
+	"github.com/raynaythegreat/ai-business-hq/cmd/aibhq/internal/web"
 	"github.com/raynaythegreat/ai-business-hq/pkg/config"
 )
 
 func NewPicoclawCommand() *cobra.Command {
-	short := fmt.Sprintf("%s aibhq - Personal AI Assistant v%s\n\n", internal.Logo, config.GetVersion())
+	short := fmt.Sprintf("%s OctAi - Personal AI Assistant v%s\n\n", internal.Logo, config.GetVersion())
 
 	cmd := &cobra.Command{
 		Use:     "aibhq",
@@ -42,9 +46,13 @@ func NewPicoclawCommand() *cobra.Command {
 		gateway.NewGatewayCommand(),
 		status.NewStatusCommand(),
 		cron.NewCronCommand(),
+		loop.NewLoopCommand(),
 		migrate.NewMigrateCommand(),
 		skills.NewSkillsCommand(),
 		model.NewModelCommand(),
+		models.NewModelsCommand(),
+		web.NewWebCommand(),
+		tui.NewTUICommand(),
 		version.NewVersionCommand(),
 	)
 
@@ -52,20 +60,20 @@ func NewPicoclawCommand() *cobra.Command {
 }
 
 const (
-	colorBlue = "\033[1;38;2;62;93;185m"
-	colorRed  = "\033[1;38;2;213;70;70m"
-	banner    = "\r\n" +
-		colorBlue + "██████╗ ██╗ ██████╗ ██████╗ " + colorRed + " ██████╗██╗      █████╗ ██╗    ██╗\n" +
-		colorBlue + "██╔══██╗██║██╔════╝██╔═══██╗" + colorRed + "██╔════╝██║     ██╔══██╗██║    ██║\n" +
-		colorBlue + "██████╔╝██║██║     ██║   ██║" + colorRed + "██║     ██║     ███████║██║ █╗ ██║\n" +
-		colorBlue + "██╔═══╝ ██║██║     ██║   ██║" + colorRed + "██║     ██║     ██╔══██║██║███╗██║\n" +
-		colorBlue + "██║     ██║╚██████╗╚██████╔╝" + colorRed + "╚██████╗███████╗██║  ██║╚███╔███╔╝\n" +
-		colorBlue + "╚═╝     ╚═╝ ╚═════╝ ╚═════╝ " + colorRed + " ╚═════╝╚══════╝╚═╝  ╚═╝ ╚══╝╚══╝\n " +
+	colorPurple = "\033[1;38;2;168;85;247m"
+	banner      = "\r\n" +
+		colorPurple + " ██████╗  ██████╗████████╗ █████╗ ██╗\n" +
+		colorPurple + "██╔═══██╗██╔════╝╚══██╔══╝██╔══██╗██║\n" +
+		colorPurple + "██║   ██║██║        ██║   ███████║██║\n" +
+		colorPurple + "╚██████╔╝╚██████╗   ██║   ██╔══██║██║\n" +
+		colorPurple + " ╚═════╝  ╚═════╝   ╚═╝   ╚═╝  ╚═╝╚═╝\n" +
 		"\033[0m\r\n"
 )
 
 func main() {
-	fmt.Printf("%s", banner)
+	if len(os.Args) < 2 || os.Args[1] != "agent" {
+		fmt.Printf("%s", banner)
+	}
 	cmd := NewPicoclawCommand()
 	if err := cmd.Execute(); err != nil {
 		os.Exit(1)

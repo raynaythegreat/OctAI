@@ -1,6 +1,6 @@
 <div align="center">
 
-<h1>AI Business HQ</h1>
+<h1>OctAi</h1>
 
 <h3>The All-in-One AI-Powered Business Operations Platform</h3>
 
@@ -16,9 +16,9 @@
 
 ---
 
-## What is AI Business HQ?
+## What is OctAi?
 
-**AI Business HQ** is a comprehensive, AI-powered business operations platform designed to streamline and automate every aspect of your business. Built on a lightweight Go foundation, it brings enterprise-grade AI capabilities to businesses of all sizes.
+**OctAi** is a comprehensive, AI-powered business operations platform designed to streamline and automate every aspect of your business. Built on a lightweight Go foundation, it brings enterprise-grade AI capabilities to businesses of all sizes.
 
 ### Core Capabilities
 
@@ -31,9 +31,9 @@
 - **Voice & Vision** - Audio transcription and image understanding capabilities
 - **Web Dashboard** - Modern React-based launcher and management interface
 
-### Why AI Business HQ?
+### Why OctAi?
 
-| Feature | AI Business HQ | Traditional Solutions |
+| Feature | OctAi | Traditional Solutions |
 |---------|---------------|----------------------|
 | Memory Usage | <20MB RAM | 500MB+ |
 | Boot Time | <1 second | 30+ seconds |
@@ -173,4 +173,4 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 ## Acknowledgments
 
-AI Business HQ is built on the foundation of [AI Business HQ](https://github.com/raynaythegreat/ai-business-hq) by [Sipeed](https://sipeed.com), reimagined as a comprehensive business operations platform.
+OctAi is built on the foundation of [OctAi](https://github.com/raynaythegreat/ai-business-hq) by [Sipeed](https://sipeed.com), reimagined as a comprehensive business operations platform.

@@ -1,4 +1,4 @@
-# AI Business HQ Marketing Copy
+# OctAi Marketing Copy
 
 ## Tagline Options
 
@@ -25,19 +25,19 @@
 ## Short Description (1 Sentence)
 
 **Option A:**
-AI Business HQ is the unified platform that centralizes your AI tools, workflows, and operations into a single, intelligent command center.
+OctAi is the unified platform that centralizes your AI tools, workflows, and operations into a single, intelligent command center.
 
 **Option B:**
-Centralize, automate, and scale your AI operations with AI Business HQ—the command center for intelligent business.
+Centralize, automate, and scale your AI operations with OctAi—the command center for intelligent business.
 
 **Recommended:**
-> **AI Business HQ is the unified platform that centralizes your AI tools, workflows, and operations into a single, intelligent command center.**
+> **OctAi is the unified platform that centralizes your AI tools, workflows, and operations into a single, intelligent command center.**
 
 ---
 
 ## Medium Description (1 Paragraph)
 
-AI Business HQ transforms how organizations leverage artificial intelligence by consolidating scattered AI tools and workflows into one powerful command center. Built for teams that need to scale AI operations without complexity, our platform provides unified access to multiple AI models, automated workflow orchestration, and comprehensive observability—all through an intuitive interface designed for both technical and business users. From prototyping to production, AI Business HQ streamlines the entire AI lifecycle, enabling faster deployment, better governance, and measurable business outcomes.
+OctAi transforms how organizations leverage artificial intelligence by consolidating scattered AI tools and workflows into one powerful command center. Built for teams that need to scale AI operations without complexity, our platform provides unified access to multiple AI models, automated workflow orchestration, and comprehensive observability—all through an intuitive interface designed for both technical and business users. From prototyping to production, OctAi streamlines the entire AI lifecycle, enabling faster deployment, better governance, and measurable business outcomes.
 
 ---
 
@@ -130,7 +130,7 @@ Organize projects, share resources, and collaborate in real-time. Granular permi
 - "Built for teams that ship"
 
 ### Testimonial Structure
-"[Job Title] at [Company] reduced [metric] by [percentage] using AI Business HQ to [specific action]."
+"[Job Title] at [Company] reduced [metric] by [percentage] using OctAi to [specific action]."
 
 ---
 
@@ -138,12 +138,12 @@ Organize projects, share resources, and collaborate in real-time. Granular permi
 
 ### Page Title (60 characters max)
 ```
-AI Business HQ | Central Command for AI Operations
+OctAi | Central Command for AI Operations
 ```
 
 ### Meta Description (160 characters max)
 ```
-Centralize your AI tools, automate workflows, and scale operations with AI Business HQ. The unified platform for intelligent business. Start free today.
+Centralize your AI tools, automate workflows, and scale operations with OctAi. The unified platform for intelligent business. Start free today.
 ```
 
 ### H1 Options
@@ -158,7 +158,7 @@ Centralize your AI tools, automate workflows, and scale operations with AI Busin
 ### Primary CTAs
 - "Start Free Trial"
 - "Get Started"
-- "Try AI Business HQ Free"
+- "Try OctAi Free"
 
 ### Secondary CTAs
 - "Schedule Demo"
@@ -176,32 +176,32 @@ Centralize your AI tools, automate workflows, and scale operations with AI Busin
 ## Email Subject Line Options
 
 ### Introduction Emails
-- "Meet AI Business HQ: Your new AI command center"
+- "Meet OctAi: Your new AI command center"
 - "One platform for all your AI operations"
-- "See how teams are scaling AI with AI Business HQ"
+- "See how teams are scaling AI with OctAi"
 
 ### Feature Announcements
-- "New in AI Business HQ: [Feature Name]"
+- "New in OctAi: [Feature Name]"
 - "[Feature Name] is here—here's what it means for you"
 - "Big update: We've added [Feature Name]"
 
 ### Re-engagement
 - "Your AI workflows miss you"
-- "5 things you can do with AI Business HQ today"
-- "Quick wins with AI Business HQ"
+- "5 things you can do with OctAi today"
+- "Quick wins with OctAi"
 
 ---
 
 ## Product Descriptions by Channel
 
 ### GitHub README
-AI Business HQ is an open-source platform for centralizing AI operations. Manage models, automate workflows, and scale AI across your organization with a unified command center.
+OctAi is an open-source platform for centralizing AI operations. Manage models, automate workflows, and scale AI across your organization with a unified command center.
 
 ### Product Hunt
 The command center for AI operations. Unify your AI tools, automate workflows, and scale intelligently—all in one platform built for modern teams.
 
 ### LinkedIn
-AI Business HQ helps organizations centralize their AI operations. From prototyping to production, we provide the tools to manage, monitor, and scale AI across the enterprise.
+OctAi helps organizations centralize their AI operations. From prototyping to production, we provide the tools to manage, monitor, and scale AI across the enterprise.
 
 ### Twitter/X
 Central command for AI operations. One platform. All your AI tools. ⚡

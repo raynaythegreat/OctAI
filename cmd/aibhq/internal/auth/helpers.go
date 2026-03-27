@@ -21,6 +21,14 @@ const (
 	defaultAnthropicModel = "claude-sonnet-4.6"
 )
 
+// LoginProvider is the public entry point for wizard-driven OAuth login.
+// provider is the provider name (e.g. "openai", "anthropic"), useDeviceCode
+// selects the device-code flow over the browser flow, and isOAuth is always
+// true when called from the wizard (kept for API symmetry).
+func LoginProvider(provider string, useDeviceCode bool, isOAuth bool) error {
+	return authLoginCmd(provider, useDeviceCode, isOAuth)
+}
+
 func authLoginCmd(provider string, useDeviceCode bool, useOauth bool) error {
 	switch provider {
 	case "openai":

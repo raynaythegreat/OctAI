@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"sync"
 
+	"github.com/raynaythegreat/ai-business-hq/pkg/agent"
 	"github.com/raynaythegreat/ai-business-hq/pkg/marketplace"
 	"github.com/raynaythegreat/ai-business-hq/pkg/tenant"
 	"github.com/raynaythegreat/ai-business-hq/web/backend/launcherconfig"
@@ -28,6 +29,13 @@ type Handler struct {
 	marketplaceStore     marketplace.MarketplaceStore
 	analyticsCache       map[string]interface{}
 	membershipIDs        map[string]string
+	auditCache           map[string]interface{}
+	complianceHandler    *ComplianceHandler
+	ssoMu                sync.Mutex
+	ssoFlows             map[string]*ssoFlow
+	ssoStates            map[string]string
+	loopSched            *agent.LoopScheduler
+	loopSchedOnce        sync.Once
 }
 
 func NewHandler(configPath string) *Handler {
@@ -40,6 +48,9 @@ func NewHandler(configPath string) *Handler {
 		wecomFlows:     make(map[string]*wecomFlow),
 		analyticsCache: make(map[string]interface{}),
 		membershipIDs:  make(map[string]string),
+		auditCache:     make(map[string]interface{}),
+		ssoFlows:       make(map[string]*ssoFlow),
+		ssoStates:      make(map[string]string),
 	}
 	for _, fn := range postInitFuncs {
 		fn(h)
@@ -73,6 +84,9 @@ func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
 	h.registerSubscriptionRoutes(mux)
 	h.registerAnalyticsRoutes(mux)
 	h.registerMarketplaceRoutes(mux)
+	h.registerTeamRoutes(mux)
+	h.registerWorkflowRoutes(mux)
+	h.registerLoopRoutes(mux)
 }
 
 func (h *Handler) Shutdown() {

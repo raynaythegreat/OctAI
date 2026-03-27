@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/raynaythegreat/ai-business-hq/pkg/logger"
 	"github.com/raynaythegreat/ai-business-hq/pkg/tenant"
 )
@@ -44,51 +43,10 @@ func (h *Handler) registerMembershipRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("DELETE /api/v2/organizations/{id}/members/{userId}", h.handleRemoveMember)
 }
 
-package api
-
-import (
-	"encoding/json"
-	"errors"
-	"fmt"
-	"io"
-	"net/http"
-	"time"
-
-	"github.com/google/uuid"
-	"github.com/raynaythegreat/ai-business-hq/pkg/logger"
-	"github.com/raynaythegreat/ai-business-hq/pkg/tenant"
-)
-
-type MemberResponse struct {
-	ID         string  `json:"id"`
-	UserID     string  `json:"user_id"`
-	Role       string  `json:"role"`
-	InvitedBy  *string `json:"invited_by,omitempty"`
-	InvitedAt  *string `json:"invited_at,omitempty"`
-	 AcceptedAt *string `json:"accepted_at,omitempty"`
-	CreatedAt  string  `json:"created_at"`
-}
-
-type InviteMemberRequest struct {
-	UserID string `json:"user_id"`
-	Role   string `json:"role"`
-}
-
-type UpdateMemberRoleRequest struct {
-	Role string `json:"role"`
-}
-
-type ListMembersResponse struct {
-	Members []MemberResponse `json:"members"`
-	Total   int              `json:"total"`
-}
-
-func (h *Handler) registerMembershipRoutes(mux *http.ServeMux) {
-	mux.HandleFunc("GET /api/v2/organizations/{id}/members", h.handleListMembers)
-	mux.HandleFunc("POST /api/v2/organizations/{id}/members", h.handleInviteMember)
-	mux.HandleFunc("PUT /api/v2/organizations/{id}/members/{userId}", h.handleUpdateMemberRole)
-	mux.HandleFunc("DELETE /api/v2/organizations/{id}/members/{userId}", h.handleRemoveMember)
-}
+func formatTimePtr(t *time.Time) *string {
+	if t == nil {
+		return nil
+	}
 	formatted := t.Format(time.RFC3339)
 	return &formatted
 }
@@ -286,6 +244,11 @@ func (h *Handler) handleUpdateMemberRole(w http.ResponseWriter, r *http.Request)
 		}
 	}
 
+	if updatedMember == nil {
+		writeJSONError(w, "failed to retrieve updated member", http.StatusInternalServerError)
+		return
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(MemberResponse{
 		ID:        updatedMember.ID,
@@ -353,10 +316,3 @@ func init() {
 	})
 }
 
-type membershipIDStore struct {
-	membershipIDs map[string]string
-}
-
-func generateMembershipID() string {
-	return uuid.New().String()
-}

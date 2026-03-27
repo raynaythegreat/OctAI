@@ -33,7 +33,7 @@ export interface CostBreakdownData {
 }
 
 const PROVIDER_COLORS = [
-  "#3b82f6",
+  "#A855F7",
   "#8b5cf6",
   "#06b6d4",
   "#f59e0b",
@@ -139,7 +139,7 @@ function DailyCostChart({ data, currency }: DailyCostChartProps) {
             labelFormatter={(label) => formatShortDate(String(label))}
             formatter={(value) => [formatCurrency(Number(value), currency), "Cost"]}
           />
-          <Bar dataKey="cost" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+          <Bar dataKey="cost" fill="#A855F7" radius={[4, 4, 0, 0]} />
         </BarChart>
       </ResponsiveContainer>
     </div>

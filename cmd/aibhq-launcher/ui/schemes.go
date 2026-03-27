@@ -19,13 +19,13 @@ func (a *App) newSchemesPage() tview.Primitive {
 		SetBorders(false).
 		SetSelectable(true, false)
 	table.SetBorder(true).
-		SetTitle(" [#00f0ff::b] PROVIDER SCHEMES ").
-		SetTitleColor(tcell.NewHexColor(0x00f0ff)).
-		SetBorderColor(tcell.NewHexColor(0x00f0ff))
+		SetTitle(" [#A855F7::b] PROVIDER SCHEMES ").
+		SetTitleColor(tcell.NewHexColor(0xA855F7)).
+		SetBorderColor(tcell.NewHexColor(0x2D1B4E))
 	table.SetSelectedStyle(
-		tcell.StyleDefault.Background(tcell.NewHexColor(0xff00ff)).Foreground(tcell.NewHexColor(0xffffff)),
+		tcell.StyleDefault.Background(tcell.NewHexColor(0x1E0F3D)).Foreground(tcell.NewHexColor(0xA855F7)),
 	)
-	table.SetBackgroundColor(tcell.NewHexColor(0x050510))
+	table.SetBackgroundColor(tcell.NewHexColor(0x0A0A12))
 
 	rowToIdx := func(row int) int { return row / 2 }
 
@@ -49,7 +49,7 @@ func (a *App) newSchemesPage() tview.Primitive {
 
 			table.SetCell(nameRow, 0,
 				tview.NewTableCell(" "+s.Name).
-					SetTextColor(tcell.NewHexColor(0xe0e0e0)).
+					SetTextColor(tcell.NewHexColor(0xE8E0F0)).
 					SetExpansion(1).
 					SetSelectable(true),
 			)
@@ -63,13 +63,13 @@ func (a *App) newSchemesPage() tview.Primitive {
 				}
 			}
 			table.SetCell(detailRow, 0,
-				tview.NewTableCell(fmt.Sprintf("  [#808080](%d/%d) %s", m, n, s.BaseURL)).
-					SetTextColor(tcell.NewHexColor(0x808080)).
+				tview.NewTableCell(fmt.Sprintf("  [#7B6F8E](%d/%d) %s", m, n, s.BaseURL)).
+					SetTextColor(tcell.NewHexColor(0x7B6F8E)).
 					SetExpansion(1).
 					SetSelectable(false),
 			)
 			table.SetCell(detailRow, 1,
-				tview.NewTableCell("[#00f0ff]"+s.Type+"  ").
+				tview.NewTableCell("[#A855F7]"+s.Type+"  ").
 					SetAlign(tview.AlignRight).
 					SetSelectable(false),
 			)
@@ -174,7 +174,7 @@ func (a *App) newSchemesPage() tview.Primitive {
 	return a.buildShell(
 		"schemes",
 		table,
-		" [#00f0ff]a:[-] add  [#00f0ff]e:[-] edit  [#ff2a2a]d:[-] delete  [#39ff14]Enter:[-] open  [#ff00ff]ESC:[-] back ",
+		" [#7B6F8E]a:[-] add  [#7B6F8E]e:[-] edit  [#F87171]d:[-] delete  [#7B6F8E]Enter:[-] open  [#F87171]ESC:[-] back ",
 	)
 }
 
@@ -182,13 +182,13 @@ func (a *App) showSchemeForm(existing *tuicfg.Scheme, onSave func(tuicfg.Scheme)
 	name := ""
 	baseURL := ""
 	schemeType := "openai-compatible"
-	title := " ADD SCHEME "
+	title := " [#A855F7::b] ADD SCHEME "
 
 	if existing != nil {
 		name = existing.Name
 		baseURL = existing.BaseURL
 		schemeType = existing.Type
-		title = " EDIT SCHEME "
+		title = " [#A855F7::b] EDIT SCHEME "
 	}
 
 	typeOptions := []string{"openai-compatible", "anthropic"}
@@ -231,15 +231,15 @@ func (a *App) showSchemeForm(existing *tuicfg.Scheme, onSave func(tuicfg.Scheme)
 		})
 
 	form.SetBorder(true).
-		SetTitle(" [::b]" + title + " ").
-		SetTitleColor(tcell.NewHexColor(0x39ff14)).
-		SetBorderColor(tcell.NewHexColor(0x00f0ff))
-	form.SetBackgroundColor(tcell.NewHexColor(0x1a1a2e))
-	form.SetFieldBackgroundColor(tcell.NewHexColor(0x050510))
-	form.SetFieldTextColor(tcell.NewHexColor(0x00f0ff))
-	form.SetLabelColor(tcell.NewHexColor(0xe0e0e0))
-	form.SetButtonBackgroundColor(tcell.NewHexColor(0xff00ff))
-	form.SetButtonTextColor(tcell.NewHexColor(0xffffff))
+		SetTitle(title).
+		SetTitleColor(tcell.NewHexColor(0xA855F7)).
+		SetBorderColor(tcell.NewHexColor(0x2D1B4E))
+	form.SetBackgroundColor(tcell.NewHexColor(0x12101F))
+	form.SetFieldBackgroundColor(tcell.NewHexColor(0x1A1230))
+	form.SetFieldTextColor(tcell.NewHexColor(0xE8E0F0))
+	form.SetLabelColor(tcell.NewHexColor(0xE8E0F0))
+	form.SetButtonBackgroundColor(tcell.NewHexColor(0x1E0F3D))
+	form.SetButtonTextColor(tcell.NewHexColor(0xA855F7))
 	form.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		if event.Key() == tcell.KeyEscape {
 			a.hideModal("scheme-form")

@@ -45,7 +45,7 @@ func authFilePath() string {
 		return filepath.Join(home, "auth.json")
 	}
 	home, _ := os.UserHomeDir()
-	return filepath.Join(home, pkg.DefaultAI Business HQHome, "auth.json")
+	return filepath.Join(home, pkg.DefaultAIBusinessHQHome, "auth.json")
 }
 
 func LoadStore() (*AuthStore, error) {

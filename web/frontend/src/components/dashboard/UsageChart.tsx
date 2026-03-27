@@ -60,7 +60,7 @@ const formatNumber = (value: number): string => {
 }
 
 const COLORS = {
-  messages: "#3b82f6",
+  messages: "#A855F7",
   tokens: "#8b5cf6",
   inputTokens: "#06b6d4",
   outputTokens: "#f59e0b",

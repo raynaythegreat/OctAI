@@ -17,4 +17,20 @@ type Runtime struct {
 	SwitchChannel      func(value string) error
 	ClearHistory       func() error
 	ReloadConfig       func() error
+	// SetThinkingLevel changes the agent's thinking level for the current session.
+	SetThinkingLevel func(level string) error
+	// ToggleFastMode toggles fast mode on the current agent, returning the new state.
+	ToggleFastMode func() (enabled bool, err error)
+	// SearchMemory performs a keyword search over agent memory.
+	SearchMemory func(query string) (string, error)
+	// ListModels returns all configured models with their auth status.
+	ListModels func() []ModelStatus
+}
+
+// ModelStatus holds display info for a single configured model.
+type ModelStatus struct {
+	Name      string
+	ModelID   string
+	Provider  string
+	HasAPIKey bool
 }

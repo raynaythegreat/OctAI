@@ -20,16 +20,16 @@ import (
 func (a *App) newChannelsPage() tview.Primitive {
 	list := tview.NewList()
 	list.SetBorder(true).
-		SetTitle(" [#00f0ff::b] COMMUNICATION CHANNELS ").
-		SetTitleColor(tcell.NewHexColor(0x00f0ff)).
-		SetBorderColor(tcell.NewHexColor(0x00f0ff))
-	list.SetMainTextColor(tcell.NewHexColor(0xe0e0e0))
-	list.SetSecondaryTextColor(tcell.NewHexColor(0x808080))
+		SetTitle(" [#A855F7::b] COMMUNICATION CHANNELS ").
+		SetTitleColor(tcell.NewHexColor(0xA855F7)).
+		SetBorderColor(tcell.NewHexColor(0x2D1B4E))
+	list.SetMainTextColor(tcell.NewHexColor(0xE8E0F0))
+	list.SetSecondaryTextColor(tcell.NewHexColor(0x7B6F8E))
 	list.SetSelectedStyle(
-		tcell.StyleDefault.Background(tcell.NewHexColor(0xff00ff)).Foreground(tcell.NewHexColor(0x050510)),
+		tcell.StyleDefault.Background(tcell.NewHexColor(0x1E0F3D)).Foreground(tcell.NewHexColor(0xE8E0F0)),
 	)
 	list.SetHighlightFullLine(true)
-	list.SetBackgroundColor(tcell.NewHexColor(0x050510))
+	list.SetBackgroundColor(tcell.NewHexColor(0x0A0A12))
 
 	rebuild := func() {
 		sel := list.GetCurrentItem()
@@ -76,21 +76,21 @@ func (a *App) newChannelsPage() tview.Primitive {
 		return event
 	})
 
-	return a.buildShell("channels", list, " [#ff00ff]Enter:[-] edit  [#ff2a2a]ESC:[-] back ")
+	return a.buildShell("channels", list, " [#7B6F8E]Enter:[-] edit  [#F87171]ESC:[-] back ")
 }
 
 func (a *App) showChannelEditForm(configPath, channelName string, existing map[string]any) {
 	form := tview.NewForm()
 	form.SetBorder(true).
 		SetTitle(" [::b]EDIT CHANNEL ").
-		SetTitleColor(tcell.NewHexColor(0x39ff14)).
-		SetBorderColor(tcell.NewHexColor(0x00f0ff))
-	form.SetBackgroundColor(tcell.NewHexColor(0x1a1a2e))
-	form.SetFieldBackgroundColor(tcell.NewHexColor(0x050510))
-	form.SetFieldTextColor(tcell.NewHexColor(0x00f0ff))
-	form.SetLabelColor(tcell.NewHexColor(0xe0e0e0))
-	form.SetButtonBackgroundColor(tcell.NewHexColor(0xff00ff))
-	form.SetButtonTextColor(tcell.NewHexColor(0xffffff))
+		SetTitleColor(tcell.NewHexColor(0xA855F7)).
+		SetBorderColor(tcell.NewHexColor(0x2D1B4E))
+	form.SetBackgroundColor(tcell.NewHexColor(0x12101F))
+	form.SetFieldBackgroundColor(tcell.NewHexColor(0x1A1230))
+	form.SetFieldTextColor(tcell.NewHexColor(0xA855F7))
+	form.SetLabelColor(tcell.NewHexColor(0xE8E0F0))
+	form.SetButtonBackgroundColor(tcell.NewHexColor(0x1E0F3D))
+	form.SetButtonTextColor(tcell.NewHexColor(0xA855F7))
 
 	fields := make(map[string]*tview.InputField)
 	var nameField *tview.InputField

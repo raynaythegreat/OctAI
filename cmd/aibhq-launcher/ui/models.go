@@ -35,21 +35,21 @@ func (a *App) newModelsPage(schemeName, userName, baseURL string) tview.Primitiv
 		SetSelectable(true, false).
 		SetFixed(0, 0)
 	table.SetBorder(true).
-		SetTitle(fmt.Sprintf(" [#00f0ff::b] MODELS · %s / %s ", schemeName, userName)).
-		SetTitleColor(tcell.NewHexColor(0x00f0ff)).
-		SetBorderColor(tcell.NewHexColor(0x00f0ff))
+		SetTitle(fmt.Sprintf(" [#A855F7::b] MODELS · %s / %s ", schemeName, userName)).
+		SetTitleColor(tcell.NewHexColor(0xA855F7)).
+		SetBorderColor(tcell.NewHexColor(0x2D1B4E))
 	table.SetSelectedStyle(
-		tcell.StyleDefault.Background(tcell.NewHexColor(0xff00ff)).Foreground(tcell.NewHexColor(0xffffff)),
+		tcell.StyleDefault.Background(tcell.NewHexColor(0x1E0F3D)).Foreground(tcell.NewHexColor(0xA855F7)),
 	)
-	table.SetBackgroundColor(tcell.NewHexColor(0x050510))
+	table.SetBackgroundColor(tcell.NewHexColor(0x0A0A12))
 
 	var modelIDs []string
 
 	status := tview.NewTextView().
 		SetTextAlign(tview.AlignCenter).
 		SetDynamicColors(true).
-		SetText("[#ffff00]FETCHING MODELS...[-]")
-	status.SetBackgroundColor(tcell.NewHexColor(0x050510))
+		SetText("[#A855F7]FETCHING MODELS...[-]")
+	status.SetBackgroundColor(tcell.NewHexColor(0x0A0A12))
 
 	flex := tview.NewFlex().
 		SetDirection(tview.FlexRow).
@@ -80,32 +80,32 @@ func (a *App) newModelsPage(schemeName, userName, baseURL string) tview.Primitiv
 
 		a.tapp.QueueUpdateDraw(func() {
 			if err != nil {
-				status.SetText(fmt.Sprintf("[#ff2a2a]ERROR: %s[-]", err.Error()))
+				status.SetText(fmt.Sprintf("[#F87171]ERROR: %s[-]", err.Error()))
 				table.SetCell(0, 0, tview.NewTableCell(" (failed to load models)"))
 				a.tapp.SetFocus(table)
 				return
 			}
 			if len(entries) == 0 {
-				status.SetText("[#ff2a2a]NO MODELS RETURNED[-]")
+				status.SetText("[#F87171]NO MODELS RETURNED[-]")
 				table.SetCell(0, 0, tview.NewTableCell(" (no models available)"))
 				a.tapp.SetFocus(table)
 				return
 			}
 
-			status.SetText(fmt.Sprintf("[#39ff14]%d MODEL(S) LOADED[-]", len(entries)))
+			status.SetText(fmt.Sprintf("[#34D399]%d MODEL(S) LOADED[-]", len(entries)))
 			for i, m := range entries {
 				modelIDs = append(modelIDs, m.ID)
 				table.SetCell(i, 0,
 					tview.NewTableCell(fmt.Sprintf("%3d", i+1)).
 						SetAlign(tview.AlignRight).
-						SetTextColor(tcell.NewHexColor(0x808080)).
+						SetTextColor(tcell.NewHexColor(0x7B6F8E)).
 						SetSelectable(false),
 				)
 				table.SetCell(i, 1,
 					tview.NewTableCell(" "+m.ID).
 						SetAlign(tview.AlignLeft).
 						SetExpansion(1).
-						SetTextColor(tcell.NewHexColor(0xe0e0e0)),
+						SetTextColor(tcell.NewHexColor(0xE8E0F0)),
 				)
 			}
 			a.tapp.SetFocus(table)
@@ -143,7 +143,7 @@ func (a *App) newModelsPage(schemeName, userName, baseURL string) tview.Primitiv
 		a.goBack()
 	})
 
-	return a.buildShell("models", flex, " [#39ff14]Enter:[-] select  [#ff00ff]ESC:[-] back ")
+	return a.buildShell("models", flex, " [#7B6F8E]Enter:[-] select  [#F87171]ESC:[-] back ")
 }
 
 func (a *App) resolveKey(schemeName, userName string) string {

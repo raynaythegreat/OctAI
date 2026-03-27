@@ -21,7 +21,7 @@ func ResolveTargetHome(override string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("resolving home directory: %w", err)
 	}
-	return filepath.Join(home, pkg.DefaultAI Business HQHome), nil
+	return filepath.Join(home, pkg.DefaultAIBusinessHQHome), nil
 }
 
 func ExpandHome(path string) string {

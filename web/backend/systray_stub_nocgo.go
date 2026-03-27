@@ -1,6 +1,6 @@
 //go:build (darwin || freebsd) && !cgo
 
-package main
+package webconsole
 
 import (
 	"context"
@@ -17,7 +17,7 @@ import (
 func runTray() {
 	logger.Infof("System tray is unavailable in %s builds without cgo; running without tray", runtime.GOOS)
 
-	if !*noBrowser {
+	if !noBrowserFlag {
 		go func() {
 			time.Sleep(browserDelay)
 			if err := openBrowser(); err != nil {

@@ -21,6 +21,11 @@ func GetPicoclawHome() string {
 	return filepath.Join(home, ".aibhq")
 }
 
+// GetAIBHQHome returns the aibhq home directory (alias for GetPicoclawHome).
+func GetAIBHQHome() string {
+	return GetPicoclawHome()
+}
+
 // GetDefaultConfigPath returns the default path to the aibhq config file.
 func GetDefaultConfigPath() string {
 	if configPath := os.Getenv(config.EnvConfig); configPath != "" {

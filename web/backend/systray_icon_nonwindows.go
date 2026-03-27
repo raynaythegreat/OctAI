@@ -1,6 +1,6 @@
 //go:build !windows && ((!darwin && !freebsd) || cgo)
 
-package main
+package webconsole
 
 import _ "embed"
 

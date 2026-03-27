@@ -15,6 +15,14 @@ import (
 	tuicfg "github.com/raynaythegreat/ai-business-hq/cmd/aibhq-launcher/config"
 )
 
+// AppMode represents the current operating mode of the TUI.
+type AppMode string
+
+const (
+	ModePlan  AppMode = "plan"
+	ModeBuild AppMode = "build"
+)
+
 // App is the root TUI application.
 type App struct {
 	tapp           *tview.Application
@@ -24,7 +32,9 @@ type App struct {
 	configPath     string
 	pageRefreshFns map[string]func()
 	headerModelTV  *tview.TextView
+	headerModeTV   *tview.TextView // shows current Plan/Build mode
 	modalOpen      map[string]bool
+	currentMode    AppMode // "plan" or "build"
 
 	// OnModelSelected is called when a model is selected in the UI.
 	// Can be nil to disable.
@@ -33,6 +43,31 @@ type App struct {
 	modelCache   map[string][]modelEntry
 	modelCacheMu sync.RWMutex
 	refreshMu    sync.Mutex
+}
+
+// setMode switches between Plan and Build mode and refreshes the mode indicator.
+func (a *App) setMode(mode AppMode) {
+	a.currentMode = mode
+	if a.headerModeTV != nil {
+		a.headerModeTV.SetText(a.modeBadge())
+	}
+}
+
+// toggleMode flips between Plan and Build mode.
+func (a *App) toggleMode() {
+	if a.currentMode == ModePlan {
+		a.setMode(ModeBuild)
+	} else {
+		a.setMode(ModePlan)
+	}
+}
+
+// modeBadge returns the colored mode indicator string for the header.
+func (a *App) modeBadge() string {
+	if a.currentMode == ModePlan {
+		return "[#0A0A12:#A855F7:b] PLAN [:-:-] "
+	}
+	return "[#0A0A12:#F87171:b] BUILD [:-:-] "
 }
 
 // cacheKey returns the map key for a (scheme, user) pair.
@@ -106,23 +141,18 @@ func (a *App) refreshModelCache(onDone func()) {
 
 // New creates and wires up the TUI application.
 func New(cfg *tuicfg.TUIConfig, configPath string) *App {
-	// Cyberpunk Theme Colors
-	// Dark background
-	tview.Styles.PrimitiveBackgroundColor = tcell.NewHexColor(0x050510) // Deep Void
-	tview.Styles.ContrastBackgroundColor = tcell.NewHexColor(0x1a1a2e)  // Dark Indigo
-	tview.Styles.MoreContrastBackgroundColor = tcell.NewHexColor(0x2a2a40)
-
-	// Borders and Titles
-	tview.Styles.BorderColor = tcell.NewHexColor(0x00f0ff)   // Neon Cyan
-	tview.Styles.TitleColor = tcell.NewHexColor(0x00f0ff)    // Neon Cyan
-	tview.Styles.GraphicsColor = tcell.NewHexColor(0xff00ff) // Neon Magenta
-
-	// Text
-	tview.Styles.PrimaryTextColor = tcell.NewHexColor(0xe0e0e0)           // Off-white
-	tview.Styles.SecondaryTextColor = tcell.NewHexColor(0x00f0ff)         // Neon Cyan
-	tview.Styles.TertiaryTextColor = tcell.NewHexColor(0x39ff14)          // Neon Lime
-	tview.Styles.InverseTextColor = tcell.NewHexColor(0x000000)           // Black
-	tview.Styles.ContrastSecondaryTextColor = tcell.NewHexColor(0xff00ff) // Neon Magenta
+	// OpenClaw Warm Dark Theme
+	tview.Styles.PrimitiveBackgroundColor    = tcell.NewHexColor(0x0A0A12) // Near black
+	tview.Styles.ContrastBackgroundColor     = tcell.NewHexColor(0x12101F) // Panel bg
+	tview.Styles.MoreContrastBackgroundColor = tcell.NewHexColor(0x1A1230) // Card bg
+	tview.Styles.BorderColor                 = tcell.NewHexColor(0x2D1B4E) // Dark gray border
+	tview.Styles.TitleColor                  = tcell.NewHexColor(0xA855F7) // Amber/gold
+	tview.Styles.GraphicsColor               = tcell.NewHexColor(0xF87171) // Orange
+	tview.Styles.PrimaryTextColor            = tcell.NewHexColor(0xE8E0F0) // Warm cream
+	tview.Styles.SecondaryTextColor          = tcell.NewHexColor(0xA855F7) // Amber
+	tview.Styles.TertiaryTextColor           = tcell.NewHexColor(0x34D399) // Mint green
+	tview.Styles.InverseTextColor            = tcell.NewHexColor(0x0A0A12) // Near black
+	tview.Styles.ContrastSecondaryTextColor  = tcell.NewHexColor(0xF87171) // Orange
 
 	a := &App{
 		tapp:           tview.NewApplication(),
@@ -132,9 +162,54 @@ func New(cfg *tuicfg.TUIConfig, configPath string) *App {
 		configPath:     configPath,
 		pageRefreshFns: make(map[string]func()),
 		modalOpen:      make(map[string]bool),
+		currentMode:    ModeBuild, // default to Build mode
 	}
 
 	a.tapp.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		// Tab toggles between Plan and Build mode globally.
+		if event.Key() == tcell.KeyTab {
+			a.toggleMode()
+			a.tapp.QueueUpdateDraw(nil)
+			return nil
+		}
+		// Number keys jump directly to sections (only when no modal is open and no form active)
+		if len(a.modalOpen) == 0 {
+			switch event.Rune() {
+			case '1':
+				if len(a.pageStack) > 0 {
+					// Navigate to home: pop back to home
+					for len(a.pageStack) > 1 {
+						popped := a.pageStack[len(a.pageStack)-1]
+						a.pageStack = a.pageStack[:len(a.pageStack)-1]
+						a.pages.RemovePage(popped)
+					}
+					a.pages.SwitchToPage("home")
+					if fn, ok := a.pageRefreshFns["home"]; ok { fn() }
+				}
+				return nil
+			case '2':
+				a.navigateTo("gateway", a.newGatewayPage())
+				return nil
+			case '3':
+				a.navigateTo("schemes", a.newSchemesPage())
+				return nil
+			case '4':
+				a.navigateTo("channels", a.newChannelsPage())
+				return nil
+			case '5':
+				a.navigateTo("teams", a.newTeamsPage())
+				return nil
+			case '6':
+				a.navigateTo("skills", a.newSkillsPage())
+				return nil
+			case '7':
+				a.navigateTo("tools", a.newToolsPage())
+				return nil
+			case '8':
+				a.navigateTo("logs", a.newLogsPage())
+				return nil
+			}
+		}
 		if event.Key() == tcell.KeyEscape {
 			if len(a.modalOpen) > 0 {
 				return event
@@ -207,11 +282,10 @@ func (a *App) showError(msg string) {
 		SetDoneFunc(func(_ int, _ string) {
 			a.hideModal("error")
 		})
-	// Cyberpunk Modal Style
-	modal.SetBackgroundColor(tcell.NewHexColor(0x1a1a2e))       // Deep Indigo
-	modal.SetTextColor(tcell.NewHexColor(0xffffff))             // White
-	modal.SetButtonBackgroundColor(tcell.NewHexColor(0xff2a2a)) // Neon Red
-	modal.SetButtonTextColor(tcell.NewHexColor(0xffffff))       // White
+	modal.SetBackgroundColor(tcell.NewHexColor(0x1A1230))
+	modal.SetTextColor(tcell.NewHexColor(0xE8E0F0))
+	modal.SetButtonBackgroundColor(tcell.NewHexColor(0xF87171)) // coral red
+	modal.SetButtonTextColor(tcell.NewHexColor(0x0A0A12))
 	a.showModal("error", modal)
 }
 
@@ -225,11 +299,10 @@ func (a *App) confirmDelete(label string, onConfirm func()) {
 				onConfirm()
 			}
 		})
-	// Cyberpunk Modal Style
-	modal.SetBackgroundColor(tcell.NewHexColor(0x1a1a2e))       // Deep Indigo
-	modal.SetTextColor(tcell.NewHexColor(0xffffff))             // White
-	modal.SetButtonBackgroundColor(tcell.NewHexColor(0xff2a2a)) // Neon Red for danger
-	modal.SetButtonTextColor(tcell.NewHexColor(0xffffff))       // White
+	modal.SetBackgroundColor(tcell.NewHexColor(0x1A1230))
+	modal.SetTextColor(tcell.NewHexColor(0xE8E0F0))
+	modal.SetButtonBackgroundColor(tcell.NewHexColor(0xF87171)) // coral red
+	modal.SetButtonTextColor(tcell.NewHexColor(0x0A0A12))
 	a.showModal("confirm-delete", modal)
 }
 
@@ -248,63 +321,80 @@ func hintBar(text string) *tview.TextView {
 		SetText(text).
 		SetDynamicColors(true).
 		SetTextAlign(tview.AlignCenter).
-		SetTextColor(tcell.NewHexColor(0x00f0ff)) // Neon Cyan
-	tv.SetBackgroundColor(tcell.NewHexColor(0x2a2a40)) // Darker Indigo
+		SetTextColor(tcell.NewHexColor(0x7B6F8E)) // muted gray
+	tv.SetBackgroundColor(tcell.NewHexColor(0x12101F))
 	return tv
 }
 
 func (a *App) buildShell(pageID string, content tview.Primitive, hint string) tview.Primitive {
+	// Model display (right side of header)
 	var modelTV *tview.TextView
 	if pageID == "home" {
 		if a.headerModelTV == nil {
 			a.headerModelTV = tview.NewTextView()
 			a.headerModelTV.SetTextAlign(tview.AlignRight).
-				SetTextColor(tcell.NewHexColor(0x39ff14)). // Neon Lime
+				SetTextColor(tcell.NewHexColor(0x7B6F8E)).
 				SetDynamicColors(true).
-				SetBackgroundColor(tcell.NewHexColor(0x050510))
+				SetBackgroundColor(tcell.NewHexColor(0x0A0A12))
 		}
 		modelTV = a.headerModelTV
-		modelTV.SetText("MODEL: " + a.cfg.CurrentModelLabel() + " ")
+		modelTV.SetText(a.cfg.CurrentModelLabel() + "  ")
 	} else {
 		modelTV = tview.NewTextView()
-		modelTV.SetBackgroundColor(tcell.NewHexColor(0x050510))
+		modelTV.SetBackgroundColor(tcell.NewHexColor(0x0A0A12))
+		modelTV.SetTextColor(tcell.NewHexColor(0x7B6F8E))
+		modelTV.SetText(a.cfg.CurrentModelLabel() + "  ")
 	}
 
+	// Mode badge
+	if a.headerModeTV == nil {
+		a.headerModeTV = tview.NewTextView().SetDynamicColors(true)
+		a.headerModeTV.SetBackgroundColor(tcell.NewHexColor(0x0A0A12))
+	}
+	a.headerModeTV.SetText(a.modeBadge())
+
+	// Header left — OpenClaw style: bold amber app name
 	headerLeft := tview.NewTextView().
-		SetText(" [#ff00ff::b]///[#00f0ff] PICOCLAW LAUNCHER [#ff00ff]///").
+		SetText("  [#A855F7::b]OCTAI[-]  [#2D1B4E]·[-]").
 		SetDynamicColors(true).
-		SetBackgroundColor(tcell.NewHexColor(0x050510))
+		SetBackgroundColor(tcell.NewHexColor(0x0A0A12))
 
 	header := tview.NewFlex().
-		AddItem(headerLeft, 0, 1, false).
+		AddItem(headerLeft, 0, 2, false).
+		AddItem(a.headerModeTV, 10, 0, false).
 		AddItem(modelTV, 0, 1, false)
 
+	// Sidebar — OpenClaw uses → cursor, dim inactive items
 	sidebar := tview.NewTextView().
 		SetDynamicColors(true).
 		SetWrap(false)
-	sidebar.SetBackgroundColor(tcell.NewHexColor(0x1a1a2e)) // Deep Indigo
+	sidebar.SetBorder(false)
+	sidebar.SetBackgroundColor(tcell.NewHexColor(0x12101F))
 
-	// Cyberpunk Sidebar Styling
-	activePrefix := "[#39ff14::b]>> " // Neon Lime arrow
-	activeSuffix := "[-]"
-	inactivePrefix := "[#808080]   "
+	activePrefix   := "[#A855F7::b]→  "   // amber arrow
+	activeSuffix   := "[-]"
+	inactivePrefix := "[#7B6F8E]   "        // dim gray
 	inactiveSuffix := "[-]"
 
-	sbText := "\n\n" // Top padding
-
 	menuItem := func(id, label string) string {
-		if pageID == id {
+		active := pageID == id ||
+			(id == "model" && (pageID == "schemes" || pageID == "users" || pageID == "models"))
+		if active {
 			return activePrefix + label + activeSuffix + "\n\n"
 		}
 		return inactivePrefix + label + inactiveSuffix + "\n\n"
 	}
 
-	sbText += menuItem("home", "HOME")
-	sbText += menuItem("schemes", "SCHEMES")
-	sbText += menuItem("users", "USERS")
-	sbText += menuItem("models", "MODELS")
+	sbText := "\n"
+	sbText += menuItem("home",     "HOME")
+	sbText += menuItem("gateway",  "GATEWAY")
+	sbText += menuItem("model",    "MODEL")
 	sbText += menuItem("channels", "CHANNELS")
-	sbText += menuItem("gateway", "GATEWAY")
+	sbText += "[#2D1B4E]──────────────────────[-]\n\n"
+	sbText += menuItem("teams",    "TEAMS")
+	sbText += menuItem("skills",   "SKILLS")
+	sbText += menuItem("tools",    "TOOLS")
+	sbText += menuItem("logs",     "LOGS")
 
 	sidebar.SetText(sbText)
 
@@ -312,14 +402,11 @@ func (a *App) buildShell(pageID string, content tview.Primitive, hint string) tv
 
 	grid := tview.NewGrid().
 		SetRows(1, 0, 1).
-		SetColumns(20, 0). // Slightly wider sidebar
-		AddItem(header, 0, 0, 1, 2, 0, 0, false).
+		SetColumns(24, 0).
+		AddItem(header,  0, 0, 1, 2, 0, 0, false).
 		AddItem(sidebar, 1, 0, 1, 1, 0, 0, false).
 		AddItem(content, 1, 1, 1, 1, 0, 0, true).
-		AddItem(footer, 2, 0, 1, 2, 0, 0, false)
-
-	// Add a border around the content area if possible, or ensure content has its own border
-	// grid.SetBorders(false) // Grid borders usually look bad, handled by components
+		AddItem(footer,  2, 0, 1, 2, 0, 0, false)
 
 	return grid
 }

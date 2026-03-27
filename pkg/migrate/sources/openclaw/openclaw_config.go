@@ -476,8 +476,8 @@ func (c *OpenClawConfig) HasAuthProfiles() bool {
 	return c.Auth != nil && c.Auth.Profiles != nil && len(c.Auth.Profiles) > 0
 }
 
-func (c *OpenClawConfig) ConvertToAI Business HQ(sourceHome string) (*AI Business HQConfig, []string, error) {
-	cfg := &AI Business HQConfig{}
+func (c *OpenClawConfig) ConvertToAIBusinessHQ(sourceHome string) (*AIBusinessHQConfig, []string, error) {
+	cfg := &AIBusinessHQConfig{}
 	var warnings []string
 
 	provider, modelName := c.GetDefaultModel()
@@ -534,19 +534,19 @@ func (c *OpenClawConfig) ConvertToAI Business HQ(sourceHome string) (*AI Busines
 		)
 	}
 	if c.HasMemory() {
-		warnings = append(warnings, "Memory backend config not migrated - AI Business HQ uses SQLite with vector embeddings")
+		warnings = append(warnings, "Memory backend config not migrated - AIBusinessHQ uses SQLite with vector embeddings")
 	}
 	if c.HasCron() {
 		warnings = append(
 			warnings,
-			"Cron job scheduling not supported in AI Business HQ - consider using external schedulers",
+			"Cron job scheduling not supported in AIBusinessHQ - consider using external schedulers",
 		)
 	}
 	if c.HasHooks() {
-		warnings = append(warnings, "Webhook hooks not supported in AI Business HQ - use event system instead")
+		warnings = append(warnings, "Webhook hooks not supported in AIBusinessHQ - use event system instead")
 	}
 	if c.HasSession() {
-		warnings = append(warnings, "Session scope config differs - AI Business HQ uses per-agent sessions by default")
+		warnings = append(warnings, "Session scope config differs - AIBusinessHQ uses per-agent sessions by default")
 	}
 	if c.HasAuthProfiles() {
 		warnings = append(
@@ -566,7 +566,7 @@ type ModelConfig struct {
 	Proxy     string `json:"proxy,omitempty"`
 }
 
-type AI Business HQConfig struct {
+type AIBusinessHQConfig struct {
 	Agents    AgentsConfig   `json:"agents"`
 	Bindings  []AgentBinding `json:"bindings,omitempty"`
 	Channels  ChannelsConfig `json:"channels"`
@@ -903,13 +903,13 @@ func (c *OpenClawConfig) convertChannels(warnings *[]string) ChannelsConfig {
 	}
 
 	if c.Channels.Signal != nil {
-		*warnings = append(*warnings, "Channel 'signal': No AI Business HQ adapter available")
+		*warnings = append(*warnings, "Channel 'signal': No AIBusinessHQ adapter available")
 	}
 	if c.Channels.IRC != nil {
-		*warnings = append(*warnings, "Channel 'irc': No AI Business HQ adapter available")
+		*warnings = append(*warnings, "Channel 'irc': No AIBusinessHQ adapter available")
 	}
 	if c.Channels.Mattermost != nil {
-		*warnings = append(*warnings, "Channel 'mattermost': No AI Business HQ adapter available")
+		*warnings = append(*warnings, "Channel 'mattermost': No AIBusinessHQ adapter available")
 	}
 	if c.Channels.IMessage != nil {
 		*warnings = append(*warnings, "Channel 'imessage': macOS-only channel - requires manual setup")
@@ -917,7 +917,7 @@ func (c *OpenClawConfig) convertChannels(warnings *[]string) ChannelsConfig {
 	if c.Channels.BlueBubbles != nil {
 		*warnings = append(
 			*warnings,
-			"Channel 'bluebubbles': No AI Business HQ adapter available - consider iMessage instead",
+			"Channel 'bluebubbles': No AIBusinessHQ adapter available - consider iMessage instead",
 		)
 	}
 
@@ -972,7 +972,7 @@ func (c *OpenClawConfig) convertAgents(warnings *[]string) []AgentConfig {
 	return agents
 }
 
-func (c *AI Business HQConfig) ToStandardConfig() *config.Config {
+func (c *AIBusinessHQConfig) ToStandardConfig() *config.Config {
 	cfg := config.DefaultConfig()
 
 	cfg.Agents.Defaults.Workspace = c.Agents.Defaults.Workspace
