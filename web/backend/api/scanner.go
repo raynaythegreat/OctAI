@@ -53,12 +53,26 @@ type integrateRequestItem struct {
 	Config      map[string]any `json:"config,omitempty"`
 }
 
+// integrateRequest is the full body for POST /api/scanner/integrate.
+// Items is the list of items to integrate. Resolve maps item names to "replace" or "skip"
+// for items that were previously flagged as conflicts.
+type integrateRequest struct {
+	Items   []integrateRequestItem `json:"items"`
+	Resolve map[string]string      `json:"resolve,omitempty"` // name → "replace" | "skip"
+}
+
 // integrateResultItem is one result entry in the integrate response.
 type integrateResultItem struct {
 	Name    string `json:"name"`
 	Type    string `json:"type"`
 	Success bool   `json:"success"`
 	Error   string `json:"error,omitempty"`
+}
+
+// conflictItem describes an item that already exists.
+type conflictItem struct {
+	Name string `json:"name"`
+	Type string `json:"type"`
 }
 
 var httpClient = &http.Client{Timeout: 30 * time.Second}
@@ -119,6 +133,36 @@ func (h *Handler) handleScannerAnalyze(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// For GitHub repos, also directly scan for SKILL.md files in the repo tree.
+	// These are more accurate than LLM-detected skills.
+	if urlType == "github" {
+		pathParts := strings.SplitN(strings.TrimPrefix(parsedURL.Path, "/"), "/", 3)
+		if len(pathParts) >= 2 {
+			directSkills := fetchGitHubSkillFiles(pathParts[0], pathParts[1])
+			if len(directSkills) > 0 {
+				// Build a map of LLM-detected skill names for dedup
+				llmSkillNames := make(map[string]bool)
+				for _, item := range items {
+					if item.Type == "skill" {
+						llmSkillNames[item.Name] = true
+					}
+				}
+				// Remove LLM-detected skills that have a real file version
+				merged := make([]scannerItem, 0, len(items)+len(directSkills))
+				for _, item := range items {
+					if item.Type != "skill" {
+						merged = append(merged, item)
+					}
+				}
+				// Add direct skill items (real content wins)
+				for _, ds := range directSkills {
+					merged = append(merged, ds)
+				}
+				items = merged
+			}
+		}
+	}
+
 	resp := analyzeResponse{
 		Items:   items,
 		URL:     req.URL,
@@ -130,6 +174,8 @@ func (h *Handler) handleScannerAnalyze(w http.ResponseWriter, r *http.Request) {
 }
 
 // handleScannerIntegrate integrates discovered items into the system configuration.
+// Supports duplicate detection: if conflicts are found and no resolve map is provided,
+// returns HTTP 409 with the conflict list. Re-submit with resolve map to proceed.
 //
 //	POST /api/scanner/integrate
 func (h *Handler) handleScannerIntegrate(w http.ResponseWriter, r *http.Request) {
@@ -140,10 +186,16 @@ func (h *Handler) handleScannerIntegrate(w http.ResponseWriter, r *http.Request)
 	}
 	defer r.Body.Close()
 
-	var items []integrateRequestItem
-	if err := json.Unmarshal(body, &items); err != nil {
-		http.Error(w, fmt.Sprintf("invalid JSON: %v", err), http.StatusBadRequest)
-		return
+	// Support both legacy array format and new object format with resolve map
+	var req integrateRequest
+	if err := json.Unmarshal(body, &req); err != nil {
+		// Try legacy: plain array
+		var items []integrateRequestItem
+		if err2 := json.Unmarshal(body, &items); err2 != nil {
+			http.Error(w, fmt.Sprintf("invalid JSON: %v", err), http.StatusBadRequest)
+			return
+		}
+		req.Items = items
 	}
 
 	cfg, err := config.LoadConfig(h.configPath)
@@ -152,12 +204,40 @@ func (h *Handler) handleScannerIntegrate(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	results := make([]integrateResultItem, 0, len(items))
+	// Detect conflicts for items that weren't given an explicit resolution
+	var conflicts []conflictItem
+	if req.Resolve == nil {
+		for _, item := range req.Items {
+			if itemExists(cfg, item) {
+				conflicts = append(conflicts, conflictItem{Name: item.Name, Type: item.Type})
+			}
+		}
+	}
 
-	for _, item := range items {
+	// If there are unresolved conflicts, return 409 so the client can ask the user
+	if len(conflicts) > 0 {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusConflict)
+		json.NewEncoder(w).Encode(map[string]any{
+			"conflicts": conflicts,
+			"message":   "Some items already exist. Provide a resolve map with 'replace' or 'skip' for each conflict.",
+		})
+		return
+	}
+
+	results := make([]integrateResultItem, 0, len(req.Items))
+
+	for _, item := range req.Items {
 		result := integrateResultItem{
 			Name: item.Name,
 			Type: item.Type,
+		}
+
+		// Check resolve decision for this item
+		if decision, ok := req.Resolve[item.Name]; ok && decision == "skip" {
+			result.Success = true
+			results = append(results, result)
+			continue
 		}
 
 		var intErr error
@@ -166,8 +246,9 @@ func (h *Handler) handleScannerIntegrate(w http.ResponseWriter, r *http.Request)
 			intErr = integrateMCPServer(cfg, item)
 		case "skill":
 			intErr = integrateSkill(cfg, item)
+		case "reference_url":
+			intErr = integrateReferenceURL(cfg, item)
 		case "tool", "plugin", "connection", "other":
-			// Try as MCP server if it has command or URL; otherwise save to discovered list
 			if hasExecutableConfig(item) {
 				intErr = integrateMCPServer(cfg, item)
 			} else {
@@ -195,6 +276,27 @@ func (h *Handler) handleScannerIntegrate(w http.ResponseWriter, r *http.Request)
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(results)
+}
+
+// itemExists checks whether an item with the same name already exists in config.
+func itemExists(cfg *config.Config, item integrateRequestItem) bool {
+	switch item.Type {
+	case "mcp_server":
+		_, exists := cfg.Tools.MCP.Servers[item.Name]
+		return exists
+	case "skill":
+		home := os.Getenv("OCTAI_HOME")
+		if home == "" {
+			userHome, _ := os.UserHomeDir()
+			home = filepath.Join(userHome, ".octai")
+		}
+		skillDir := filepath.Join(home, "workspace", "skills", sanitizeName(item.Name))
+		_, err := os.Stat(skillDir)
+		return err == nil
+	default:
+		// For discovered items, duplicate check is already in saveDiscoveredItem
+		return false
+	}
 }
 
 // integrateMCPServer adds an MCP server to the config's tools.mcp.servers map.
@@ -280,27 +382,135 @@ func integrateSkill(cfg *config.Config, item integrateRequestItem) error {
 		return fmt.Errorf("creating skill directory: %w", err)
 	}
 
-	// Build SKILL.md content
-	var sb strings.Builder
-	sb.WriteString("# ")
-	sb.WriteString(item.Name)
-	sb.WriteString("\n\n")
-	if item.Description != "" {
-		sb.WriteString(item.Description)
-		sb.WriteString("\n\n")
-	}
-	sb.WriteString("*Discovered by AI URL Scanner*\n")
+	skillFile := filepath.Join(skillDir, "SKILL.md")
+
+	// If the scanner fetched the actual SKILL.md content from a GitHub repo, use it directly
+	// but prepend proper frontmatter with name, description, and source_url.
 	if item.Config != nil {
-		if raw, err := json.MarshalIndent(item.Config, "", "  "); err == nil {
-			sb.WriteString("\n## Configuration\n\n```json\n")
-			sb.Write(raw)
-			sb.WriteString("\n```\n")
+		if rawContent, ok := item.Config["content"].(string); ok && strings.TrimSpace(rawContent) != "" {
+			sourceURL, _ := item.Config["source_url"].(string)
+
+			description := item.Description
+			if description == "" {
+				description = extractFirstParagraph(rawContent)
+			}
+			if description == "" {
+				description = item.Name
+			}
+
+			var sb strings.Builder
+			sb.WriteString("---\n")
+			sb.WriteString("name: ")
+			sb.WriteString(item.Name)
+			sb.WriteString("\n")
+			sb.WriteString("description: ")
+			sb.WriteString(strings.ReplaceAll(description, "\n", " "))
+			sb.WriteString("\n")
+			if sourceURL != "" {
+				sb.WriteString("source_url: ")
+				sb.WriteString(sourceURL)
+				sb.WriteString("\n")
+			}
+			sb.WriteString("---\n\n")
+			// Strip any existing frontmatter from the fetched content
+			body := rawContent
+			if strings.HasPrefix(strings.TrimSpace(body), "---") {
+				if idx := strings.Index(body[3:], "---"); idx >= 0 {
+					body = strings.TrimLeft(body[3+idx+3:], "\n\r")
+				}
+			}
+			sb.WriteString(body)
+			if !strings.HasSuffix(sb.String(), "\n") {
+				sb.WriteString("\n")
+			}
+
+			if err := os.WriteFile(skillFile, []byte(sb.String()), 0o644); err != nil {
+				return fmt.Errorf("writing SKILL.md: %w", err)
+			}
+			return nil
 		}
 	}
 
-	skillFile := filepath.Join(skillDir, "SKILL.md")
+	// Fallback: build a minimal SKILL.md from name/description only
+	description := item.Description
+	if description == "" {
+		description = item.Name
+	}
+	var sb strings.Builder
+	sb.WriteString("---\n")
+	sb.WriteString("name: ")
+	sb.WriteString(item.Name)
+	sb.WriteString("\n")
+	sb.WriteString("description: ")
+	sb.WriteString(strings.ReplaceAll(description, "\n", " "))
+	sb.WriteString("\n")
+	sb.WriteString("---\n\n")
+	sb.WriteString("# ")
+	sb.WriteString(item.Name)
+	sb.WriteString("\n\n")
+	sb.WriteString(description)
+	sb.WriteString("\n")
+
 	if err := os.WriteFile(skillFile, []byte(sb.String()), 0o644); err != nil {
 		return fmt.Errorf("writing SKILL.md: %w", err)
+	}
+	return nil
+}
+
+// integrateReferenceURL saves a discovered reference URL to workspace/references.json.
+func integrateReferenceURL(cfg *config.Config, item integrateRequestItem) error {
+	if item.Name == "" {
+		return fmt.Errorf("reference_url name is required")
+	}
+
+	home := os.Getenv("OCTAI_HOME")
+	if home == "" {
+		userHome, err := os.UserHomeDir()
+		if err != nil {
+			return fmt.Errorf("cannot determine home directory: %w", err)
+		}
+		home = filepath.Join(userHome, ".octai")
+	}
+
+	filePath := filepath.Join(home, "workspace", "references.json")
+
+	type refEntry struct {
+		Name        string `json:"name"`
+		URL         string `json:"url,omitempty"`
+		Description string `json:"description,omitempty"`
+	}
+
+	var entries []refEntry
+	if data, err := os.ReadFile(filePath); err == nil {
+		_ = json.Unmarshal(data, &entries)
+	}
+
+	refURL := ""
+	if item.Config != nil {
+		if u, ok := item.Config["url"].(string); ok {
+			refURL = u
+		}
+	}
+
+	// Avoid duplicates by name+url
+	for _, e := range entries {
+		if e.Name == item.Name && e.URL == refURL {
+			return nil
+		}
+	}
+
+	entries = append(entries, refEntry{
+		Name:        item.Name,
+		URL:         refURL,
+		Description: item.Description,
+	})
+
+	data, err := json.MarshalIndent(entries, "", "  ")
+	if err != nil {
+		return fmt.Errorf("marshalling references: %w", err)
+	}
+	if err := os.WriteFile(filePath, data, 0o644); err != nil {
+		return fmt.Errorf("writing references: %w", err)
 	}
 	return nil
 }
@@ -427,6 +637,76 @@ func fetchGitHubContent(rawURL string) (string, error) {
 	}
 
 	return sb.String(), nil
+}
+
+// fetchGitHubSkillFiles scans a GitHub repo tree for SKILL.md files and returns
+// scannerItems with the actual file content in config["content"] and config["source_url"].
+func fetchGitHubSkillFiles(owner, repo string) []scannerItem {
+	// Fetch tree (recursive)
+	treeURL := fmt.Sprintf("https://api.github.com/repos/%s/%s/git/trees/HEAD?recursive=1", owner, repo)
+	raw, err := githubAPIGet(treeURL)
+	if err != nil {
+		return nil
+	}
+
+	var tree struct {
+		Tree []struct {
+			Path string `json:"path"`
+			Type string `json:"type"`
+		} `json:"tree"`
+	}
+	if err := json.Unmarshal([]byte(raw), &tree); err != nil {
+		return nil
+	}
+
+	sourceRepoURL := fmt.Sprintf("https://github.com/%s/%s", owner, repo)
+	var items []scannerItem
+
+	for _, node := range tree.Tree {
+		if node.Type != "blob" || !strings.HasSuffix(node.Path, "/SKILL.md") {
+			continue
+		}
+		// Derive skill name from directory containing SKILL.md
+		parts := strings.Split(node.Path, "/")
+		if len(parts) < 2 {
+			continue
+		}
+		skillDirName := parts[len(parts)-2]
+
+		content, err := githubGetFileContent(owner, repo, node.Path)
+		if err != nil || content == "" {
+			continue
+		}
+
+		// Parse description from first paragraph of the SKILL.md
+		description := extractFirstParagraph(content)
+
+		items = append(items, scannerItem{
+			Type:        "skill",
+			Name:        skillDirName,
+			Description: description,
+			Config: map[string]any{
+				"content":    content,
+				"source_url": sourceRepoURL,
+			},
+		})
+	}
+	return items
+}
+
+// extractFirstParagraph returns the first non-heading, non-empty paragraph from markdown.
+func extractFirstParagraph(md string) string {
+	for _, line := range strings.Split(md, "\n") {
+		line = strings.TrimSpace(line)
+		if line == "" || strings.HasPrefix(line, "#") || strings.HasPrefix(line, "---") {
+			continue
+		}
+		if len(line) > 200 {
+			line = line[:200]
+		}
+		return line
+	}
+	return ""
 }
 
 // githubAPIGet makes an unauthenticated GET request to the GitHub API.
@@ -616,12 +896,25 @@ func buildScannerPrompt(content, sourceURL, urlType string) string {
 	sb.WriteString(" at: ")
 	sb.WriteString(sourceURL)
 	sb.WriteString("\n\n")
-	sb.WriteString("Identify any MCP (Model Context Protocol) servers, AI skills, tools, or plugins described in the following content.\n\n")
+
+	isAwesomeList := strings.Contains(strings.ToLower(sourceURL), "awesome")
+
+	if isAwesomeList {
+		sb.WriteString("This appears to be a curated 'awesome list' containing links to useful resources, tools, and services.\n")
+		sb.WriteString("Your primary task is to extract the most valuable curated links as 'reference_url' items.\n\n")
+	}
+
+	sb.WriteString("Identify any MCP (Model Context Protocol) servers, AI skills, tools, plugins, or curated reference links described in the following content.\n\n")
 	sb.WriteString("For each item found, output a JSON array where each element has:\n")
-	sb.WriteString(`- "type": one of "mcp_server", "skill", "tool", "plugin"` + "\n")
+	sb.WriteString(`- "type": one of "mcp_server", "skill", "tool", "plugin", "reference_url"` + "\n")
 	sb.WriteString(`- "name": the identifier/name of the item` + "\n")
 	sb.WriteString(`- "description": a brief description` + "\n")
-	sb.WriteString(`- "config": an object with relevant configuration fields (e.g. command, args, url, type for MCP servers)` + "\n\n")
+	sb.WriteString(`- "config": an object with relevant configuration fields (e.g. command, args, url, type for MCP; "url" for reference_url)` + "\n\n")
+
+	if isAwesomeList {
+		sb.WriteString("For 'reference_url' items: extract up to 25 of the most useful/notable links. Set config.url to the full URL, name to the resource title, description to the annotation from the list.\n\n")
+	}
+
 	sb.WriteString("Output ONLY a JSON array wrapped in ```json ... ``` fences. If nothing is found, output an empty array.\n\n")
 	sb.WriteString("=== CONTENT ===\n")
 	sb.WriteString(content)

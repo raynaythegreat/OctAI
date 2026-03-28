@@ -1,22 +1,36 @@
 {
   "navigation": {
+    "ai_url": "AI URL",
+    "capabilities": "Capabilities",
     "chat": "Chat",
-    "model_group": "Models",
-    "models": "Models",
+    "config": "Config",
     "credentials": "Credentials",
     "agent_group": "Agent",
-    "skills": "Skills",
-    "tools": "Tools",
+    "history": "History",
+    "logs": "Logs",
+    "loops": "Loops",
+    "mcp": "MCP Servers",
+    "model_group": "Models",
+    "models": "Models",
+    "plugins": "Plugins",
+    "reference_urls": "Reference URLs",
+    "schedule": "Schedule",
     "services": "Services",
     "channels_group": "Channels",
     "show_more_channels": "More",
     "show_less_channels": "Less",
-    "config": "Config",
-    "logs": "Logs",
-    "history": "History",
-    "mcp": "MCP Servers"
+    "skills": "Skills",
+    "tools": "Tools"
   },
   "chat": {
+    "modes": {
+      "build": "Build",
+      "build_description": "Execute tasks directly",
+      "chat": "Chat",
+      "chat_description": "Research and discussion",
+      "plan": "Plan",
+      "plan_description": "Plan before acting"
+    },
     "welcome": "How can I help you today?",
     "welcomeDesc": "Ask me about weather, settings, or any other tasks. I'm here to assist you.",
     "placeholder": "Start a new message...\nPress Enter to send, Shift + Enter for a new line",
@@ -269,7 +283,7 @@
       "saveError": "Failed to save"
     },
     "tabs": {
-      "text": "Text",
+      "text": "Chat",
       "image": "Image",
       "video": "Video"
     }
@@ -457,7 +471,51 @@
   },
   "pages": {
     "agent": {
+      "aiUrl": {
+        "add": "Add",
+        "already_exists": "Already exists",
+        "args_hint": "space-separated",
+        "args_label": "Arguments",
+        "args_placeholder": "e.g. -y @modelcontextprotocol/server-github",
+        "cancel_all": "Cancel all",
+        "command_label": "Command",
+        "command_placeholder": "e.g. npx, uvx, node",
+        "conflict_description": "Some items already exist. Choose how to handle each one.",
+        "conflict_title": "Resolve Conflicts",
+        "connection_http": "HTTP (remote URL)",
+        "connection_sse": "SSE (remote URL)",
+        "connection_stdio": "stdio (local command)",
+        "connection_type": "Connection type",
+        "continue": "Continue",
+        "manual_config_description": "needs connection details to be integrated.",
+        "manual_config_more": "{{count}} more after this",
+        "manual_config_title": "Configure MCP Server",
+        "needs_config": "needs config",
+        "replace": "Replace",
+        "skip": "Skip",
+        "skip_this": "Skip this one",
+        "url_label": "URL",
+        "url_placeholder": "https://mcp.example.com/sse"
+      },
       "load_error": "Failed to load agent support information.",
+      "plugins": {
+        "delete_error": "Failed to delete plugin.",
+        "empty_no_installed": "No plugins installed yet. Use the AI URL Scanner to discover and install plugins.",
+        "empty_no_match": "No plugins match your search.",
+        "load_error": "Failed to load plugins.",
+        "no_description": "No description",
+        "refresh": "Refresh",
+        "remove": "Remove plugin",
+        "remove_success": "Removed \"{{name}}\"",
+        "search_placeholder": "Search by name or type…",
+        "tab_all": "All",
+        "tab_mcp_servers": "MCP Servers",
+        "tab_other": "Other",
+        "tab_skills": "Skills",
+        "tab_tools": "Tools",
+        "title": "Plugins",
+        "update_error": "Failed to update plugin."
+      },
       "skills": {
         "description": "Skills are loaded from the workspace, global OctAi home, and builtin directories.",
         "empty": "No skills are currently available.",
@@ -511,7 +569,25 @@
       }
     },
     "config": {
+      "autoAssist": {
+        "description": "Automatically activate skills and tools based on context.",
+        "exclude_mcp_servers": "Exclude MCP Servers",
+        "exclude_skills": "Exclude Skills",
+        "exclude_tools": "Exclude Tools",
+        "excluded": "excluded",
+        "loading": "Loading Auto-Assist settings…",
+        "max_auto_skills": "Max auto-activated skills",
+        "none_available": "None available.",
+        "save_error": "Failed to save settings.",
+        "saved": "Saved",
+        "title": "Auto-Assist"
+      },
+      "load_config_error": "Failed to load config.",
       "load_error": "Failed to load configuration. Please refresh and try again.",
+      "validation": {
+        "session_scope_required": "Session scope is required.",
+        "workspace_required": "Workspace path is required."
+      },
       "workspace": "Workspace Directory",
       "workspace_hint": "Base directory for agent file operations.",
       "restrict_workspace": "Restrict to Workspace",

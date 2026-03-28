@@ -1,4 +1,5 @@
 import { IconCode, IconDeviceFloppy } from "@tabler/icons-react"
+import { AutoAssistSettings } from "@/components/config/auto-assist-settings"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { Link } from "@tanstack/react-router"
 import { useEffect, useState } from "react"
@@ -51,7 +52,7 @@ export function ConfigPage() {
     queryFn: async () => {
       const res = await fetch("/api/config")
       if (!res.ok) {
-        throw new Error("Failed to load config")
+        throw new Error(t("pages.config.load_config_error"))
       }
       return res.json()
     },
@@ -138,10 +139,10 @@ export function ConfigPage() {
         const dmScope = form.dmScope.trim()
 
         if (!workspace) {
-          throw new Error("Workspace path is required.")
+          throw new Error(t("pages.config.validation.workspace_required"))
         }
         if (!dmScope) {
-          throw new Error("Session scope is required.")
+          throw new Error(t("pages.config.validation.session_scope_required"))
         }
 
         const maxTokens = parseIntField(form.maxTokens, "Max tokens", {
@@ -319,6 +320,8 @@ export function ConfigPage() {
                   {t("pages.config.unsaved_changes")}
                 </div>
               )}
+
+              <AutoAssistSettings />
 
               <AgentDefaultsSection form={form} onFieldChange={updateField} />
 

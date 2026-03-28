@@ -239,19 +239,33 @@ func (c *PicoChannel) Send(ctx context.Context, msg bus.OutboundMessage) error {
 		return channels.ErrNotRunning
 	}
 
-	outMsg := newMessage(TypeMessageCreate, map[string]any{
+	payload := map[string]any{
 		"content": msg.Content,
-	})
+	}
+	if msg.Meta != nil {
+		payload["meta"] = msg.Meta
+	}
+
+	outMsg := newMessage(TypeMessageCreate, payload)
 
 	return c.broadcastToSession(msg.ChatID, outMsg)
 }
 
 // EditMessage implements channels.MessageEditor.
 func (c *PicoChannel) EditMessage(ctx context.Context, chatID string, messageID string, content string) error {
-	outMsg := newMessage(TypeMessageUpdate, map[string]any{
+	return c.EditMessageWithMeta(ctx, chatID, messageID, content, nil)
+}
+
+// EditMessageWithMeta sends a message.update event with optional meta.
+func (c *PicoChannel) EditMessageWithMeta(ctx context.Context, chatID string, messageID string, content string, meta *bus.MessageMeta) error {
+	payload := map[string]any{
 		"message_id": messageID,
 		"content":    content,
-	})
+	}
+	if meta != nil {
+		payload["meta"] = meta
+	}
+	outMsg := newMessage(TypeMessageUpdate, payload)
 	return c.broadcastToSession(chatID, outMsg)
 }
 

@@ -28,6 +28,7 @@ const (
 type SkillMetadata struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
+	SourceURL   string `json:"source_url,omitempty"`
 }
 
 type SkillInfo struct {
@@ -35,6 +36,7 @@ type SkillInfo struct {
 	Path        string `json:"path"`
 	Source      string `json:"source"`
 	Description string `json:"description"`
+	SourceURL   string `json:"source_url,omitempty"`
 }
 
 func (info SkillInfo) validate() error {
@@ -126,6 +128,7 @@ func (sl *SkillsLoader) ListSkills() []SkillInfo {
 			if metadata != nil {
 				info.Description = metadata.Description
 				info.Name = metadata.Name
+				info.SourceURL = metadata.SourceURL
 			}
 			if err := info.validate(); err != nil {
 				slog.Warn("invalid skill from "+source, "name", info.Name, "error", err)
@@ -266,6 +269,9 @@ func (sl *SkillsLoader) getSkillMetadata(skillPath string) *SkillMetadata {
 	if description := yamlMeta["description"]; description != "" {
 		metadata.Description = description
 	}
+	if sourceURL := yamlMeta["source_url"]; sourceURL != "" {
+		metadata.SourceURL = sourceURL
+	}
 	return metadata
 }
 
@@ -330,6 +336,7 @@ func (sl *SkillsLoader) parseSimpleYAML(content string) map[string]string {
 	var meta struct {
 		Name        string `yaml:"name"`
 		Description string `yaml:"description"`
+		SourceURL   string `yaml:"source_url"`
 	}
 	if err := yaml.Unmarshal([]byte(content), &meta); err != nil {
 		return result
@@ -339,6 +346,9 @@ func (sl *SkillsLoader) parseSimpleYAML(content string) map[string]string {
 	}
 	if meta.Description != "" {
 		result["description"] = meta.Description
+	}
+	if meta.SourceURL != "" {
+		result["source_url"] = meta.SourceURL
 	}
 
 	return result

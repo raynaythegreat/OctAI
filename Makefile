@@ -11,7 +11,7 @@ VERSION?=$(shell git describe --tags --always --dirty 2>/dev/null || echo "dev")
 GIT_COMMIT=$(shell git rev-parse --short=8 HEAD 2>/dev/null || echo "dev")
 BUILD_TIME=$(shell date +%FT%T%z)
 GO_VERSION=$(shell $(GO) version | awk '{print $$3}')
-CONFIG_PKG=github.com/sipeed/aibhq/pkg/config
+CONFIG_PKG=github.com/raynaythegreat/ai-business-hq/pkg/config
 LDFLAGS=-X $(CONFIG_PKG).Version=$(VERSION) -X $(CONFIG_PKG).GitCommit=$(GIT_COMMIT) -X $(CONFIG_PKG).BuildTime=$(BUILD_TIME) -X $(CONFIG_PKG).GoVersion=$(GO_VERSION) -s -w
 
 # Go variables
@@ -48,7 +48,7 @@ define PATCH_MIPS_FLAGS
 endef
 
 # Patch creack/pty for loong64 support (upstream doesn't have ztypes_loong64.go)
-PTY_PATCH_LOONG64=pty_dir=$$(go env GOMODCACHE)/github.com/creack/pty@v1.1.9; \
+PTY_PATCH_LOONG64=pty_dir=$$(go env GOMODCACHE)/github.com/creack/pty@v1.1.24; \
 	if [ -d "$$pty_dir" ] && [ ! -f "$$pty_dir/ztypes_loong64.go" ]; then \
 		chmod +w "$$pty_dir" 2>/dev/null || true; \
 		printf '//go:build linux && loong64\npackage pty\ntype (_C_int int32; _C_uint uint32)\n' > "$$pty_dir/ztypes_loong64.go"; \
@@ -138,13 +138,6 @@ build-launcher:
 	@ln -sf octai-launcher-$(PLATFORM)-$(ARCH) $(BUILD_DIR)/octai-launcher
 	@echo "Build complete: $(BUILD_DIR)/octai-launcher"
 
-## build-launcher-tui: Build the octai-launcher TUI binary
-build-launcher-tui:
-	@echo "Building octai-launcher-tui for $(PLATFORM)/$(ARCH)..."
-	@mkdir -p $(BUILD_DIR)
-	@$(GO) build $(GOFLAGS) -o $(BUILD_DIR)/octai-launcher-tui-$(PLATFORM)-$(ARCH) ./cmd/aibhq-launcher-tui
-	@ln -sf octai-launcher-tui-$(PLATFORM)-$(ARCH) $(BUILD_DIR)/octai-launcher-tui
-	@echo "Build complete: $(BUILD_DIR)/octai-launcher-tui"
 
 ## build-whatsapp-native: Build with WhatsApp native (whatsmeow) support; larger binary
 build-whatsapp-native: generate
@@ -244,12 +237,12 @@ clean:
 ## vet: Run go vet for static analysis
 vet: generate
 	@packages="$$($(GO) list $(GOFLAGS) ./...)" && \
-		$(GO) vet $(GOFLAGS) $$(printf '%s\n' "$$packages" | grep -v '^github.com/sipeed/aibhq/web/')
+		$(GO) vet $(GOFLAGS) $$(printf '%s\n' "$$packages" | grep -v '^github.com/raynaythegreat/ai-business-hq/web/')
 	@cd web/backend && $(WEB_GO) vet ./...
 
 ## test: Test Go code
 test: generate
-	@$(GO) test $(GOFLAGS) $$($(GO) list $(GOFLAGS) ./... | grep -v github.com/sipeed/aibhq/web/)
+	@$(GO) test $(GOFLAGS) $$($(GO) list $(GOFLAGS) ./... | grep -v github.com/raynaythegreat/ai-business-hq/web/)
 	@cd web && make test
 
 ## fmt: Format Go code

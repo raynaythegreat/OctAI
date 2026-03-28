@@ -30,13 +30,18 @@ type chatMode int
 const (
 	modeBuild chatMode = iota // default: direct execution
 	modePlan                  // plan before acting
+	modeChat                  // conversational/research mode
 )
 
 func (m chatMode) String() string {
-	if m == modePlan {
+	switch m {
+	case modePlan:
 		return "PLAN"
+	case modeChat:
+		return "CHAT"
+	default:
+		return "BUILD"
 	}
-	return "BUILD"
 }
 
 type chatUI struct {
@@ -154,10 +159,14 @@ func (c *chatUI) buildLayout() {
 }
 
 func (c *chatUI) modeColor() string {
-	if c.mode == modePlan {
+	switch c.mode {
+	case modePlan:
 		return "#F59E0B" // amber for plan
+	case modeChat:
+		return "#A855F7" // violet for chat
+	default:
+		return "#34D399" // green for build
 	}
-	return "#34D399" // green for build
 }
 
 func (c *chatUI) updateHeader() {
@@ -170,15 +179,18 @@ func (c *chatUI) updateHeader() {
 
 func (c *chatUI) updateFooter() {
 	c.footer.SetText(fmt.Sprintf(
-		"  [#7B6F8E]%s[-]  [#2D1B4E]·[-]  [#7B6F8E]session:%s[-]  [#2D1B4E]·[-]  [#A855F7]Tab[-][#7B6F8E]:plan/build  [#A855F7]Ctrl+L[-][#7B6F8E]:models  /help[-]",
+		"  [#7B6F8E]%s[-]  [#2D1B4E]·[-]  [#7B6F8E]session:%s[-]  [#2D1B4E]·[-]  [#A855F7]Tab[-][#7B6F8E]:chat/plan/build  [#A855F7]Ctrl+L[-][#7B6F8E]:models  /help[-]",
 		c.modelName, c.shortSession(),
 	))
 }
 
 func (c *chatUI) toggleMode() {
-	if c.mode == modeBuild {
+	switch c.mode {
+	case modeBuild:
+		c.mode = modeChat
+	case modeChat:
 		c.mode = modePlan
-	} else {
+	default:
 		c.mode = modeBuild
 	}
 	c.updateHeader()
@@ -196,7 +208,7 @@ func (c *chatUI) printWelcome() {
 	fmt.Fprintf(c.chatLog, "  [#2D1B4E]────────────────────────────────────────[-]\n")
 	fmt.Fprintf(c.chatLog, "  [#7B6F8E]model:[-] [#A855F7]%s[-]  [#7B6F8E]· session:[-] [#A855F7]%s[-]\n",
 		c.modelName, c.shortSession())
-	fmt.Fprintf(c.chatLog, "  [#7B6F8E]type a message to begin · / for commands · Tab to toggle Plan/Build[-]\n")
+	fmt.Fprintf(c.chatLog, "  [#7B6F8E]type a message to begin · / for commands · Tab to cycle Chat/Plan/Build[-]\n")
 	fmt.Fprintf(c.chatLog, "  [#2D1B4E]────────────────────────────────────────[-]\n\n")
 }
 
@@ -266,35 +278,38 @@ func (c *chatUI) run(ctx context.Context, loop *pkgagent.AgentLoop) error {
 				c.hideModelPicker()
 				return nil
 			}
+		case tcell.KeyEnter:
+			// Handle Enter at app level so tview v0.42's internal TextArea
+			// inside InputField cannot swallow it before our handler fires.
+			if c.app.GetFocus() == c.input {
+				if c.suggVisible {
+					c.app.QueueUpdateDraw(c.applySugg)
+					return nil
+				}
+				text := strings.TrimSpace(c.input.GetText())
+				if text == "" {
+					return nil
+				}
+				captured := text
+				c.input.SetText("")
+				c.hideSuggestions()
+				if strings.HasPrefix(captured, "/") {
+					c.app.QueueUpdateDraw(func() { c.handleSlashCommand(captured) })
+				} else {
+					c.app.QueueUpdateDraw(func() { c.sendToLoop(captured) })
+				}
+				return nil
+			}
 		}
 		return event
 	})
 
 	// ── Input key capture ─────────────────────────────────────
-	// NOTE: Enter is handled HERE (not in SetDoneFunc) because tview v0.42
-	// routes keys through the internal TextArea which can swallow SetDoneFunc
-	// callbacks. SetInputCapture runs before any internal widget handling.
+	// NOTE: Enter is handled at the app level (c.app.SetInputCapture above)
+	// because tview v0.42 rewrote InputField to use an internal TextArea that
+	// swallows KeyEnter before widget-level SetInputCapture can fire.
 	c.input.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		switch event.Key() {
-		case tcell.KeyEnter:
-			if c.suggVisible {
-				c.app.QueueUpdateDraw(c.applySugg)
-				return nil
-			}
-			text := strings.TrimSpace(c.input.GetText())
-			if text == "" {
-				return nil
-			}
-			captured := text
-			c.input.SetText("")
-			c.hideSuggestions()
-			if strings.HasPrefix(captured, "/") {
-				c.app.QueueUpdateDraw(func() { c.handleSlashCommand(captured) })
-			} else {
-				c.app.QueueUpdateDraw(func() { c.sendToLoop(captured) })
-			}
-			return nil
-
 		case tcell.KeyTab:
 			if c.suggVisible {
 				c.app.QueueUpdateDraw(c.applySugg)
@@ -503,16 +518,6 @@ func (c *chatUI) handleSlashCommand(raw string) {
 		raw = "/list skills"
 	}
 
-	// Skill shorthand: /<skillname> [msg] → /use <skillname> [msg]
-	cmdWithoutSlash := strings.TrimPrefix(cmd, "/")
-	if c.skillNames[cmdWithoutSlash] {
-		rest := ""
-		if len(parts) > 1 {
-			rest = " " + strings.Join(parts[1:], " ")
-		}
-		raw = "/use " + cmdWithoutSlash + rest
-	}
-
 	// Forward to agent loop
 	c.sendToLoop(raw)
 }
@@ -529,10 +534,13 @@ func (c *chatUI) sendToLoop(text string) {
 
 	c.appendUserMessage(text)
 
-	// In plan mode, prepend instruction to output a plan before acting
+	// Apply mode-specific prefix
 	payload := text
-	if mode == modePlan {
+	switch mode {
+	case modePlan:
 		payload = "Before taking any action, write a clear numbered plan of what you will do. Then execute it step by step.\n\n" + text
+	case modeChat:
+		payload = "You are in conversational mode. Focus on discussion, research, and answering questions. Do not make file changes or run commands unless explicitly asked.\n\n" + text
 	}
 
 	go func() {

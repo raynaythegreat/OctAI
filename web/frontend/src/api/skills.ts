@@ -3,6 +3,7 @@ export interface SkillSupportItem {
   path: string
   source: "workspace" | "global" | "builtin" | string
   description: string
+  source_url?: string
 }
 
 export interface SkillDetailResponse extends SkillSupportItem {

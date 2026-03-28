@@ -575,7 +575,13 @@ func DefaultConfig() *Config {
 					UseBM25:          true,
 					UseRegex:         false,
 				},
-				Servers: map[string]MCPServerConfig{},
+				Servers: map[string]MCPServerConfig{
+				"notebooklm": {
+					Enabled: false,
+					Command: "uvx",
+					Args:    []string{"--from", "notebooklm-mcp-cli", "notebooklm-mcp"},
+				},
+			},
 			},
 			AppendFile: ToolConfig{
 				Enabled: true,

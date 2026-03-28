@@ -1,4 +1,5 @@
 import {
+  IconBrandGithub,
   IconFileInfo,
   IconLoader2,
   IconPlus,
@@ -169,7 +170,7 @@ export function SkillsPage() {
                   {data.skills.map((skill) => (
                     <Card
                       key={`${skill.source}:${skill.name}`}
-                      className="border-border/60 gap-4 bg-white/80"
+                      className="gap-4 border-violet-200/60 bg-violet-50/60 dark:border-violet-700/30 dark:bg-violet-950/20"
                       size="sm"
                     >
                       <CardHeader>
@@ -184,6 +185,18 @@ export function SkillsPage() {
                             </CardDescription>
                           </div>
                           <div className="flex items-center gap-1">
+                            {skill.source_url && (
+                              <a
+                                href={skill.source_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-muted-foreground hover:text-violet-500"
+                                title={skill.source_url}
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <IconBrandGithub className="size-4" />
+                              </a>
+                            )}
                             <Button
                               variant="ghost"
                               size="icon-sm"

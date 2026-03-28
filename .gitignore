@@ -67,5 +67,7 @@ web/backend/dist/*
 
 docker/data
 octai
+/aibhq
+/aibhq-launcher
 octai-launcher
 octai-web

@@ -1,0 +1,75 @@
+{
+  "comment": "Dev Assistant Team — a general-purpose development and creative assistant team. Copy the 'agents' and 'teams' sections into your config.json to activate.",
+  "agents": {
+    "list": [
+      {
+        "id": "dev-orchestrator",
+        "name": "Dev Orchestrator",
+        "role": "orchestrator",
+        "team_id": "dev-assistant",
+        "workspace": "workspace/teams/dev-assistant",
+        "subagents": {
+          "allow_agents": ["*"]
+        },
+        "model": {
+          "model_name": "claude-opus-4-6"
+        }
+      },
+      {
+        "id": "research-assistant",
+        "name": "Research Assistant",
+        "role": "research",
+        "team_id": "dev-assistant",
+        "workspace": "workspace/teams/dev-assistant",
+        "skills": ["github", "agent-browser"]
+      },
+      {
+        "id": "code-assistant",
+        "name": "Code Assistant",
+        "role": "custom",
+        "team_id": "dev-assistant",
+        "workspace": "workspace/teams/dev-assistant"
+      },
+      {
+        "id": "creative-assistant",
+        "name": "Creative Assistant",
+        "role": "content",
+        "team_id": "dev-assistant",
+        "workspace": "workspace/teams/dev-assistant"
+      }
+    ],
+    "teams": [
+      {
+        "id": "dev-assistant",
+        "name": "Dev Assistant Team",
+        "orchestrator_id": "dev-orchestrator",
+        "member_ids": ["research-assistant", "code-assistant", "creative-assistant"],
+        "shared_kb_path": "workspace/teams/dev-assistant/knowledge",
+        "token_budget": 150000,
+        "max_concurrent": 3
+      }
+    ]
+  },
+  "usage_examples": [
+    {
+      "description": "Research and implement a feature",
+      "user_message": "Research how to add WebSocket compression in Go, then implement it in our server.",
+      "flow": [
+        "1. dev-orchestrator receives request",
+        "2. Delegates to research-assistant: search for Go WebSocket compression options",
+        "3. Delegates to code-assistant: implement the solution based on research results",
+        "4. Synthesizes and presents the implementation"
+      ]
+    },
+    {
+      "description": "Debug with creative problem-solving",
+      "user_message": "Our API rate limiter is causing issues. Figure out why and suggest alternatives.",
+      "flow": [
+        "1. dev-orchestrator delegates research to research-assistant",
+        "2. code-assistant analyzes the existing implementation",
+        "3. creative-assistant brainstorms alternative approaches",
+        "4. Orchestrator synthesizes a recommendation"
+      ]
+    }
+  ]
+}

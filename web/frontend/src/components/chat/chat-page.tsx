@@ -1,4 +1,4 @@
-import { IconPlus } from "@tabler/icons-react"
+import { IconBrain, IconBug, IconHammer, IconMessageCircle, IconPlus, IconSparkles, IconSearch } from "@tabler/icons-react"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 
@@ -27,7 +27,7 @@ export function ChatPage() {
   const [activeChannel, setActiveChannel] = useState("pico")
   const [viewingSessionId, setViewingSessionId] = useState<string | null>(null)
   const [viewingMessages, setViewingMessages] = useState<{ role: string; content: string }[] | null>(null)
-  const [isPlanMode, setIsPlanMode] = useState(false)
+  const [chatMode, setChatMode] = useState<"chat" | "plan" | "build">("build")
 
   const readOnly = activeChannel !== "pico"
 
@@ -103,14 +103,23 @@ export function ChatPage() {
     }
   }, [messages, isTyping, isAtBottom])
 
-  const applyPlanPrefix = (content: string) =>
-    isPlanMode
-      ? `Before taking any action, write a clear numbered plan of what you will do. Then execute it step by step.\n\n${content}`
-      : content
+  const applyModePrefix = (content: string) => {
+    if (chatMode === "plan") {
+      return `Before taking any action, write a clear numbered plan of what you will do. Then execute it step by step.\n\n${content}`
+    }
+    if (chatMode === "chat") {
+      return `You are in conversational mode. Focus on discussion, research, and answering questions. Do not make file changes or run commands unless explicitly asked.\n\n${content}`
+    }
+    return content
+  }
+
+  const cycleChatMode = () => {
+    setChatMode((m) => (m === "build" ? "chat" : m === "chat" ? "plan" : "build"))
+  }
 
   const handleSend = () => {
     if (!input.trim() || !canSend) return
-    if (sendMessage(applyPlanPrefix(input.trim()))) {
+    if (sendMessage(applyModePrefix(input.trim()))) {
       setInput("")
     }
   }
@@ -135,7 +144,7 @@ export function ChatPage() {
         }
       }
     }
-    if (sendMessage(applyPlanPrefix(fullContent))) {
+    if (sendMessage(applyModePrefix(fullContent))) {
       setInput("")
     }
   }
@@ -212,11 +221,65 @@ export function ChatPage() {
       >
         <div className="mx-auto flex w-full max-w-250 flex-col gap-8 pb-8">
           {!readOnly && messages.length === 0 && !isTyping && (
-            <ChatEmptyState
-              hasConfiguredModels={hasConfiguredModels}
-              defaultModelName={defaultModelName}
-              isConnected={isGatewayRunning}
-            />
+            <>
+              <ChatEmptyState
+                hasConfiguredModels={hasConfiguredModels}
+                defaultModelName={defaultModelName}
+                isConnected={isGatewayRunning}
+              />
+              {canSend && (
+                <div className="flex flex-wrap justify-center gap-2 px-4">
+                  <button
+                    type="button"
+                    className="flex items-center gap-2 rounded-full border border-violet-500/30 bg-violet-500/5 px-4 py-2 text-sm text-violet-400 transition-colors hover:bg-violet-500/10"
+                    onClick={() => { setChatMode("chat"); setInput("Research: ") }}
+                  >
+                    <IconSearch className="size-3.5" />
+                    Research a topic
+                  </button>
+                  <button
+                    type="button"
+                    className="flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/5 px-4 py-2 text-sm text-amber-400 transition-colors hover:bg-amber-500/10"
+                    onClick={() => { setChatMode("plan"); setInput("") }}
+                  >
+                    <IconBrain className="size-3.5" />
+                    Write a plan
+                  </button>
+                  <button
+                    type="button"
+                    className="flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/5 px-4 py-2 text-sm text-emerald-400 transition-colors hover:bg-emerald-500/10"
+                    onClick={() => { setChatMode("build"); setInput("") }}
+                  >
+                    <IconHammer className="size-3.5" />
+                    Build something
+                  </button>
+                  <button
+                    type="button"
+                    className="flex items-center gap-2 rounded-full border border-violet-500/30 bg-violet-500/5 px-4 py-2 text-sm text-violet-400 transition-colors hover:bg-violet-500/10"
+                    onClick={() => setInput("/use brainstorming ")}
+                  >
+                    <IconSparkles className="size-3.5" />
+                    Brainstorm ideas
+                  </button>
+                  <button
+                    type="button"
+                    className="flex items-center gap-2 rounded-full border border-rose-500/30 bg-rose-500/5 px-4 py-2 text-sm text-rose-400 transition-colors hover:bg-rose-500/10"
+                    onClick={() => setInput("/use systematic-debugging ")}
+                  >
+                    <IconBug className="size-3.5" />
+                    Debug an issue
+                  </button>
+                  <button
+                    type="button"
+                    className="flex items-center gap-2 rounded-full border border-violet-500/30 bg-violet-500/5 px-4 py-2 text-sm text-violet-400 transition-colors hover:bg-violet-500/10"
+                    onClick={() => { setChatMode("chat"); setInput("") }}
+                  >
+                    <IconMessageCircle className="size-3.5" />
+                    Just chat
+                  </button>
+                </div>
+              )}
+            </>
           )}
 
           {!readOnly &&
@@ -226,6 +289,7 @@ export function ChatPage() {
                   <AssistantMessage
                     content={msg.content}
                     timestamp={msg.timestamp}
+                    meta={msg.meta}
                   />
                 ) : (
                   <UserMessage content={msg.content} />
@@ -269,8 +333,8 @@ export function ChatPage() {
           onSendWithAttachments={(content, attachments) => {
             void handleSendWithAttachments(content, attachments)
           }}
-          isPlanMode={isPlanMode}
-          onTogglePlanMode={() => setIsPlanMode((v) => !v)}
+          chatMode={chatMode}
+          onCycleMode={cycleChatMode}
         />
       )}
     </div>

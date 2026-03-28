@@ -1,22 +1,36 @@
 {
   "navigation": {
+    "ai_url": "AI URL",
+    "capabilities": "Capacidades",
     "chat": "Chat",
-    "model_group": "Modelos",
-    "models": "Modelos",
+    "config": "Configuración",
     "credentials": "Credenciales",
     "agent_group": "Agente",
-    "skills": "Habilidades",
-    "tools": "Herramientas",
+    "history": "Historial",
+    "logs": "Registros",
+    "loops": "Bucles",
+    "mcp": "Servidores MCP",
+    "model_group": "Modelos",
+    "models": "Modelos",
+    "plugins": "Plugins",
+    "reference_urls": "URLs de Referencia",
+    "schedule": "Programación",
     "services": "Servicios",
     "channels_group": "Canales",
     "show_more_channels": "Más",
     "show_less_channels": "Menos",
-    "config": "Configuración",
-    "logs": "Registros",
-    "history": "Historial",
-    "mcp": "Servidores MCP"
+    "skills": "Habilidades",
+    "tools": "Herramientas"
   },
   "chat": {
+    "modes": {
+      "build": "Construir",
+      "build_description": "Ejecutar tareas directamente",
+      "chat": "Chat",
+      "chat_description": "Investigación y discusión",
+      "plan": "Planificar",
+      "plan_description": "Planificar antes de actuar"
+    },
     "welcome": "¿Cómo puedo ayudarte hoy?",
     "welcomeDesc": "Pregúntame sobre el clima, configuración o cualquier otra tarea. Estoy aquí para ayudarte.",
     "placeholder": "Escribe un mensaje...\nPresiona Enter para enviar, Shift + Enter para nueva línea",
@@ -269,7 +283,7 @@
       "saveError": "Error al guardar"
     },
     "tabs": {
-      "text": "Texto",
+      "text": "Chat",
       "image": "Imagen",
       "video": "Video"
     }
@@ -457,7 +471,51 @@
   },
   "pages": {
     "agent": {
+      "aiUrl": {
+        "add": "Agregar",
+        "already_exists": "Ya existe",
+        "args_hint": "separados por espacios",
+        "args_label": "Argumentos",
+        "args_placeholder": "ej. -y @modelcontextprotocol/server-github",
+        "cancel_all": "Cancelar todo",
+        "command_label": "Comando",
+        "command_placeholder": "ej. npx, uvx, node",
+        "conflict_description": "Algunos elementos ya existen. Elige cómo manejar cada uno.",
+        "conflict_title": "Resolver Conflictos",
+        "connection_http": "HTTP (URL remota)",
+        "connection_sse": "SSE (URL remota)",
+        "connection_stdio": "stdio (comando local)",
+        "connection_type": "Tipo de conexión",
+        "continue": "Continuar",
+        "manual_config_description": "necesita detalles de conexión para ser integrado.",
+        "manual_config_more": "{{count}} más después de este",
+        "manual_config_title": "Configurar Servidor MCP",
+        "needs_config": "requiere configuración",
+        "replace": "Reemplazar",
+        "skip": "Omitir",
+        "skip_this": "Omitir este",
+        "url_label": "URL",
+        "url_placeholder": "https://mcp.example.com/sse"
+      },
       "load_error": "Error al cargar información de soporte del agente.",
+      "plugins": {
+        "delete_error": "Error al eliminar plugin.",
+        "empty_no_installed": "No hay plugins instalados aún. Usa el Escáner de URL con IA para descubrir e instalar plugins.",
+        "empty_no_match": "Ningún plugin coincide con tu búsqueda.",
+        "load_error": "Error al cargar plugins.",
+        "no_description": "Sin descripción",
+        "refresh": "Actualizar",
+        "remove": "Eliminar plugin",
+        "remove_success": "Eliminado \"{{name}}\"",
+        "search_placeholder": "Buscar por nombre o tipo…",
+        "tab_all": "Todos",
+        "tab_mcp_servers": "Servidores MCP",
+        "tab_other": "Otros",
+        "tab_skills": "Habilidades",
+        "tab_tools": "Herramientas",
+        "title": "Plugins",
+        "update_error": "Error al actualizar plugin."
+      },
       "skills": {
         "description": "Las habilidades se cargan desde el espacio de trabajo, el directorio global de OctAi y los directorios integrados.",
         "empty": "No hay habilidades disponibles actualmente.",
@@ -511,7 +569,25 @@
       }
     },
     "config": {
+      "autoAssist": {
+        "description": "Activar automáticamente habilidades y herramientas según el contexto.",
+        "exclude_mcp_servers": "Excluir Servidores MCP",
+        "exclude_skills": "Excluir Habilidades",
+        "exclude_tools": "Excluir Herramientas",
+        "excluded": "excluido",
+        "loading": "Cargando ajustes de Auto-Asistencia…",
+        "max_auto_skills": "Máximo de habilidades auto-activadas",
+        "none_available": "Ninguno disponible.",
+        "save_error": "Error al guardar ajustes.",
+        "saved": "Guardado",
+        "title": "Auto-Asistencia"
+      },
+      "load_config_error": "Error al cargar la configuración.",
       "load_error": "Error al cargar configuración. Actualiza e inténtalo de nuevo.",
+      "validation": {
+        "session_scope_required": "El ámbito de sesión es obligatorio.",
+        "workspace_required": "La ruta del espacio de trabajo es obligatoria."
+      },
       "workspace": "Directorio de Espacio de Trabajo",
       "workspace_hint": "Directorio base para operaciones de archivos del agente.",
       "restrict_workspace": "Restringir al Espacio de Trabajo",

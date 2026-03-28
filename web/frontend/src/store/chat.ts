@@ -5,11 +5,35 @@ import {
   writeStoredSessionId,
 } from "@/features/chat/state"
 
+export interface ToolUseBlock {
+  tool_name: string
+  status: "running" | "done" | "error"
+  args_preview?: string
+  result_preview?: string
+  duration_ms?: number
+}
+
+export interface AgentBlock {
+  agent_id: string
+  agent_name: string
+  status: "running" | "done" | "error"
+  model?: string
+  tokens?: { input: number; output: number }
+  tool_uses?: ToolUseBlock[]
+}
+
+export interface MessageMeta {
+  active_skills?: string[]
+  tool_uses?: ToolUseBlock[]
+  agents?: AgentBlock[]
+}
+
 export interface ChatMessage {
   id: string
   role: "user" | "assistant"
   content: string
   timestamp: number | string
+  meta?: MessageMeta
 }
 
 export type ConnectionState =

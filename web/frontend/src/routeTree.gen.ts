@@ -27,6 +27,7 @@ import { Route as ChannelsNameRouteImport } from './routes/channels/$name'
 import { Route as AgentToolsRouteImport } from './routes/agent/tools'
 import { Route as AgentSkillsRouteImport } from './routes/agent/skills'
 import { Route as AgentReferenceUrlRouteImport } from './routes/agent/reference-url'
+import { Route as AgentPluginsRouteImport } from './routes/agent/plugins'
 import { Route as AgentCapabilitiesRouteImport } from './routes/agent/capabilities'
 import { Route as AgentAiUrlRouteImport } from './routes/agent/ai-url'
 
@@ -120,6 +121,11 @@ const AgentReferenceUrlRoute = AgentReferenceUrlRouteImport.update({
   path: '/reference-url',
   getParentRoute: () => AgentRoute,
 } as any)
+const AgentPluginsRoute = AgentPluginsRouteImport.update({
+  id: '/plugins',
+  path: '/plugins',
+  getParentRoute: () => AgentRoute,
+} as any)
 const AgentCapabilitiesRoute = AgentCapabilitiesRouteImport.update({
   id: '/capabilities',
   path: '/capabilities',
@@ -147,6 +153,7 @@ export interface FileRoutesByFullPath {
   '/workflows': typeof WorkflowsRoute
   '/agent/ai-url': typeof AgentAiUrlRoute
   '/agent/capabilities': typeof AgentCapabilitiesRoute
+  '/agent/plugins': typeof AgentPluginsRoute
   '/agent/reference-url': typeof AgentReferenceUrlRoute
   '/agent/skills': typeof AgentSkillsRoute
   '/agent/tools': typeof AgentToolsRoute
@@ -169,6 +176,7 @@ export interface FileRoutesByTo {
   '/workflows': typeof WorkflowsRoute
   '/agent/ai-url': typeof AgentAiUrlRoute
   '/agent/capabilities': typeof AgentCapabilitiesRoute
+  '/agent/plugins': typeof AgentPluginsRoute
   '/agent/reference-url': typeof AgentReferenceUrlRoute
   '/agent/skills': typeof AgentSkillsRoute
   '/agent/tools': typeof AgentToolsRoute
@@ -192,6 +200,7 @@ export interface FileRoutesById {
   '/workflows': typeof WorkflowsRoute
   '/agent/ai-url': typeof AgentAiUrlRoute
   '/agent/capabilities': typeof AgentCapabilitiesRoute
+  '/agent/plugins': typeof AgentPluginsRoute
   '/agent/reference-url': typeof AgentReferenceUrlRoute
   '/agent/skills': typeof AgentSkillsRoute
   '/agent/tools': typeof AgentToolsRoute
@@ -216,6 +225,7 @@ export interface FileRouteTypes {
     | '/workflows'
     | '/agent/ai-url'
     | '/agent/capabilities'
+    | '/agent/plugins'
     | '/agent/reference-url'
     | '/agent/skills'
     | '/agent/tools'
@@ -238,6 +248,7 @@ export interface FileRouteTypes {
     | '/workflows'
     | '/agent/ai-url'
     | '/agent/capabilities'
+    | '/agent/plugins'
     | '/agent/reference-url'
     | '/agent/skills'
     | '/agent/tools'
@@ -260,6 +271,7 @@ export interface FileRouteTypes {
     | '/workflows'
     | '/agent/ai-url'
     | '/agent/capabilities'
+    | '/agent/plugins'
     | '/agent/reference-url'
     | '/agent/skills'
     | '/agent/tools'
@@ -411,6 +423,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AgentReferenceUrlRouteImport
       parentRoute: typeof AgentRoute
     }
+    '/agent/plugins': {
+      id: '/agent/plugins'
+      path: '/plugins'
+      fullPath: '/agent/plugins'
+      preLoaderRoute: typeof AgentPluginsRouteImport
+      parentRoute: typeof AgentRoute
+    }
     '/agent/capabilities': {
       id: '/agent/capabilities'
       path: '/capabilities'
@@ -443,6 +462,7 @@ const ChannelsRouteRouteWithChildren = ChannelsRouteRoute._addFileChildren(
 interface AgentRouteChildren {
   AgentAiUrlRoute: typeof AgentAiUrlRoute
   AgentCapabilitiesRoute: typeof AgentCapabilitiesRoute
+  AgentPluginsRoute: typeof AgentPluginsRoute
   AgentReferenceUrlRoute: typeof AgentReferenceUrlRoute
   AgentSkillsRoute: typeof AgentSkillsRoute
   AgentToolsRoute: typeof AgentToolsRoute
@@ -451,6 +471,7 @@ interface AgentRouteChildren {
 const AgentRouteChildren: AgentRouteChildren = {
   AgentAiUrlRoute: AgentAiUrlRoute,
   AgentCapabilitiesRoute: AgentCapabilitiesRoute,
+  AgentPluginsRoute: AgentPluginsRoute,
   AgentReferenceUrlRoute: AgentReferenceUrlRoute,
   AgentSkillsRoute: AgentSkillsRoute,
   AgentToolsRoute: AgentToolsRoute,

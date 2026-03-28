@@ -89,6 +89,7 @@ func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
 	h.registerLoopRoutes(mux)
 	h.registerScannerRoutes(mux)
 	h.registerReferenceURLRoutes(mux)
+	h.registerPluginRoutes(mux)
 	h.registerImageModelRoutes(mux)
 	h.registerVideoModelRoutes(mux)
 	h.registerMediaRoutes(mux)

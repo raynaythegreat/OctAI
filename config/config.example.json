@@ -309,6 +309,15 @@
         "use_regex": false
       },
       "servers": {
+        "notebooklm": {
+          "enabled": false,
+          "command": "uvx",
+          "args": [
+            "--from",
+            "notebooklm-mcp-cli",
+            "notebooklm-mcp"
+          ]
+        },
         "context7": {
           "enabled": false,
           "type": "http",

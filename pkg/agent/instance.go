@@ -39,6 +39,7 @@ type AgentInstance struct {
 	Tools                     *tools.ToolRegistry
 	Subagents                 *config.SubagentsConfig
 	SkillsFilter              []string
+	AutoAssist                config.AutoAssistConfig
 	Candidates                []providers.FallbackCandidate
 
 	// Router is non-nil when model routing is configured and the light model
@@ -207,6 +208,7 @@ func NewAgentInstance(
 		Tools:                     toolsRegistry,
 		Subagents:                 subagents,
 		SkillsFilter:              skillsFilter,
+		AutoAssist:                defaults.AutoAssist,
 		Candidates:                candidates,
 		Router:                    router,
 		LightCandidates:           lightCandidates,

@@ -1,4 +1,4 @@
-import { IconArrowUp, IconBrain, IconHammer, IconMicrophone, IconPaperclip, IconPhoto } from "@tabler/icons-react"
+import { IconArrowUp, IconBrain, IconHammer, IconMessageCircle, IconMicrophone, IconPaperclip, IconPhoto } from "@tabler/icons-react"
 import type { KeyboardEvent } from "react"
 import * as React from "react"
 import { useTranslation } from "react-i18next"
@@ -15,8 +15,8 @@ interface ChatComposerProps {
   isConnected: boolean
   hasDefaultModel: boolean
   onSendWithAttachments?: (content: string, attachments: { file: File; dataUrl?: string }[]) => void
-  isPlanMode?: boolean
-  onTogglePlanMode?: () => void
+  chatMode?: "chat" | "plan" | "build"
+  onCycleMode?: () => void
 }
 
 // Slash commands supported by the gateway
@@ -76,8 +76,8 @@ export function ChatComposer({
   isConnected,
   hasDefaultModel,
   onSendWithAttachments,
-  isPlanMode = false,
-  onTogglePlanMode,
+  chatMode = "build",
+  onCycleMode,
 }: ChatComposerProps) {
   const { t } = useTranslation()
   const canInput = isConnected && hasDefaultModel
@@ -107,7 +107,7 @@ export function ChatComposer({
         setSkillCommands(
           (data.skills as { name: string; description?: string }[]).map((s) => ({
             name: s.name,
-            usage: `/use ${s.name}`,
+            usage: `/${s.name}`,
             description: s.description || `Run ${s.name} skill`,
           })),
         )
@@ -211,10 +211,10 @@ export function ChatComposer({
       }
     }
 
-    // Tab with empty input → toggle Plan/Build mode
+    // Tab with empty input → cycle Chat/Plan/Build mode
     if (e.key === "Tab" && !input.trim()) {
       e.preventDefault()
-      onTogglePlanMode?.()
+      onCycleMode?.()
       return
     }
 
@@ -344,27 +344,29 @@ export function ChatComposer({
           )}
 
           <div className="mt-2 flex items-center justify-between px-1">
-            {/* Left: Plan/Build mode toggle */}
+            {/* Left: Chat/Plan/Build mode cycle */}
             <Button
               type="button"
               size="sm"
               variant="ghost"
               className={cn(
                 "h-7 gap-1.5 rounded-full px-2.5 text-xs font-medium transition-all",
-                isPlanMode
-                  ? "bg-amber-500/15 text-amber-400 hover:bg-amber-500/20"
-                  : "bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20",
+                chatMode === "plan" && "bg-amber-500/15 text-amber-400 hover:bg-amber-500/20",
+                chatMode === "chat" && "bg-violet-500/15 text-violet-400 hover:bg-violet-500/20",
+                chatMode === "build" && "bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20",
               )}
-              onClick={onTogglePlanMode}
+              onClick={onCycleMode}
               disabled={!canInput}
-              title={isPlanMode ? "Plan mode (Tab to toggle)" : "Build mode (Tab to toggle)"}
+              title={`${chatMode === "build" ? "Build" : chatMode === "plan" ? "Plan" : "Chat"} mode (Tab to cycle)`}
             >
-              {isPlanMode ? (
+              {chatMode === "plan" ? (
                 <IconBrain className="size-3.5" />
+              ) : chatMode === "chat" ? (
+                <IconMessageCircle className="size-3.5" />
               ) : (
                 <IconHammer className="size-3.5" />
               )}
-              {isPlanMode ? "Plan" : "Build"}
+              {chatMode === "plan" ? "Plan" : chatMode === "chat" ? "Chat" : "Build"}
             </Button>
 
             {/* Right: media buttons + send */}

@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -1504,11 +1505,18 @@ func (al *AgentLoop) runAgentLoop(
 	}
 
 	if opts.SendResponse && result.finalContent != "" {
-		al.bus.PublishOutbound(ctx, bus.OutboundMessage{
+		outMsg := bus.OutboundMessage{
 			Channel: opts.Channel,
 			ChatID:  opts.ChatID,
 			Content: result.finalContent,
-		})
+		}
+		// Attach active skill names as meta for rich UI rendering
+		if skillNames := activeSkillNames(agent, opts); len(skillNames) > 0 {
+			outMsg.Meta = &bus.MessageMeta{
+				ActiveSkills: skillNames,
+			}
+		}
+		al.bus.PublishOutbound(ctx, outMsg)
 	}
 
 	if result.finalContent != "" {
@@ -3219,6 +3227,10 @@ func (al *AgentLoop) handleCommand(
 		return reply, handled
 	}
 
+	if matched, handled, reply := al.applySkillShorthandCommand(msg.Content, agent, opts); matched {
+		return reply, handled
+	}
+
 	if al.cmdRegistry == nil {
 		return "", false
 	}
@@ -3260,6 +3272,14 @@ func activeSkillNames(agent *AgentInstance, opts processOptions) []string {
 	combined := make([]string, 0, len(agent.SkillsFilter)+len(opts.ForcedSkills))
 	combined = append(combined, agent.SkillsFilter...)
 	combined = append(combined, opts.ForcedSkills...)
+
+	// Auto-Assist: when enabled and no explicit skills are forced, auto-select
+	// relevant skills based on the user's message content.
+	if agent.AutoAssist.Enabled && len(opts.ForcedSkills) == 0 && agent.ContextBuilder != nil {
+		auto := autoSelectSkills(agent, opts.UserMessage, agent.AutoAssist)
+		combined = append(combined, auto...)
+	}
+
 	if len(combined) == 0 {
 		return nil
 	}
@@ -3285,6 +3305,75 @@ func activeSkillNames(agent *AgentInstance, opts processOptions) []string {
 	}
 
 	return resolved
+}
+
+// autoSelectSkills returns skill names that are relevant to the given message based on
+// simple keyword overlap between the message and each skill's name/description.
+// It respects the AutoAssist exclusion list and caps results at MaxAutoSkills.
+func autoSelectSkills(agent *AgentInstance, message string, cfg config.AutoAssistConfig) []string {
+	if agent.ContextBuilder == nil {
+		return nil
+	}
+
+	allSkills := agent.ContextBuilder.ListSkillsInfo()
+	if len(allSkills) == 0 {
+		return nil
+	}
+
+	excluded := make(map[string]struct{}, len(cfg.ExcludedSkills))
+	for _, s := range cfg.ExcludedSkills {
+		excluded[strings.ToLower(strings.TrimSpace(s))] = struct{}{}
+	}
+
+	msgLower := strings.ToLower(message)
+	msgWords := strings.Fields(msgLower)
+
+	type scored struct {
+		name  string
+		score int
+	}
+	var candidates []scored
+
+	for _, skill := range allSkills {
+		key := strings.ToLower(skill.Name)
+		if _, skip := excluded[key]; skip {
+			continue
+		}
+
+		score := 0
+		target := strings.ToLower(skill.Name + " " + skill.Description)
+
+		// Exact skill name mention scores highest
+		if strings.Contains(msgLower, key) {
+			score += 10
+		}
+
+		// Count keyword overlaps
+		for _, w := range msgWords {
+			if len(w) >= 4 && strings.Contains(target, w) {
+				score++
+			}
+		}
+
+		if score > 0 {
+			candidates = append(candidates, scored{name: skill.Name, score: score})
+		}
+	}
+
+	// Sort by score descending
+	sort.Slice(candidates, func(i, j int) bool {
+		return candidates[i].score > candidates[j].score
+	})
+
+	max := cfg.GetMaxAutoSkills()
+	result := make([]string, 0, max)
+	for i, c := range candidates {
+		if i >= max {
+			break
+		}
+		result = append(result, c.name)
+	}
+	return result
 }
 
 func (al *AgentLoop) applyExplicitSkillCommand(
@@ -3338,6 +3427,59 @@ func (al *AgentLoop) applyExplicitSkillCommand(
 	if opts != nil {
 		opts.ForcedSkills = append(opts.ForcedSkills, skillName)
 		opts.UserMessage = message
+	}
+
+	return true, false, ""
+}
+
+// applySkillShorthandCommand handles direct skill invocation without the /use prefix.
+// Supports single skill (/brainstorming) and comma-separated multi-skill (/skill1,skill2 message).
+// If the command name matches one or more installed skills, they are added to ForcedSkills.
+func (al *AgentLoop) applySkillShorthandCommand(
+	raw string,
+	agent *AgentInstance,
+	opts *processOptions,
+) (matched bool, handled bool, reply string) {
+	if agent == nil || agent.ContextBuilder == nil {
+		return false, false, ""
+	}
+
+	cmdName, ok := commands.CommandName(raw)
+	if !ok {
+		return false, false, ""
+	}
+
+	// Support comma-separated: /skill1,skill2
+	candidates := strings.Split(cmdName, ",")
+	var resolvedSkills []string
+	for _, candidate := range candidates {
+		candidate = strings.TrimSpace(candidate)
+		if candidate == "" {
+			continue
+		}
+		if canonical, ok := agent.ContextBuilder.ResolveSkillName(candidate); ok {
+			resolvedSkills = append(resolvedSkills, canonical)
+		}
+	}
+
+	if len(resolvedSkills) == 0 {
+		return false, false, ""
+	}
+
+	// Extract message body after the command word
+	parts := strings.Fields(strings.TrimSpace(raw))
+	if opts != nil {
+		opts.ForcedSkills = append(opts.ForcedSkills, resolvedSkills...)
+		if len(parts) > 1 {
+			opts.UserMessage = strings.TrimSpace(strings.Join(parts[1:], " "))
+		} else if opts.UserMessage == "" {
+			// No message body — arm as pending skill for the next message
+			al.setPendingSkills(opts.SessionKey, resolvedSkills)
+			return true, true, fmt.Sprintf(
+				"Skill(s) %s armed for your next message. Send your prompt now, or use /use clear to cancel.",
+				strings.Join(resolvedSkills, ", "),
+			)
+		}
 	}
 
 	return true, false, ""

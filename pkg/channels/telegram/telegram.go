@@ -44,12 +44,13 @@ var (
 
 type TelegramChannel struct {
 	*channels.BaseChannel
-	bot     *telego.Bot
-	bh      *th.BotHandler
-	config  *config.Config
-	chatIDs map[string]int64
-	ctx     context.Context
-	cancel  context.CancelFunc
+	bot       *telego.Bot
+	bh        *th.BotHandler
+	config    *config.Config
+	chatIDs   map[string]int64
+	chatModes map[string]string // compositeChatID → "build" | "chat" | "plan"
+	ctx       context.Context
+	cancel    context.CancelFunc
 
 	registerFunc     func(context.Context, []commands.Definition) error
 	commandRegCancel context.CancelFunc
@@ -103,6 +104,7 @@ func NewTelegramChannel(cfg *config.Config, bus *bus.MessageBus) (*TelegramChann
 		bot:         bot,
 		config:      cfg,
 		chatIDs:     make(map[string]int64),
+		chatModes:   make(map[string]string),
 	}, nil
 }
 
@@ -135,7 +137,9 @@ func (c *TelegramChannel) Start(ctx context.Context) error {
 		"username": c.bot.Username(),
 	})
 
-	c.startCommandRegistration(c.ctx, commands.BuiltinDefinitions())
+	allDefs := commands.BuiltinDefinitions()
+	allDefs = append(allDefs, c.skillCommandDefs()...)
+	c.startCommandRegistration(c.ctx, allDefs)
 
 	go func() {
 		if err = bh.Start(); err != nil {
@@ -146,6 +150,33 @@ func (c *TelegramChannel) Start(ctx context.Context) error {
 	}()
 
 	return nil
+}
+
+// skillCommandDefs returns command definitions for all installed skills so they
+// appear as bot commands in the Telegram command menu.
+func (c *TelegramChannel) skillCommandDefs() []commands.Definition {
+	workspace := c.config.WorkspacePath()
+	if workspace == "" {
+		return nil
+	}
+	skillsDir := workspace + "/skills"
+	entries, err := os.ReadDir(skillsDir)
+	if err != nil {
+		return nil
+	}
+	var defs []commands.Definition
+	for _, e := range entries {
+		if !e.IsDir() {
+			continue
+		}
+		name := e.Name()
+		description := "Run " + name + " skill"
+		defs = append(defs, commands.Definition{
+			Name:        name,
+			Description: description,
+		})
+	}
+	return defs
 }
 
 func (c *TelegramChannel) Stop(ctx context.Context) error {
@@ -679,6 +710,38 @@ func (c *TelegramChannel) handleMessage(ctx context.Context, message *telego.Mes
 		"thread_id": threadID,
 		"preview":   utils.Truncate(content, 50),
 	})
+
+	// Handle /mode command — cycles chat/plan/build per conversation
+	trimmed := strings.TrimSpace(content)
+	if trimmed == "/mode" || strings.HasPrefix(trimmed, "/mode ") {
+		current := c.chatModes[compositeChatID]
+		if current == "" {
+			current = "build"
+		}
+		var next string
+		switch current {
+		case "build":
+			next = "chat"
+		case "chat":
+			next = "plan"
+		default:
+			next = "build"
+		}
+		c.chatModes[compositeChatID] = next
+		reply := fmt.Sprintf("Mode switched to *%s*", strings.ToUpper(next))
+		_, _ = c.bot.SendMessage(ctx, tu.Message(tu.ID(chatID), reply).WithParseMode(telego.ModeMarkdown))
+		return nil
+	}
+
+	// Apply mode prefix before forwarding to agent
+	if mode := c.chatModes[compositeChatID]; mode != "" && mode != "build" {
+		switch mode {
+		case "plan":
+			content = "Before taking any action, write a clear numbered plan of what you will do. Then execute it step by step.\n\n" + content
+		case "chat":
+			content = "You are in conversational mode. Focus on discussion, research, and answering questions. Do not make file changes or run commands unless explicitly asked.\n\n" + content
+		}
+	}
 
 	peerKind := "direct"
 	peerID := fmt.Sprintf("%d", user.ID)

@@ -262,6 +262,30 @@ type AgentHookConfig struct {
 	Match   map[string]string `json:"match,omitempty"`
 }
 
+// AutoAssistConfig controls automatic selection of skills, tools, and MCP servers
+// based on the user's message content. When enabled, the agent proactively activates
+// relevant installed skills without requiring explicit /use commands.
+type AutoAssistConfig struct {
+	// Enabled turns on automatic skill/tool/MCP selection for every message.
+	Enabled bool `json:"enabled"`
+	// ExcludedSkills lists skill names that should never be auto-activated.
+	ExcludedSkills []string `json:"excluded_skills,omitempty"`
+	// ExcludedTools lists tool names that should be hidden from the LLM in auto mode.
+	ExcludedTools []string `json:"excluded_tools,omitempty"`
+	// ExcludedMCP lists MCP server names whose tools should be hidden in auto mode.
+	ExcludedMCP []string `json:"excluded_mcp_servers,omitempty"`
+	// MaxAutoSkills caps how many skills are auto-activated per message. Default: 3.
+	MaxAutoSkills int `json:"max_auto_skills,omitempty"`
+}
+
+// GetMaxAutoSkills returns the effective cap for auto-activated skills.
+func (a *AutoAssistConfig) GetMaxAutoSkills() int {
+	if a.MaxAutoSkills <= 0 {
+		return 3
+	}
+	return a.MaxAutoSkills
+}
+
 // AgentAutoModeConfig configures the auto mode safety classifier.
 type AgentAutoModeConfig struct {
 	Enabled         bool     `json:"enabled,omitempty"`
@@ -392,6 +416,7 @@ type AgentDefaults struct {
 	ToolFeedback              ToolFeedbackConfig  `json:"tool_feedback,omitempty"`
 	Hooks                     []AgentHookConfig   `json:"hooks,omitempty"`
 	AutoMode                  AgentAutoModeConfig `json:"auto_mode,omitempty"`
+	AutoAssist                AutoAssistConfig    `json:"auto_assist,omitempty"`
 	Budget                    AgentBudgetConfig   `json:"budget,omitempty"`
 	LLMStreaming               bool               `json:"llm_streaming,omitempty"`
 	Session                   AgentSessionConfig  `json:"session,omitempty"`

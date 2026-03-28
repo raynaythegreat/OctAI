@@ -1,5 +1,5 @@
 import { normalizeUnixTimestamp } from "@/features/chat/state"
-import { updateChatStore } from "@/store/chat"
+import { type MessageMeta, updateChatStore } from "@/store/chat"
 
 export interface PicoMessage {
   type: string
@@ -28,6 +28,7 @@ export function handlePicoMessage(
         Number.isFinite(Number(message.timestamp))
           ? normalizeUnixTimestamp(Number(message.timestamp))
           : Date.now()
+      const meta = (payload.meta as MessageMeta) || undefined
 
       updateChatStore((prev) => ({
         messages: [
@@ -37,6 +38,7 @@ export function handlePicoMessage(
             role: "assistant",
             content,
             timestamp,
+            meta,
           },
         ],
         isTyping: false,
@@ -50,10 +52,11 @@ export function handlePicoMessage(
       if (!messageId) {
         break
       }
+      const meta = (payload.meta as MessageMeta) || undefined
 
       updateChatStore((prev) => ({
         messages: prev.messages.map((msg) =>
-          msg.id === messageId ? { ...msg, content } : msg,
+          msg.id === messageId ? { ...msg, content, ...(meta ? { meta } : {}) } : msg,
         ),
       }))
       break

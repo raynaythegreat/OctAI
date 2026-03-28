@@ -18,6 +18,8 @@ func (h *Handler) registerConfigRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("PUT /api/config", h.handleUpdateConfig)
 	mux.HandleFunc("PATCH /api/config", h.handlePatchConfig)
 	mux.HandleFunc("POST /api/config/test-command-patterns", h.handleTestCommandPatterns)
+	mux.HandleFunc("GET /api/config/auto-assist", h.handleGetAutoAssist)
+	mux.HandleFunc("PUT /api/config/auto-assist", h.handleUpdateAutoAssist)
 }
 
 // handleGetConfig returns the complete system configuration.
@@ -326,4 +328,50 @@ func mergeMap(dst, src map[string]any) {
 			dst[key] = srcVal
 		}
 	}
+}
+
+// handleGetAutoAssist returns the current Auto-Assist configuration.
+//
+//	GET /api/config/auto-assist
+func (h *Handler) handleGetAutoAssist(w http.ResponseWriter, r *http.Request) {
+	cfg, err := config.LoadConfig(h.configPath)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to load config: %v", err), http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(cfg.Agents.Defaults.AutoAssist)
+}
+
+// handleUpdateAutoAssist saves the Auto-Assist configuration.
+//
+//	PUT /api/config/auto-assist
+func (h *Handler) handleUpdateAutoAssist(w http.ResponseWriter, r *http.Request) {
+	body, err := io.ReadAll(io.LimitReader(r.Body, 1<<16))
+	if err != nil {
+		http.Error(w, "Failed to read request body", http.StatusBadRequest)
+		return
+	}
+	defer r.Body.Close()
+
+	var aa config.AutoAssistConfig
+	if err = json.Unmarshal(body, &aa); err != nil {
+		http.Error(w, fmt.Sprintf("Invalid JSON: %v", err), http.StatusBadRequest)
+		return
+	}
+
+	cfg, err := config.LoadConfig(h.configPath)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to load config: %v", err), http.StatusInternalServerError)
+		return
+	}
+	cfg.Agents.Defaults.AutoAssist = aa
+
+	if err := config.SaveConfig(h.configPath, cfg); err != nil {
+		http.Error(w, fmt.Sprintf("Failed to save config: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
 }

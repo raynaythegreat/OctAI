@@ -1,6 +1,6 @@
 // Scanner API — AI-powered URL analysis for discovering integrable items
 
-export type DiscoveredItemType = "mcp_server" | "skill" | "tool" | "plugin" | "connection" | "other"
+export type DiscoveredItemType = "mcp_server" | "skill" | "tool" | "plugin" | "connection" | "reference_url" | "other"
 
 export interface DiscoveredItem {
   type: DiscoveredItemType

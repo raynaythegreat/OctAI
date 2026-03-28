@@ -29,11 +29,45 @@ type InboundMessage struct {
 	Metadata   map[string]string `json:"metadata,omitempty"`
 }
 
+// MessageMeta carries structured metadata about tool uses, active skills,
+// and parallel agent executions for rich chat UI rendering.
+type MessageMeta struct {
+	ActiveSkills []string      `json:"active_skills,omitempty"`
+	ToolUses     []ToolUseInfo `json:"tool_uses,omitempty"`
+	Agents       []AgentInfo   `json:"agents,omitempty"`
+}
+
+// ToolUseInfo describes a single tool invocation.
+type ToolUseInfo struct {
+	ToolName      string `json:"tool_name"`
+	Status        string `json:"status"` // "running" | "done" | "error"
+	ArgsPreview   string `json:"args_preview,omitempty"`
+	ResultPreview string `json:"result_preview,omitempty"`
+	DurationMs    int64  `json:"duration_ms,omitempty"`
+}
+
+// AgentInfo describes a parallel sub-agent execution.
+type AgentInfo struct {
+	AgentID   string        `json:"agent_id"`
+	AgentName string        `json:"agent_name"`
+	Status    string        `json:"status"` // "running" | "done" | "error"
+	Model     string        `json:"model,omitempty"`
+	Tokens    *AgentTokens  `json:"tokens,omitempty"`
+	ToolUses  []ToolUseInfo `json:"tool_uses,omitempty"`
+}
+
+// AgentTokens holds token counts for a sub-agent run.
+type AgentTokens struct {
+	Input  int `json:"input"`
+	Output int `json:"output"`
+}
+
 type OutboundMessage struct {
-	Channel          string `json:"channel"`
-	ChatID           string `json:"chat_id"`
-	Content          string `json:"content"`
-	ReplyToMessageID string `json:"reply_to_message_id,omitempty"`
+	Channel          string       `json:"channel"`
+	ChatID           string       `json:"chat_id"`
+	Content          string       `json:"content"`
+	ReplyToMessageID string       `json:"reply_to_message_id,omitempty"`
+	Meta             *MessageMeta `json:"meta,omitempty"`
 }
 
 // MediaPart describes a single media attachment to send.

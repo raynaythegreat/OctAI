@@ -835,6 +835,15 @@ The following skills are active for this request. Follow them when relevant.
 %s`, content)
 }
 
+// ListSkillsInfo returns all available skills with their names and descriptions.
+// Used by Auto-Assist to match skills to user message content.
+func (cb *ContextBuilder) ListSkillsInfo() []skills.SkillInfo {
+	if cb.skillsLoader == nil {
+		return nil
+	}
+	return cb.skillsLoader.ListSkills()
+}
+
 func (cb *ContextBuilder) ListSkillNames() []string {
 	if cb.skillsLoader == nil {
 		return nil
