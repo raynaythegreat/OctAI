@@ -1,3 +1,4 @@
+import { IconSparkles } from "@tabler/icons-react"
 import { useTranslation } from "react-i18next"
 
 import type { ModelInfo } from "@/api/models"
@@ -18,6 +19,8 @@ interface ModelSelectorProps {
   oauthModels: ModelInfo[]
   localModels: ModelInfo[]
   onValueChange: (modelName: string) => void
+  isAutoMode: boolean
+  toggleAutoMode: (enabled: boolean) => void
 }
 
 export function ModelSelector({
@@ -26,11 +29,27 @@ export function ModelSelector({
   oauthModels,
   localModels,
   onValueChange,
+  isAutoMode,
+  toggleAutoMode,
 }: ModelSelectorProps) {
   const { t } = useTranslation()
 
+  function handleValueChange(value: string) {
+    if (value === "__auto__") {
+      void toggleAutoMode(true)
+    } else {
+      if (isAutoMode) {
+        void toggleAutoMode(false)
+      }
+      onValueChange(value)
+    }
+  }
+
   return (
-    <Select value={defaultModelName} onValueChange={onValueChange}>
+    <Select
+      value={isAutoMode ? "__auto__" : defaultModelName}
+      onValueChange={handleValueChange}
+    >
       <SelectTrigger
         size="sm"
         className="text-muted-foreground hover:text-foreground focus-visible:border-input h-8 max-w-[160px] min-w-[80px] bg-transparent shadow-none focus-visible:ring-0 sm:max-w-[220px]"
@@ -38,6 +57,24 @@ export function ModelSelector({
         <SelectValue placeholder={t("chat.noModel")} />
       </SelectTrigger>
       <SelectContent position="popper" align="start">
+        <SelectGroup>
+          <SelectItem value="__auto__">
+            <div className="flex items-center gap-2">
+              <IconSparkles className="size-4 text-violet-400" />
+              <span>Auto</span>
+              {isAutoMode && (
+                <span className="text-xs text-muted-foreground ml-1">
+                  (active)
+                </span>
+              )}
+            </div>
+          </SelectItem>
+        </SelectGroup>
+
+        {(apiKeyModels.length > 0 ||
+          oauthModels.length > 0 ||
+          localModels.length > 0) && <SelectSeparator />}
+
         {apiKeyModels.length > 0 && (
           <SelectGroup>
             <SelectLabel>{t("chat.modelGroup.apikey")}</SelectLabel>

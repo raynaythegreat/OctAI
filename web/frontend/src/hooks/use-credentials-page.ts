@@ -11,8 +11,23 @@ import {
   logoutOAuth,
   pollOAuthFlow,
 } from "@/api/oauth"
+import {
+  getModels,
+  updateModel,
+  testModelKey,
+  getImageModels,
+  updateImageModel,
+  testImageModelKey,
+  getVideoModels,
+  updateVideoModel,
+  testVideoModelKey,
+  type ModelInfo,
+} from "@/api/models"
+import { toast } from "sonner"
 
 type FlowWatchMode = "" | "status" | "poll"
+
+const OAUTH_PROTOCOLS = new Set(["openai", "antigravity", "google-antigravity"])
 
 function getProviderLabel(provider: OAuthProvider | ""): string {
   if (provider === "openai") return "OpenAI"
@@ -46,6 +61,14 @@ export function useCredentialsPage() {
   const [deviceSheetOpen, setDeviceSheetOpen] = useState(false)
   const [deviceFlow, setDeviceFlow] = useState<OAuthFlowState | null>(null)
 
+  const [apiModels, setApiModels] = useState<ModelInfo[]>([])
+  const [apiModelsLoading, setApiModelsLoading] = useState(false)
+
+  const [imageModels, setImageModels] = useState<ModelInfo[]>([])
+  const [videoModels, setVideoModels] = useState<ModelInfo[]>([])
+  const [imageModelsLoading, setImageModelsLoading] = useState(false)
+  const [videoModelsLoading, setVideoModelsLoading] = useState(false)
+
   const loadProviders = useCallback(async () => {
     try {
       const data = await getOAuthProviders()
@@ -60,9 +83,48 @@ export function useCredentialsPage() {
     }
   }, [t])
 
+  const loadApiModels = useCallback(async () => {
+    setApiModelsLoading(true)
+    try {
+      const data = await getModels()
+      setApiModels(data.models)
+    } catch {
+      // silent — page still usable with OAuth providers
+    } finally {
+      setApiModelsLoading(false)
+    }
+  }, [])
+
+  const loadImageModels = useCallback(async () => {
+    setImageModelsLoading(true)
+    try {
+      const data = await getImageModels()
+      setImageModels(data.models)
+    } catch {
+      // silent
+    } finally {
+      setImageModelsLoading(false)
+    }
+  }, [])
+
+  const loadVideoModels = useCallback(async () => {
+    setVideoModelsLoading(true)
+    try {
+      const data = await getVideoModels()
+      setVideoModels(data.models)
+    } catch {
+      // silent
+    } finally {
+      setVideoModelsLoading(false)
+    }
+  }, [])
+
   useEffect(() => {
     void loadProviders()
-  }, [loadProviders])
+    void loadApiModels()
+    void loadImageModels()
+    void loadVideoModels()
+  }, [loadProviders, loadApiModels, loadImageModels, loadVideoModels])
 
   useEffect(() => {
     if (!watchFlowID || !watchMode) {
@@ -406,6 +468,217 @@ export function useCredentialsPage() {
     return activeFlow.error || t("credentials.flow.error")
   }, [activeFlow, t])
 
+  const saveApiKey = useCallback(
+    async (index: number, key: string) => {
+      const model = apiModels.find((m) => m.index === index)
+      if (!model) return
+      try {
+        await updateModel(index, {
+          model_name: model.model_name,
+          model: model.model,
+          api_base: model.api_base ?? "",
+          api_key: key,
+        })
+        toast.success(t("credentials.save.success"))
+        await loadApiModels()
+      } catch (err) {
+        toast.error(
+          err instanceof Error ? err.message : t("credentials.errors.saveFailed"),
+        )
+      }
+    },
+    [apiModels, loadApiModels, t],
+  )
+
+  const deleteApiKey = useCallback(
+    async (index: number) => {
+      const model = apiModels.find((m) => m.index === index)
+      if (!model) return
+      try {
+        await updateModel(index, {
+          model_name: model.model_name,
+          model: model.model,
+          api_base: model.api_base ?? "",
+          api_key: "REMOVED",
+        })
+        toast.success(t("credentials.delete.success"))
+        await loadApiModels()
+      } catch (err) {
+        toast.error(
+          err instanceof Error ? err.message : t("credentials.errors.logoutFailed"),
+        )
+      }
+    },
+    [apiModels, loadApiModels, t],
+  )
+
+  const testApiKey = useCallback(
+    async (index: number): Promise<{ success: boolean; models?: string[] }> => {
+      try {
+        const result = await testModelKey(index)
+        if (result.success) {
+          toast.success(t("credentials.test.success"))
+        } else {
+          toast.error(
+            t("credentials.test.failure", { error: result.error ?? "Unknown error" }),
+          )
+        }
+        return result
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : "Test failed"
+        toast.error(t("credentials.test.failure", { error: msg }))
+        return { success: false }
+      }
+    },
+    [t],
+  )
+
+  const saveImageApiKey = useCallback(
+    async (index: number, key: string) => {
+      const model = imageModels.find((m) => m.index === index)
+      if (!model) return
+      try {
+        await updateImageModel(index, {
+          model_name: model.model_name,
+          model: model.model,
+          api_base: model.api_base ?? "",
+          api_key: key,
+        })
+        toast.success(t("credentials.save.success"))
+        await loadImageModels()
+      } catch (err) {
+        toast.error(
+          err instanceof Error ? err.message : t("credentials.errors.saveFailed"),
+        )
+      }
+    },
+    [imageModels, loadImageModels, t],
+  )
+
+  const deleteImageApiKey = useCallback(
+    async (index: number) => {
+      const model = imageModels.find((m) => m.index === index)
+      if (!model) return
+      try {
+        await updateImageModel(index, {
+          model_name: model.model_name,
+          model: model.model,
+          api_base: model.api_base ?? "",
+          api_key: "REMOVED",
+        })
+        toast.success(t("credentials.delete.success"))
+        await loadImageModels()
+      } catch (err) {
+        toast.error(
+          err instanceof Error ? err.message : t("credentials.errors.logoutFailed"),
+        )
+      }
+    },
+    [imageModels, loadImageModels, t],
+  )
+
+  const testImageApiKey = useCallback(
+    async (index: number): Promise<{ success: boolean; models?: string[] }> => {
+      try {
+        const result = await testImageModelKey(index)
+        if (result.success) {
+          toast.success(t("credentials.test.success"))
+        } else {
+          toast.error(
+            t("credentials.test.failure", { error: result.error ?? "Unknown error" }),
+          )
+        }
+        return result
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : "Test failed"
+        toast.error(t("credentials.test.failure", { error: msg }))
+        return { success: false }
+      }
+    },
+    [t],
+  )
+
+  const saveVideoApiKey = useCallback(
+    async (index: number, key: string) => {
+      const model = videoModels.find((m) => m.index === index)
+      if (!model) return
+      try {
+        await updateVideoModel(index, {
+          model_name: model.model_name,
+          model: model.model,
+          api_base: model.api_base ?? "",
+          api_key: key,
+        })
+        toast.success(t("credentials.save.success"))
+        await loadVideoModels()
+      } catch (err) {
+        toast.error(
+          err instanceof Error ? err.message : t("credentials.errors.saveFailed"),
+        )
+      }
+    },
+    [videoModels, loadVideoModels, t],
+  )
+
+  const deleteVideoApiKey = useCallback(
+    async (index: number) => {
+      const model = videoModels.find((m) => m.index === index)
+      if (!model) return
+      try {
+        await updateVideoModel(index, {
+          model_name: model.model_name,
+          model: model.model,
+          api_base: model.api_base ?? "",
+          api_key: "REMOVED",
+        })
+        toast.success(t("credentials.delete.success"))
+        await loadVideoModels()
+      } catch (err) {
+        toast.error(
+          err instanceof Error ? err.message : t("credentials.errors.logoutFailed"),
+        )
+      }
+    },
+    [videoModels, loadVideoModels, t],
+  )
+
+  const testVideoApiKey = useCallback(
+    async (index: number): Promise<{ success: boolean; models?: string[] }> => {
+      try {
+        const result = await testVideoModelKey(index)
+        if (result.success) {
+          toast.success(t("credentials.test.success"))
+        } else {
+          toast.error(
+            t("credentials.test.failure", { error: result.error ?? "Unknown error" }),
+          )
+        }
+        return result
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : "Test failed"
+        toast.error(t("credentials.test.failure", { error: msg }))
+        return { success: false }
+      }
+    },
+    [t],
+  )
+
+  const providerModelGroups = useMemo(() => {
+    const groups = new Map<string, ModelInfo[]>()
+    for (const m of apiModels) {
+      if (m.is_virtual) continue
+      // Skip OAuth providers (they have dedicated cards)
+      const protocol = m.model.split("/")[0].toLowerCase()
+      if (OAUTH_PROTOCOLS.has(protocol)) continue
+      // Skip models with no api_base (CLI-based) and no protocol prefix
+      if (!m.api_base && protocol === "openai") continue
+      const existing = groups.get(protocol) ?? []
+      existing.push(m)
+      groups.set(protocol, existing)
+    }
+    return groups
+  }, [apiModels])
+
   return {
     loading,
     error,
@@ -432,5 +705,24 @@ export function useCredentialsPage() {
     handleConfirmLogout,
     handleLogoutDialogOpenChange,
     handleDeviceSheetOpenChange,
+    apiModels,
+    apiModelsLoading,
+    providerModelGroups,
+    saveApiKey,
+    deleteApiKey,
+    testApiKey,
+    loadApiModels,
+    imageModels,
+    videoModels,
+    imageModelsLoading,
+    videoModelsLoading,
+    saveImageApiKey,
+    deleteImageApiKey,
+    testImageApiKey,
+    saveVideoApiKey,
+    deleteVideoApiKey,
+    testVideoApiKey,
+    loadImageModels,
+    loadVideoModels,
   }
 }

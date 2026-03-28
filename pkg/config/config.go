@@ -88,8 +88,10 @@ type Config struct {
 	Bindings  []AgentBinding  `json:"bindings,omitempty"`
 	Session   SessionConfig   `json:"session,omitempty"`
 	Channels  ChannelsConfig  `json:"channels"`
-	ModelList []*ModelConfig  `json:"model_list"` // New model-centric provider configuration
-	Gateway   GatewayConfig   `json:"gateway"`
+	ModelList      []*ModelConfig `json:"model_list"`                 // New model-centric provider configuration
+	ImageModelList []*ModelConfig `json:"image_model_list,omitempty"` // Image generation model configurations
+	VideoModelList []*ModelConfig `json:"video_model_list,omitempty"` // Video generation model configurations
+	Gateway        GatewayConfig  `json:"gateway"`
 	Hooks     HooksConfig     `json:"hooks,omitempty"`
 	Tools     ToolsConfig     `json:"tools"`
 	Heartbeat HeartbeatConfig `json:"heartbeat"`
@@ -373,9 +375,11 @@ type AgentDefaults struct {
 	Provider                  string              `json:"provider"                        env:"OCTAI_AGENTS_DEFAULTS_PROVIDER"`
 	ModelName                 string              `json:"model_name"                      env:"OCTAI_AGENTS_DEFAULTS_MODEL_NAME"`
 	ModelFallbacks            []string            `json:"model_fallbacks,omitempty"`
-	ImageModel                string              `json:"image_model,omitempty"           env:"OCTAI_AGENTS_DEFAULTS_IMAGE_MODEL"`
+	ImageModel                string              `json:"image_model,omitempty"            env:"OCTAI_AGENTS_DEFAULTS_IMAGE_MODEL"`
 	ImageModelFallbacks       []string            `json:"image_model_fallbacks,omitempty"`
-	MaxTokens                 int                 `json:"max_tokens"                      env:"OCTAI_AGENTS_DEFAULTS_MAX_TOKENS"`
+	VideoModel                string              `json:"video_model,omitempty"            env:"OCTAI_AGENTS_DEFAULTS_VIDEO_MODEL"`
+	VideoModelFallbacks       []string            `json:"video_model_fallbacks,omitempty"`
+	MaxTokens                 int                 `json:"max_tokens"                       env:"OCTAI_AGENTS_DEFAULTS_MAX_TOKENS"`
 	ContextWindow             int                 `json:"context_window,omitempty"        env:"OCTAI_AGENTS_DEFAULTS_CONTEXT_WINDOW"`
 	Temperature               *float64            `json:"temperature,omitempty"           env:"OCTAI_AGENTS_DEFAULTS_TEMPERATURE"`
 	MaxToolIterations         int                 `json:"max_tool_iterations"             env:"OCTAI_AGENTS_DEFAULTS_MAX_TOOL_ITERATIONS"`
@@ -1442,13 +1446,25 @@ func LoadConfig(path string) (*Config, error) {
 
 	// Expand multi-key configs into separate entries for key-level failover
 	cfg.ModelList = expandMultiKeyModels(cfg.ModelList)
+	cfg.ImageModelList = expandMultiKeyModels(cfg.ImageModelList)
+	cfg.VideoModelList = expandMultiKeyModels(cfg.VideoModelList)
 
 	// Migrate legacy channel config fields to new unified structures
 	cfg.migrateChannelConfigs()
 
-	// Validate model_list for uniqueness and required fields
+	// Validate model lists for uniqueness and required fields
 	if err := cfg.ValidateModelList(); err != nil {
 		return nil, err
+	}
+	for i := range cfg.ImageModelList {
+		if err := cfg.ImageModelList[i].Validate(); err != nil {
+			return nil, fmt.Errorf("image_model_list[%d]: %w", i, err)
+		}
+	}
+	for i := range cfg.VideoModelList {
+		if err := cfg.VideoModelList[i].Validate(); err != nil {
+			return nil, fmt.Errorf("video_model_list[%d]: %w", i, err)
+		}
 	}
 
 	// Ensure Workspace has a default if not set
@@ -1922,13 +1938,31 @@ func SaveConfig(path string, cfg *Config) error {
 			nonVirtualModels = append(nonVirtualModels, m)
 		}
 	}
-	// Temporarily replace ModelList with filtered version for serialization
+	nonVirtualImageModels := make([]*ModelConfig, 0, len(cfg.ImageModelList))
+	for _, m := range cfg.ImageModelList {
+		if !m.isVirtual {
+			nonVirtualImageModels = append(nonVirtualImageModels, m)
+		}
+	}
+	nonVirtualVideoModels := make([]*ModelConfig, 0, len(cfg.VideoModelList))
+	for _, m := range cfg.VideoModelList {
+		if !m.isVirtual {
+			nonVirtualVideoModels = append(nonVirtualVideoModels, m)
+		}
+	}
+	// Temporarily replace model lists with filtered versions for serialization
 	originalModelList := cfg.ModelList
+	originalImageModelList := cfg.ImageModelList
+	originalVideoModelList := cfg.VideoModelList
 	cfg.ModelList = nonVirtualModels
+	cfg.ImageModelList = nonVirtualImageModels
+	cfg.VideoModelList = nonVirtualVideoModels
 
 	data, err := json.MarshalIndent(cfg, "", "  ")
-	// Restore original ModelList after serialization
+	// Restore original model lists after serialization
 	cfg.ModelList = originalModelList
+	cfg.ImageModelList = originalImageModelList
+	cfg.VideoModelList = originalVideoModelList
 	if err != nil {
 		return err
 	}

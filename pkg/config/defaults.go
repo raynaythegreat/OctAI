@@ -421,6 +421,58 @@ func DefaultConfig() *Config {
 			// LiteLLM proxy
 			{ModelName: "litellm-auto", Model: "litellm/auto", APIBase: "http://localhost:4000/v1"},
 		},
+		ImageModelList: []*ModelConfig{
+			// OpenAI DALL-E - https://platform.openai.com/api-keys
+			{
+				ModelName: "dall-e-3",
+				Model:     "openai/dall-e-3",
+				APIBase:   "https://api.openai.com/v1",
+			},
+			// Google Imagen - https://ai.google.dev/
+			{
+				ModelName: "gemini-imagen-4",
+				Model:     "google/imagen-4",
+				APIBase:   "https://generativelanguage.googleapis.com/v1beta",
+			},
+			// Stability AI - https://platform.stability.ai/
+			{
+				ModelName: "stability-sdxl",
+				Model:     "stability/stable-diffusion-xl-1024-v1-0",
+				APIBase:   "https://api.stability.ai/v1",
+			},
+			// Together AI / Black Forest Labs FLUX - https://api.together.xyz/
+			{
+				ModelName: "flux-schnell",
+				Model:     "together/black-forest-labs/FLUX.1-schnell",
+				APIBase:   "https://api.together.xyz/v1",
+			},
+		},
+		VideoModelList: []*ModelConfig{
+			// Runway Gen-4 - https://runwayml.com/
+			{
+				ModelName: "runway-gen4",
+				Model:     "runway/gen4-turbo",
+				APIBase:   "https://api.runwayml.com/v1",
+			},
+			// Kling AI - https://klingai.com/
+			{
+				ModelName: "kling-v2",
+				Model:     "kling/v2-master",
+				APIBase:   "https://api.klingai.com/v1",
+			},
+			// Google Veo - https://ai.google.dev/
+			{
+				ModelName: "google-veo-2",
+				Model:     "google/veo-2",
+				APIBase:   "https://generativelanguage.googleapis.com/v1beta",
+			},
+			// MiniMax Video - https://api.minimax.chat/
+			{
+				ModelName: "minimax-video",
+				Model:     "minimax/video-01",
+				APIBase:   "https://api.minimax.chat/v1",
+			},
+		},
 		Gateway: GatewayConfig{
 			Host:      "127.0.0.1",
 			Port:      18790,

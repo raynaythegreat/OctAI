@@ -40,6 +40,7 @@ type sessionListItem struct {
 	MessageCount int    `json:"message_count"`
 	Created      string `json:"created"`
 	Updated      string `json:"updated"`
+	Channel      string `json:"channel,omitempty"`
 }
 
 type sessionMetaFile struct {
@@ -80,6 +81,34 @@ func extractPicoSessionIDFromSanitizedKey(key string) (string, bool) {
 		return strings.TrimPrefix(key, sanitizedPicoSessionPrefix), true
 	}
 	return "", false
+}
+
+// parseSessionFilename extracts the channel and session ID from a sanitized
+// session filename base (without extension). Returns the channel name, a
+// session ID for API responses, and whether the file belongs to a known channel.
+//
+// Known formats:
+//   - agent_main_pico_direct_pico_<uuid>  → channel="pico", id=<uuid>
+//   - agent_main_<channel>_direct_<peer>  → channel=<channel>, id=<sanitized_base>
+//   - cli_default                          → channel="cli", id="cli_default"
+func parseSessionFilename(base string) (channel, sessionID string, ok bool) {
+	if strings.HasPrefix(base, sanitizedPicoSessionPrefix) {
+		uuid := strings.TrimPrefix(base, sanitizedPicoSessionPrefix)
+		if uuid == "" {
+			return "", "", false
+		}
+		return "pico", uuid, true
+	}
+	if base == "cli_default" {
+		return "cli", "cli_default", true
+	}
+	// Match agent_main_<channel>_direct_<peer>
+	parts := strings.SplitN(base, "_", 5)
+	if len(parts) >= 5 && parts[0] == "agent" && parts[1] == "main" && parts[3] == "direct" {
+		ch := parts[2]
+		return ch, base, true
+	}
+	return "", "", false
 }
 
 func sanitizeSessionKey(key string) string {
@@ -160,6 +189,44 @@ func (h *Handler) readJSONLSession(dir, sessionID string) (sessionFile, error) {
 	jsonlPath := base + ".jsonl"
 	metaPath := base + ".meta.json"
 
+	meta, err := h.readSessionMeta(metaPath, sessionKey)
+	if err != nil {
+		return sessionFile{}, err
+	}
+
+	messages, err := h.readSessionMessages(jsonlPath, meta.Skip)
+	if err != nil {
+		return sessionFile{}, err
+	}
+
+	updated := meta.UpdatedAt
+	created := meta.CreatedAt
+	if created.IsZero() || updated.IsZero() {
+		if info, statErr := os.Stat(jsonlPath); statErr == nil {
+			if created.IsZero() {
+				created = info.ModTime()
+			}
+			if updated.IsZero() {
+				updated = info.ModTime()
+			}
+		}
+	}
+
+	return sessionFile{
+		Key:      meta.Key,
+		Messages: messages,
+		Summary:  meta.Summary,
+		Created:  created,
+		Updated:  updated,
+	}, nil
+}
+
+func (h *Handler) readJSONLSessionByBase(dir, base string) (sessionFile, error) {
+	fullBase := filepath.Join(dir, base)
+	jsonlPath := fullBase + ".jsonl"
+	metaPath := fullBase + ".meta.json"
+
+	sessionKey := strings.ReplaceAll(base, "_", ":")
 	meta, err := h.readSessionMeta(metaPath, sessionKey)
 	if err != nil {
 		return sessionFile{}, err
@@ -295,43 +362,66 @@ func (h *Handler) handleListSessions(w http.ResponseWriter, r *http.Request) {
 	items := []sessionListItem{}
 	seen := make(map[string]struct{})
 
+	channelFilter := r.URL.Query().Get("channel")
+
 	for _, entry := range entries {
 		if entry.IsDir() {
 			continue
 		}
 
 		name := entry.Name()
-		var (
-			sessionID string
-			sess      sessionFile
-			loadErr   error
-			ok        bool
-		)
 
+		var base string
+		var isMeta bool
 		switch {
 		case strings.HasSuffix(name, ".jsonl"):
-			sessionID, ok = extractPicoSessionIDFromSanitizedKey(strings.TrimSuffix(name, ".jsonl"))
-			if !ok {
-				continue
+			base = strings.TrimSuffix(name, ".jsonl")
+		case strings.HasSuffix(name, ".meta.json"):
+			isMeta = true
+			continue // skip meta files in listing
+		case filepath.Ext(name) == ".json":
+			base = strings.TrimSuffix(name, ".json")
+		default:
+			continue
+		}
+		_ = isMeta
+
+		channel, sessionID, ok := parseSessionFilename(base)
+		if !ok {
+			continue
+		}
+
+		// Apply channel filter
+		if channelFilter != "" && channelFilter != "all" && channel != channelFilter {
+			continue
+		}
+		// Backward compat: empty filter = pico only
+		if channelFilter == "" && channel != "pico" {
+			continue
+		}
+
+		if _, exists := seen[sessionID]; exists {
+			continue
+		}
+
+		var sess sessionFile
+		var loadErr error
+
+		if strings.HasSuffix(name, ".jsonl") {
+			if channel == "pico" {
+				sess, loadErr = h.readJSONLSession(dir, sessionID)
+			} else {
+				// For non-pico channels, read directly by sanitized base
+				sess, loadErr = h.readJSONLSessionByBase(dir, base)
 			}
-			sess, loadErr = h.readJSONLSession(dir, sessionID)
 			if loadErr == nil && isEmptySession(sess) {
 				continue
 			}
-		case strings.HasSuffix(name, ".meta.json"):
-			continue
-		case filepath.Ext(name) == ".json":
-			base := strings.TrimSuffix(name, ".json")
+		} else {
+			// JSON file (legacy or cli_default)
+			// Skip if there's a corresponding .jsonl file
 			if _, statErr := os.Stat(filepath.Join(dir, base+".jsonl")); statErr == nil {
-				if jsonlSessionID, found := extractPicoSessionIDFromSanitizedKey(base); found {
-					if jsonlSess, jsonlErr := h.readJSONLSession(
-						dir,
-						jsonlSessionID,
-					); jsonlErr == nil &&
-						!isEmptySession(jsonlSess) {
-						continue
-					}
-				}
+				continue
 			}
 			data, err := os.ReadFile(filepath.Join(dir, name))
 			if err != nil {
@@ -343,15 +433,6 @@ func (h *Handler) handleListSessions(w http.ResponseWriter, r *http.Request) {
 			if isEmptySession(sess) {
 				continue
 			}
-			sessionID, ok = extractPicoSessionID(sess.Key)
-			if !ok {
-				continue
-			}
-			if _, exists := seen[sessionID]; exists {
-				continue
-			}
-		default:
-			continue
 		}
 
 		if loadErr != nil {
@@ -362,7 +443,9 @@ func (h *Handler) handleListSessions(w http.ResponseWriter, r *http.Request) {
 		}
 
 		seen[sessionID] = struct{}{}
-		items = append(items, buildSessionListItem(sessionID, sess))
+		item := buildSessionListItem(sessionID, sess)
+		item.Channel = channel
+		items = append(items, item)
 	}
 
 	// Sort by updated descending (most recent first)
@@ -416,24 +499,55 @@ func (h *Handler) handleGetSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sess, err := h.readJSONLSession(dir, sessionID)
-	if err == nil && isEmptySession(sess) {
-		err = os.ErrNotExist
-	}
-	if err != nil {
-		if errors.Is(err, os.ErrNotExist) {
-			sess, err = h.readLegacySession(dir, sessionID)
-			if err == nil && isEmptySession(sess) {
-				err = os.ErrNotExist
-			}
+	channelParam := r.URL.Query().Get("channel")
+
+	var sess sessionFile
+	if channelParam != "" && channelParam != "pico" {
+		// Non-pico: sessionID is the sanitized base name
+		sess, err = h.readJSONLSessionByBase(dir, sessionID)
+		if err == nil && isEmptySession(sess) {
+			err = os.ErrNotExist
 		}
 		if err != nil {
 			if errors.Is(err, os.ErrNotExist) {
-				http.Error(w, "session not found", http.StatusNotFound)
-			} else {
-				http.Error(w, "failed to parse session", http.StatusInternalServerError)
+				// Try JSON file
+				data, jsonErr := os.ReadFile(filepath.Join(dir, sessionID+".json"))
+				if jsonErr == nil {
+					if jsonErr2 := json.Unmarshal(data, &sess); jsonErr2 == nil && !isEmptySession(sess) {
+						err = nil
+					}
+				}
 			}
-			return
+			if err != nil {
+				if errors.Is(err, os.ErrNotExist) {
+					http.Error(w, "session not found", http.StatusNotFound)
+				} else {
+					http.Error(w, "failed to parse session", http.StatusInternalServerError)
+				}
+				return
+			}
+		}
+	} else {
+		// Original pico logic
+		sess, err = h.readJSONLSession(dir, sessionID)
+		if err == nil && isEmptySession(sess) {
+			err = os.ErrNotExist
+		}
+		if err != nil {
+			if errors.Is(err, os.ErrNotExist) {
+				sess, err = h.readLegacySession(dir, sessionID)
+				if err == nil && isEmptySession(sess) {
+					err = os.ErrNotExist
+				}
+			}
+			if err != nil {
+				if errors.Is(err, os.ErrNotExist) {
+					http.Error(w, "session not found", http.StatusNotFound)
+				} else {
+					http.Error(w, "failed to parse session", http.StatusInternalServerError)
+				}
+				return
+			}
 		}
 	}
 
@@ -480,7 +594,13 @@ func (h *Handler) handleDeleteSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	base := filepath.Join(dir, sanitizeSessionKey(picoSessionPrefix+sessionID))
+	channelParam := r.URL.Query().Get("channel")
+	var base string
+	if channelParam != "" && channelParam != "pico" {
+		base = filepath.Join(dir, sessionID)
+	} else {
+		base = filepath.Join(dir, sanitizeSessionKey(picoSessionPrefix+sessionID))
+	}
 	jsonlPath := base + ".jsonl"
 	metaPath := base + ".meta.json"
 	legacyPath := base + ".json"

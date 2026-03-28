@@ -8,11 +8,13 @@ const LIMIT = 20
 interface UseSessionHistoryOptions {
   activeSessionId: string
   onDeletedActiveSession: () => void
+  channel?: string
 }
 
 export function useSessionHistory({
   activeSessionId,
   onDeletedActiveSession,
+  channel,
 }: UseSessionHistoryOptions) {
   const { t } = useTranslation()
   const observerRef = useRef<HTMLDivElement>(null)
@@ -32,7 +34,7 @@ export function useSessionHistory({
           setOffset(0)
         }
 
-        const data = await getSessions(currentOffset, LIMIT)
+        const data = await getSessions(currentOffset, LIMIT, channel)
         setLoadError(false)
 
         if (data.length < LIMIT) {
@@ -60,7 +62,7 @@ export function useSessionHistory({
         setIsLoadingMore(false)
       }
     },
-    [offset],
+    [offset, channel],
   )
 
   useEffect(() => {

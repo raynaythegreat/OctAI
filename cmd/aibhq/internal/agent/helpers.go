@@ -76,5 +76,11 @@ func interactiveMode(agentLoop *agent.AgentLoop, sessionKey string, modelName st
 }
 
 func simpleInteractiveMode(agentLoop *agent.AgentLoop, sessionKey string) error {
-	return interactiveMode(agentLoop, sessionKey, "ai-business-hq")
+	return interactiveMode(agentLoop, sessionKey, "OctAi")
+}
+
+// RunInteractive starts the interactive agent chat UI.
+// Called directly by the tui command to avoid subprocess issues.
+func RunInteractive(sessionKey string) error {
+	return agentCmd("", sessionKey, "", false)
 }

@@ -13,8 +13,10 @@ import { Route as WorkflowsRouteImport } from './routes/workflows'
 import { Route as TeamsRouteImport } from './routes/teams'
 import { Route as ScheduleRouteImport } from './routes/schedule'
 import { Route as ModelsRouteImport } from './routes/models'
+import { Route as McpRouteImport } from './routes/mcp'
 import { Route as LoopsRouteImport } from './routes/loops'
 import { Route as LogsRouteImport } from './routes/logs'
+import { Route as HistoryRouteImport } from './routes/history'
 import { Route as CredentialsRouteImport } from './routes/credentials'
 import { Route as ConfigRouteImport } from './routes/config'
 import { Route as AgentRouteImport } from './routes/agent'
@@ -24,6 +26,9 @@ import { Route as ConfigRawRouteImport } from './routes/config.raw'
 import { Route as ChannelsNameRouteImport } from './routes/channels/$name'
 import { Route as AgentToolsRouteImport } from './routes/agent/tools'
 import { Route as AgentSkillsRouteImport } from './routes/agent/skills'
+import { Route as AgentReferenceUrlRouteImport } from './routes/agent/reference-url'
+import { Route as AgentCapabilitiesRouteImport } from './routes/agent/capabilities'
+import { Route as AgentAiUrlRouteImport } from './routes/agent/ai-url'
 
 const WorkflowsRoute = WorkflowsRouteImport.update({
   id: '/workflows',
@@ -45,6 +50,11 @@ const ModelsRoute = ModelsRouteImport.update({
   path: '/models',
   getParentRoute: () => rootRouteImport,
 } as any)
+const McpRoute = McpRouteImport.update({
+  id: '/mcp',
+  path: '/mcp',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoopsRoute = LoopsRouteImport.update({
   id: '/loops',
   path: '/loops',
@@ -53,6 +63,11 @@ const LoopsRoute = LoopsRouteImport.update({
 const LogsRoute = LogsRouteImport.update({
   id: '/logs',
   path: '/logs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HistoryRoute = HistoryRouteImport.update({
+  id: '/history',
+  path: '/history',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CredentialsRoute = CredentialsRouteImport.update({
@@ -100,6 +115,21 @@ const AgentSkillsRoute = AgentSkillsRouteImport.update({
   path: '/skills',
   getParentRoute: () => AgentRoute,
 } as any)
+const AgentReferenceUrlRoute = AgentReferenceUrlRouteImport.update({
+  id: '/reference-url',
+  path: '/reference-url',
+  getParentRoute: () => AgentRoute,
+} as any)
+const AgentCapabilitiesRoute = AgentCapabilitiesRouteImport.update({
+  id: '/capabilities',
+  path: '/capabilities',
+  getParentRoute: () => AgentRoute,
+} as any)
+const AgentAiUrlRoute = AgentAiUrlRouteImport.update({
+  id: '/ai-url',
+  path: '/ai-url',
+  getParentRoute: () => AgentRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -107,12 +137,17 @@ export interface FileRoutesByFullPath {
   '/agent': typeof AgentRouteWithChildren
   '/config': typeof ConfigRouteWithChildren
   '/credentials': typeof CredentialsRoute
+  '/history': typeof HistoryRoute
   '/logs': typeof LogsRoute
   '/loops': typeof LoopsRoute
+  '/mcp': typeof McpRoute
   '/models': typeof ModelsRoute
   '/schedule': typeof ScheduleRoute
   '/teams': typeof TeamsRoute
   '/workflows': typeof WorkflowsRoute
+  '/agent/ai-url': typeof AgentAiUrlRoute
+  '/agent/capabilities': typeof AgentCapabilitiesRoute
+  '/agent/reference-url': typeof AgentReferenceUrlRoute
   '/agent/skills': typeof AgentSkillsRoute
   '/agent/tools': typeof AgentToolsRoute
   '/channels/$name': typeof ChannelsNameRoute
@@ -124,12 +159,17 @@ export interface FileRoutesByTo {
   '/agent': typeof AgentRouteWithChildren
   '/config': typeof ConfigRouteWithChildren
   '/credentials': typeof CredentialsRoute
+  '/history': typeof HistoryRoute
   '/logs': typeof LogsRoute
   '/loops': typeof LoopsRoute
+  '/mcp': typeof McpRoute
   '/models': typeof ModelsRoute
   '/schedule': typeof ScheduleRoute
   '/teams': typeof TeamsRoute
   '/workflows': typeof WorkflowsRoute
+  '/agent/ai-url': typeof AgentAiUrlRoute
+  '/agent/capabilities': typeof AgentCapabilitiesRoute
+  '/agent/reference-url': typeof AgentReferenceUrlRoute
   '/agent/skills': typeof AgentSkillsRoute
   '/agent/tools': typeof AgentToolsRoute
   '/channels/$name': typeof ChannelsNameRoute
@@ -142,12 +182,17 @@ export interface FileRoutesById {
   '/agent': typeof AgentRouteWithChildren
   '/config': typeof ConfigRouteWithChildren
   '/credentials': typeof CredentialsRoute
+  '/history': typeof HistoryRoute
   '/logs': typeof LogsRoute
   '/loops': typeof LoopsRoute
+  '/mcp': typeof McpRoute
   '/models': typeof ModelsRoute
   '/schedule': typeof ScheduleRoute
   '/teams': typeof TeamsRoute
   '/workflows': typeof WorkflowsRoute
+  '/agent/ai-url': typeof AgentAiUrlRoute
+  '/agent/capabilities': typeof AgentCapabilitiesRoute
+  '/agent/reference-url': typeof AgentReferenceUrlRoute
   '/agent/skills': typeof AgentSkillsRoute
   '/agent/tools': typeof AgentToolsRoute
   '/channels/$name': typeof ChannelsNameRoute
@@ -161,12 +206,17 @@ export interface FileRouteTypes {
     | '/agent'
     | '/config'
     | '/credentials'
+    | '/history'
     | '/logs'
     | '/loops'
+    | '/mcp'
     | '/models'
     | '/schedule'
     | '/teams'
     | '/workflows'
+    | '/agent/ai-url'
+    | '/agent/capabilities'
+    | '/agent/reference-url'
     | '/agent/skills'
     | '/agent/tools'
     | '/channels/$name'
@@ -178,12 +228,17 @@ export interface FileRouteTypes {
     | '/agent'
     | '/config'
     | '/credentials'
+    | '/history'
     | '/logs'
     | '/loops'
+    | '/mcp'
     | '/models'
     | '/schedule'
     | '/teams'
     | '/workflows'
+    | '/agent/ai-url'
+    | '/agent/capabilities'
+    | '/agent/reference-url'
     | '/agent/skills'
     | '/agent/tools'
     | '/channels/$name'
@@ -195,12 +250,17 @@ export interface FileRouteTypes {
     | '/agent'
     | '/config'
     | '/credentials'
+    | '/history'
     | '/logs'
     | '/loops'
+    | '/mcp'
     | '/models'
     | '/schedule'
     | '/teams'
     | '/workflows'
+    | '/agent/ai-url'
+    | '/agent/capabilities'
+    | '/agent/reference-url'
     | '/agent/skills'
     | '/agent/tools'
     | '/channels/$name'
@@ -213,8 +273,10 @@ export interface RootRouteChildren {
   AgentRoute: typeof AgentRouteWithChildren
   ConfigRoute: typeof ConfigRouteWithChildren
   CredentialsRoute: typeof CredentialsRoute
+  HistoryRoute: typeof HistoryRoute
   LogsRoute: typeof LogsRoute
   LoopsRoute: typeof LoopsRoute
+  McpRoute: typeof McpRoute
   ModelsRoute: typeof ModelsRoute
   ScheduleRoute: typeof ScheduleRoute
   TeamsRoute: typeof TeamsRoute
@@ -251,6 +313,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ModelsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/mcp': {
+      id: '/mcp'
+      path: '/mcp'
+      fullPath: '/mcp'
+      preLoaderRoute: typeof McpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/loops': {
       id: '/loops'
       path: '/loops'
@@ -263,6 +332,13 @@ declare module '@tanstack/react-router' {
       path: '/logs'
       fullPath: '/logs'
       preLoaderRoute: typeof LogsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/history': {
+      id: '/history'
+      path: '/history'
+      fullPath: '/history'
+      preLoaderRoute: typeof HistoryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/credentials': {
@@ -328,6 +404,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AgentSkillsRouteImport
       parentRoute: typeof AgentRoute
     }
+    '/agent/reference-url': {
+      id: '/agent/reference-url'
+      path: '/reference-url'
+      fullPath: '/agent/reference-url'
+      preLoaderRoute: typeof AgentReferenceUrlRouteImport
+      parentRoute: typeof AgentRoute
+    }
+    '/agent/capabilities': {
+      id: '/agent/capabilities'
+      path: '/capabilities'
+      fullPath: '/agent/capabilities'
+      preLoaderRoute: typeof AgentCapabilitiesRouteImport
+      parentRoute: typeof AgentRoute
+    }
+    '/agent/ai-url': {
+      id: '/agent/ai-url'
+      path: '/ai-url'
+      fullPath: '/agent/ai-url'
+      preLoaderRoute: typeof AgentAiUrlRouteImport
+      parentRoute: typeof AgentRoute
+    }
   }
 }
 
@@ -344,11 +441,17 @@ const ChannelsRouteRouteWithChildren = ChannelsRouteRoute._addFileChildren(
 )
 
 interface AgentRouteChildren {
+  AgentAiUrlRoute: typeof AgentAiUrlRoute
+  AgentCapabilitiesRoute: typeof AgentCapabilitiesRoute
+  AgentReferenceUrlRoute: typeof AgentReferenceUrlRoute
   AgentSkillsRoute: typeof AgentSkillsRoute
   AgentToolsRoute: typeof AgentToolsRoute
 }
 
 const AgentRouteChildren: AgentRouteChildren = {
+  AgentAiUrlRoute: AgentAiUrlRoute,
+  AgentCapabilitiesRoute: AgentCapabilitiesRoute,
+  AgentReferenceUrlRoute: AgentReferenceUrlRoute,
   AgentSkillsRoute: AgentSkillsRoute,
   AgentToolsRoute: AgentToolsRoute,
 }
@@ -372,8 +475,10 @@ const rootRouteChildren: RootRouteChildren = {
   AgentRoute: AgentRouteWithChildren,
   ConfigRoute: ConfigRouteWithChildren,
   CredentialsRoute: CredentialsRoute,
+  HistoryRoute: HistoryRoute,
   LogsRoute: LogsRoute,
   LoopsRoute: LoopsRoute,
+  McpRoute: McpRoute,
   ModelsRoute: ModelsRoute,
   ScheduleRoute: ScheduleRoute,
   TeamsRoute: TeamsRoute,

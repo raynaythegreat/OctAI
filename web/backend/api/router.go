@@ -87,6 +87,12 @@ func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
 	h.registerTeamRoutes(mux)
 	h.registerWorkflowRoutes(mux)
 	h.registerLoopRoutes(mux)
+	h.registerScannerRoutes(mux)
+	h.registerReferenceURLRoutes(mux)
+	h.registerImageModelRoutes(mux)
+	h.registerVideoModelRoutes(mux)
+	h.registerMediaRoutes(mux)
+	h.registerImageGenRoutes(mux)
 }
 
 func (h *Handler) Shutdown() {

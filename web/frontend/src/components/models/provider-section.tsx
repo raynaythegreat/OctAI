@@ -13,6 +13,7 @@ interface ProviderSectionProps {
   onEdit: (model: ModelInfo) => void
   onSetDefault: (model: ModelInfo) => void
   onDelete: (model: ModelInfo) => void
+  onRotateKey: (model: ModelInfo) => void
   settingDefaultIndex: number | null
 }
 
@@ -23,6 +24,7 @@ export function ProviderSection({
   onEdit,
   onSetDefault,
   onDelete,
+  onRotateKey,
   settingDefaultIndex,
 }: ProviderSectionProps) {
   const [open, setOpen] = useState(true)
@@ -62,6 +64,7 @@ export function ProviderSection({
               onEdit={onEdit}
               onSetDefault={onSetDefault}
               onDelete={onDelete}
+              onRotateKey={onRotateKey}
               settingDefault={settingDefaultIndex === model.index}
             />
           ))}

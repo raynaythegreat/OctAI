@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { toast } from "sonner"
 
-import { type ModelInfo, getModels, setDefaultModel } from "@/api/models"
+import { type ModelInfo, getAutoRouting, getModels, setAutoRouting, setDefaultModel } from "@/api/models"
 
 interface UseChatModelsOptions {
   isConnected: boolean
@@ -20,6 +21,7 @@ function isLocalModel(model: ModelInfo): boolean {
 export function useChatModels({ isConnected }: UseChatModelsOptions) {
   const [modelList, setModelList] = useState<ModelInfo[]>([])
   const [defaultModelName, setDefaultModelName] = useState("")
+  const [isAutoMode, setIsAutoMode] = useState(false)
   const setDefaultRequestIdRef = useRef(0)
 
   const loadModels = useCallback(async () => {
@@ -34,13 +36,33 @@ export function useChatModels({ isConnected }: UseChatModelsOptions) {
     }
   }, [])
 
+  const loadAutoRouting = useCallback(async () => {
+    try {
+      const data = await getAutoRouting()
+      setIsAutoMode(data.enabled)
+    } catch {
+      // silently fail
+    }
+  }, [])
+
   useEffect(() => {
     const timerId = setTimeout(() => {
       void loadModels()
+      void loadAutoRouting()
     }, 0)
 
     return () => clearTimeout(timerId)
-  }, [isConnected, loadModels])
+  }, [isConnected, loadModels, loadAutoRouting])
+
+  const toggleAutoMode = useCallback(async (enabled: boolean) => {
+    try {
+      await setAutoRouting({ enabled })
+      setIsAutoMode(enabled)
+      toast(enabled ? "Auto mode enabled" : "Auto mode disabled")
+    } catch (err) {
+      console.error("Failed to toggle auto mode:", err)
+    }
+  }, [])
 
   const handleSetDefault = useCallback(
     async (modelName: string) => {
@@ -95,5 +117,7 @@ export function useChatModels({ isConnected }: UseChatModelsOptions) {
     oauthModels,
     localModels,
     handleSetDefault,
+    isAutoMode,
+    toggleAutoMode,
   }
 }

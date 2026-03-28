@@ -1,6 +1,7 @@
 import dayjs from "dayjs"
 import "dayjs/locale/en"
 import "dayjs/locale/zh-cn"
+import "dayjs/locale/es"
 import localizedFormat from "dayjs/plugin/localizedFormat"
 import relativeTime from "dayjs/plugin/relativeTime"
 import i18n from "i18next"
@@ -9,6 +10,7 @@ import { initReactI18next } from "react-i18next"
 
 import en from "./locales/en.json"
 import zh from "./locales/zh.json"
+import es from "./locales/es.json"
 
 dayjs.extend(relativeTime)
 dayjs.extend(localizedFormat)
@@ -29,6 +31,9 @@ i18n
       zh: {
         translation: zh,
       },
+      es: {
+        translation: es,
+      },
     },
     fallbackLng: "en",
     debug: false,
@@ -41,6 +46,8 @@ i18n
 i18n.on("languageChanged", (lng) => {
   if (lng.startsWith("zh")) {
     dayjs.locale("zh-cn")
+  } else if (lng.startsWith("es")) {
+    dayjs.locale("es")
   } else {
     dayjs.locale("en")
   }

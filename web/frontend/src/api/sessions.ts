@@ -7,6 +7,7 @@ export interface SessionSummary {
   message_count: number
   created: string
   updated: string
+  channel?: string
 }
 
 export interface SessionDetail {
@@ -15,16 +16,21 @@ export interface SessionDetail {
   summary: string
   created: string
   updated: string
+  channel?: string
 }
 
 export async function getSessions(
   offset: number = 0,
   limit: number = 20,
+  channel?: string,
 ): Promise<SessionSummary[]> {
   const params = new URLSearchParams({
     offset: offset.toString(),
     limit: limit.toString(),
   })
+  if (channel) {
+    params.set("channel", channel)
+  }
 
   const res = await fetch(`/api/sessions?${params.toString()}`)
   if (!res.ok) {
@@ -33,16 +39,22 @@ export async function getSessions(
   return res.json()
 }
 
-export async function getSessionHistory(id: string): Promise<SessionDetail> {
-  const res = await fetch(`/api/sessions/${encodeURIComponent(id)}`)
+export async function getSessionHistory(id: string, channel?: string): Promise<SessionDetail> {
+  const url = channel
+    ? `/api/sessions/${encodeURIComponent(id)}?channel=${encodeURIComponent(channel)}`
+    : `/api/sessions/${encodeURIComponent(id)}`
+  const res = await fetch(url)
   if (!res.ok) {
     throw new Error(`Failed to fetch session ${id}: ${res.status}`)
   }
   return res.json()
 }
 
-export async function deleteSession(id: string): Promise<void> {
-  const res = await fetch(`/api/sessions/${encodeURIComponent(id)}`, {
+export async function deleteSession(id: string, channel?: string): Promise<void> {
+  const url = channel
+    ? `/api/sessions/${encodeURIComponent(id)}?channel=${encodeURIComponent(channel)}`
+    : `/api/sessions/${encodeURIComponent(id)}`
+  const res = await fetch(url, {
     method: "DELETE",
   })
   if (!res.ok) {

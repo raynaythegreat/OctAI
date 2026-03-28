@@ -12,7 +12,9 @@
     "show_more_channels": "More",
     "show_less_channels": "Less",
     "config": "Config",
-    "logs": "Logs"
+    "logs": "Logs",
+    "history": "History",
+    "mcp": "MCP Servers"
   },
   "chat": {
     "welcome": "How can I help you today?",
@@ -47,6 +49,20 @@
       "apikey": "API Key",
       "oauth": "OAuth",
       "local": "Local"
+    },
+    "voice": {
+      "stopRecording": "Stop recording",
+      "voiceInput": "Voice input"
+    },
+    "channelSwitchHint": "This channel is configured via its settings page.",
+    "channel": {
+      "web": "Web Chat",
+      "tui": "TUI Terminal",
+      "active": "Active Channels",
+      "notConfigured": "Not Configured",
+      "readOnly": "Read-only — view history",
+      "noHistory": "No chat history for {{channel}}",
+      "viewingHistory": "Viewing history"
     }
   },
   "header": {
@@ -104,7 +120,10 @@
       "deviceCode": "Device Code",
       "stopLoading": "Stop Loading",
       "saveToken": "Save",
-      "logout": "Logout"
+      "logout": "Logout",
+      "test": "Test",
+      "deleteKey": "Delete Key",
+      "updateModels": "Update Models"
     },
     "logoutDialog": {
       "title": "Logout provider?",
@@ -126,7 +145,9 @@
       "logoutFailed": "Logout failed",
       "invalidBrowserResponse": "Invalid browser login response",
       "invalidDeviceResponse": "Invalid device code response",
-      "popupBlocked": "Unable to open a new tab. Please allow popups and try again."
+      "popupBlocked": "Unable to open a new tab. Please allow popups and try again.",
+      "saveFailed": "Failed to save API key",
+      "testFailed": "Verification failed"
     },
     "flow": {
       "current": "Current authentication status",
@@ -142,6 +163,34 @@
       "url": "Verification URL",
       "polling": "Polling login status...",
       "open": "Open Verification Page"
+    },
+    "sections": {
+      "oauth": "OAuth Providers",
+      "apikey": "API Key Providers"
+    },
+    "apikey": {
+      "configured": "Configured",
+      "notConfigured": "Not configured",
+      "keyPlaceholder": "Enter API key"
+    },
+    "updateModels": {
+      "success": "Found {{count}} models from {{provider}}",
+      "noNew": "No new models found"
+    },
+    "save": {
+      "success": "API key saved"
+    },
+    "delete": {
+      "success": "API key removed"
+    },
+    "test": {
+      "success": "API key verified successfully",
+      "failure": "Verification failed: {{error}}"
+    },
+    "tabs": {
+      "text": "API Keys",
+      "image": "Image",
+      "video": "Video"
     }
   },
   "models": {
@@ -218,6 +267,39 @@
       "apiKeyHint": "A key is already set. Leave blank to keep it unchanged.",
       "oauthNote": "This provider uses OAuth — no API key required.",
       "saveError": "Failed to save"
+    },
+    "tabs": {
+      "text": "Text",
+      "image": "Image",
+      "video": "Video"
+    }
+  },
+  "aiUrl": {
+    "title": "AI URL Scanner",
+    "description": "Discover and integrate tools, skills, and MCP servers from any URL",
+    "inputPlaceholder": "https://github.com/owner/repo or https://example.com",
+    "scanButton": "Scan",
+    "scanning": "Analyzing URL with AI...",
+    "noResults": "No integrable items found",
+    "resultsTitle": "{{count}} item discovered",
+    "resultsTitle_plural": "{{count}} items discovered",
+    "selectAll": "Select all",
+    "integrateButton": "Integrate {{count}} selected",
+    "integrateSuccess": "Successfully integrated {{count}} item",
+    "integrateSuccess_plural": "Successfully integrated {{count}} items",
+    "sidebarTitle": "AI URL",
+    "errors": {
+      "emptyUrl": "Please enter a URL",
+      "analyzeFailed": "Failed to analyze URL",
+      "integrateFailed": "Failed to integrate selected items"
+    },
+    "types": {
+      "mcp_server": "MCP Server",
+      "skill": "Skill",
+      "tool": "Tool",
+      "plugin": "Plugin",
+      "connection": "Connection",
+      "other": "Other"
     }
   },
   "channels": {
@@ -527,6 +609,44 @@
     "logs": {
       "clear": "Clear logs",
       "empty": "Waiting for logs..."
+    }
+  },
+  "mcp": {
+    "title": "MCP Servers",
+    "description": "Manage Model Context Protocol servers to extend your agent with additional tools and capabilities.",
+    "enabled": "MCP Enabled",
+    "addServer": "Add Server",
+    "editServer": "Edit Server",
+    "deleteServer": "Delete Server",
+    "noServers": "No MCP servers configured yet. Add one to extend your agent's capabilities.",
+    "fields": {
+      "name": "Server Name",
+      "command": "Command",
+      "args": "Arguments",
+      "type": "Type",
+      "url": "URL",
+      "env": "Environment Variables",
+      "argsHint": "Space-separated arguments, e.g. --port 3000",
+      "envHint": "One KEY=value per line"
+    },
+    "types": {
+      "stdio": "Stdio (local process)",
+      "sse": "SSE (HTTP stream)",
+      "http": "HTTP"
+    },
+    "server": {
+      "saved": "Server saved",
+      "deleted": "Server deleted",
+      "saveError": "Failed to save server",
+      "deleteError": "Failed to delete server"
+    },
+    "discovery": {
+      "title": "Tool Discovery",
+      "description": "Automatically discover and index tools from connected MCP servers.",
+      "enabled": "Discovery Enabled"
+    },
+    "toggle": {
+      "enableError": "Failed to update MCP settings"
     }
   }
 }

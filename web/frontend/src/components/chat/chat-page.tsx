@@ -1,8 +1,10 @@
 import { IconPlus } from "@tabler/icons-react"
-import { useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 
+import { getSessionHistory } from "@/api/sessions"
 import { AssistantMessage } from "@/components/chat/assistant-message"
+import { ChannelSelector } from "@/components/chat/channel-selector"
 import { ChatComposer } from "@/components/chat/chat-composer"
 import { ChatEmptyState } from "@/components/chat/chat-empty-state"
 import { ModelSelector } from "@/components/chat/model-selector"
@@ -22,6 +24,12 @@ export function ChatPage() {
   const [isAtBottom, setIsAtBottom] = useState(true)
   const [hasScrolled, setHasScrolled] = useState(false)
   const [input, setInput] = useState("")
+  const [activeChannel, setActiveChannel] = useState("pico")
+  const [viewingSessionId, setViewingSessionId] = useState<string | null>(null)
+  const [viewingMessages, setViewingMessages] = useState<{ role: string; content: string }[] | null>(null)
+  const [isPlanMode, setIsPlanMode] = useState(false)
+
+  const readOnly = activeChannel !== "pico"
 
   const {
     messages,
@@ -44,6 +52,8 @@ export function ChatPage() {
     oauthModels,
     localModels,
     handleSetDefault,
+    isAutoMode,
+    toggleAutoMode,
   } = useChatModels({ isConnected: isGatewayRunning })
   const canSend = isChatConnected && Boolean(defaultModelName)
 
@@ -58,7 +68,21 @@ export function ChatPage() {
   } = useSessionHistory({
     activeSessionId,
     onDeletedActiveSession: newChat,
+    channel: activeChannel !== "pico" ? activeChannel : undefined,
   })
+
+  const loadReadOnlySession = useCallback(
+    async (id: string) => {
+      try {
+        const detail = await getSessionHistory(id, activeChannel)
+        setViewingSessionId(id)
+        setViewingMessages(detail.messages)
+      } catch (err) {
+        console.error("Failed to load session:", err)
+      }
+    },
+    [activeChannel],
+  )
 
   const syncScrollState = (element: HTMLDivElement) => {
     const { scrollTop, scrollHeight, clientHeight } = element
@@ -79,9 +103,39 @@ export function ChatPage() {
     }
   }, [messages, isTyping, isAtBottom])
 
+  const applyPlanPrefix = (content: string) =>
+    isPlanMode
+      ? `Before taking any action, write a clear numbered plan of what you will do. Then execute it step by step.\n\n${content}`
+      : content
+
   const handleSend = () => {
     if (!input.trim() || !canSend) return
-    if (sendMessage(input.trim())) {
+    if (sendMessage(applyPlanPrefix(input.trim()))) {
+      setInput("")
+    }
+  }
+
+  const handleSendWithAttachments = async (
+    content: string,
+    attachments: { file: File; dataUrl?: string }[],
+  ) => {
+    if (!canSend) return
+    let fullContent = content
+    for (const att of attachments) {
+      if (att.dataUrl && att.dataUrl.startsWith("data:image/")) {
+        // Note the attached image by name; vision-capable models receive context via the UI
+        fullContent += `\n\n[Attached image: ${att.file.name}]`
+      } else {
+        // For text files, inline the content
+        try {
+          const text = await att.file.text()
+          fullContent += `\n\n\`\`\`\n${att.file.name}:\n${text}\`\`\``
+        } catch {
+          fullContent += `\n\n[Attached file: ${att.file.name}]`
+        }
+      }
+    }
+    if (sendMessage(applyPlanPrefix(fullContent))) {
       setInput("")
     }
   }
@@ -94,21 +148,40 @@ export function ChatPage() {
           hasScrolled ? "shadow-sm" : "shadow-none"
         }`}
         titleExtra={
-          hasConfiguredModels && (
-            <ModelSelector
-              defaultModelName={defaultModelName}
-              apiKeyModels={apiKeyModels}
-              oauthModels={oauthModels}
-              localModels={localModels}
-              onValueChange={handleSetDefault}
+          <div className="flex items-center gap-2">
+            {hasConfiguredModels && (
+              <ModelSelector
+                defaultModelName={defaultModelName}
+                apiKeyModels={apiKeyModels}
+                oauthModels={oauthModels}
+                localModels={localModels}
+                onValueChange={handleSetDefault}
+                isAutoMode={isAutoMode}
+                toggleAutoMode={toggleAutoMode}
+              />
+            )}
+            <ChannelSelector
+              activeChannel={activeChannel}
+              onChannelChange={(ch) => {
+                setActiveChannel(ch)
+                setViewingSessionId(null)
+                setViewingMessages(null)
+              }}
             />
-          )
+          </div>
         }
       >
         <Button
           variant="secondary"
           size="sm"
-          onClick={newChat}
+          onClick={
+            readOnly
+              ? () => {
+                  setViewingSessionId(null)
+                  setViewingMessages(null)
+                }
+              : newChat
+          }
           className="h-9 gap-2"
         >
           <IconPlus className="size-4" />
@@ -117,7 +190,7 @@ export function ChatPage() {
 
         <SessionHistoryMenu
           sessions={sessions}
-          activeSessionId={activeSessionId}
+          activeSessionId={readOnly ? (viewingSessionId ?? "") : activeSessionId}
           hasMore={hasMore}
           loadError={loadError}
           loadErrorMessage={loadErrorMessage}
@@ -127,7 +200,7 @@ export function ChatPage() {
               void loadSessions(true)
             }
           }}
-          onSwitchSession={switchSession}
+          onSwitchSession={readOnly ? loadReadOnlySession : switchSession}
           onDeleteSession={handleDeleteSession}
         />
       </PageHeader>
@@ -138,7 +211,7 @@ export function ChatPage() {
         className="min-h-0 flex-1 overflow-y-auto px-4 py-6 md:px-8 lg:px-24 xl:px-48"
       >
         <div className="mx-auto flex w-full max-w-250 flex-col gap-8 pb-8">
-          {messages.length === 0 && !isTyping && (
+          {!readOnly && messages.length === 0 && !isTyping && (
             <ChatEmptyState
               hasConfiguredModels={hasConfiguredModels}
               defaultModelName={defaultModelName}
@@ -146,30 +219,60 @@ export function ChatPage() {
             />
           )}
 
-          {messages.map((msg) => (
-            <div key={msg.id} className="flex w-full">
-              {msg.role === "assistant" ? (
-                <AssistantMessage
-                  content={msg.content}
-                  timestamp={msg.timestamp}
-                />
-              ) : (
-                <UserMessage content={msg.content} />
-              )}
-            </div>
-          ))}
+          {!readOnly &&
+            messages.map((msg) => (
+              <div key={msg.id} className="flex w-full">
+                {msg.role === "assistant" ? (
+                  <AssistantMessage
+                    content={msg.content}
+                    timestamp={msg.timestamp}
+                  />
+                ) : (
+                  <UserMessage content={msg.content} />
+                )}
+              </div>
+            ))}
 
-          {isTyping && <TypingIndicator />}
+          {!readOnly && isTyping && <TypingIndicator />}
+
+          {readOnly && !viewingMessages && (
+            <div className="flex h-full items-center justify-center text-muted-foreground">
+              <p>{t("chat.channel.noHistory", { channel: activeChannel.toUpperCase() })}</p>
+            </div>
+          )}
+
+          {readOnly &&
+            viewingMessages &&
+            viewingMessages.map((msg, i) => (
+              <div key={i} className="flex w-full">
+                {msg.role === "assistant" ? (
+                  <AssistantMessage content={msg.content} />
+                ) : (
+                  <UserMessage content={msg.content} />
+                )}
+              </div>
+            ))}
         </div>
       </div>
 
-      <ChatComposer
-        input={input}
-        onInputChange={setInput}
-        onSend={handleSend}
-        isConnected={isChatConnected}
-        hasDefaultModel={Boolean(defaultModelName)}
-      />
+      {readOnly ? (
+        <div className="border-t px-4 py-3 text-center text-sm text-muted-foreground">
+          {t("chat.channel.readOnly")}
+        </div>
+      ) : (
+        <ChatComposer
+          input={input}
+          onInputChange={setInput}
+          onSend={handleSend}
+          isConnected={isChatConnected}
+          hasDefaultModel={Boolean(defaultModelName)}
+          onSendWithAttachments={(content, attachments) => {
+            void handleSendWithAttachments(content, attachments)
+          }}
+          isPlanMode={isPlanMode}
+          onTogglePlanMode={() => setIsPlanMode((v) => !v)}
+        />
+      )}
     </div>
   )
 }

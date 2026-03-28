@@ -12,7 +12,9 @@
     "show_more_channels": "更多",
     "show_less_channels": "收起",
     "config": "配置",
-    "logs": "日志"
+    "logs": "日志",
+    "history": "历史记录",
+    "mcp": "MCP 服务器"
   },
   "chat": {
     "welcome": "今天我能为您做些什么？",
@@ -47,6 +49,20 @@
       "apikey": "API Key",
       "oauth": "OAuth",
       "local": "本地模型"
+    },
+    "voice": {
+      "stopRecording": "停止录音",
+      "voiceInput": "语音输入"
+    },
+    "channelSwitchHint": "此频道通过其设置页面配置。",
+    "channel": {
+      "web": "网页聊天",
+      "tui": "终端界面",
+      "active": "活跃频道",
+      "notConfigured": "未配置",
+      "readOnly": "只读 — 查看历史",
+      "noHistory": "{{channel}}暂无聊天记录",
+      "viewingHistory": "查看历史"
     }
   },
   "header": {
@@ -104,7 +120,10 @@
       "deviceCode": "设备码",
       "stopLoading": "停止加载",
       "saveToken": "保存",
-      "logout": "退出登录"
+      "logout": "退出登录",
+      "test": "测试",
+      "deleteKey": "删除密钥",
+      "updateModels": "更新模型"
     },
     "logoutDialog": {
       "title": "确认退出登录？",
@@ -126,7 +145,9 @@
       "logoutFailed": "退出登录失败",
       "invalidBrowserResponse": "浏览器登录响应无效",
       "invalidDeviceResponse": "设备码响应无效",
-      "popupBlocked": "无法打开新标签页，请允许弹窗后重试。"
+      "popupBlocked": "无法打开新标签页，请允许弹窗后重试。",
+      "saveFailed": "保存 API 密钥失败",
+      "testFailed": "验证失败"
     },
     "flow": {
       "current": "当前授权状态",
@@ -142,6 +163,34 @@
       "url": "验证地址",
       "polling": "正在轮询登录状态...",
       "open": "打开验证页面"
+    },
+    "sections": {
+      "oauth": "OAuth 提供商",
+      "apikey": "API 密钥提供商"
+    },
+    "apikey": {
+      "configured": "已配置",
+      "notConfigured": "未配置",
+      "keyPlaceholder": "输入 API 密钥"
+    },
+    "updateModels": {
+      "success": "从 {{provider}} 发现 {{count}} 个模型",
+      "noNew": "未发现新模型"
+    },
+    "save": {
+      "success": "API 密钥已保存"
+    },
+    "delete": {
+      "success": "API 密钥已移除"
+    },
+    "test": {
+      "success": "API 密钥验证成功",
+      "failure": "验证失败：{{error}}"
+    },
+    "tabs": {
+      "text": "API密钥",
+      "image": "图像",
+      "video": "视频"
     }
   },
   "models": {
@@ -218,6 +267,39 @@
       "apiKeyHint": "已设置 API Key，留空表示不修改。",
       "oauthNote": "该服务商使用 OAuth 认证，无需 API Key。",
       "saveError": "保存失败"
+    },
+    "tabs": {
+      "text": "文本",
+      "image": "图像",
+      "video": "视频"
+    }
+  },
+  "aiUrl": {
+    "title": "AI URL扫描器",
+    "description": "从任意URL发现并集成工具、技能和MCP服务器",
+    "inputPlaceholder": "https://github.com/owner/repo 或 https://example.com",
+    "scanButton": "扫描",
+    "scanning": "AI正在分析URL...",
+    "noResults": "未发现可集成的项目",
+    "resultsTitle": "发现{{count}}个项目",
+    "resultsTitle_plural": "发现{{count}}个项目",
+    "selectAll": "全选",
+    "integrateButton": "集成已选{{count}}个",
+    "integrateSuccess": "成功集成{{count}}个项目",
+    "integrateSuccess_plural": "成功集成{{count}}个项目",
+    "sidebarTitle": "AI URL",
+    "errors": {
+      "emptyUrl": "请输入URL",
+      "analyzeFailed": "URL分析失败",
+      "integrateFailed": "集成失败"
+    },
+    "types": {
+      "mcp_server": "MCP服务器",
+      "skill": "技能",
+      "tool": "工具",
+      "plugin": "插件",
+      "connection": "连接",
+      "other": "其他"
     }
   },
   "channels": {
@@ -527,6 +609,44 @@
     "logs": {
       "clear": "清空日志",
       "empty": "等待日志中..."
+    }
+  },
+  "mcp": {
+    "title": "MCP 服务器",
+    "description": "管理模型上下文协议服务器，使用额外的工具和功能扩展您的智能体。",
+    "enabled": "启用 MCP",
+    "addServer": "添加服务器",
+    "editServer": "编辑服务器",
+    "deleteServer": "删除服务器",
+    "noServers": "尚未配置 MCP 服务器。添加一个来扩展您的智能体功能。",
+    "fields": {
+      "name": "服务器名称",
+      "command": "命令",
+      "args": "参数",
+      "type": "类型",
+      "url": "URL",
+      "env": "环境变量",
+      "argsHint": "空格分隔的参数，例如 --port 3000",
+      "envHint": "每行一个 KEY=value"
+    },
+    "types": {
+      "stdio": "Stdio（本地进程）",
+      "sse": "SSE（HTTP 流）",
+      "http": "HTTP"
+    },
+    "server": {
+      "saved": "服务器已保存",
+      "deleted": "服务器已删除",
+      "saveError": "保存服务器失败",
+      "deleteError": "删除服务器失败"
+    },
+    "discovery": {
+      "title": "工具发现",
+      "description": "自动发现并索引已连接 MCP 服务器的工具。",
+      "enabled": "启用发现"
+    },
+    "toggle": {
+      "enableError": "更新 MCP 设置失败"
     }
   }
 }

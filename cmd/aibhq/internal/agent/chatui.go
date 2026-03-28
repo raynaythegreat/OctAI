@@ -24,6 +24,21 @@ type cmdSuggestion struct {
 	desc string
 }
 
+// chatMode controls how the agent approaches responses.
+type chatMode int
+
+const (
+	modeBuild chatMode = iota // default: direct execution
+	modePlan                  // plan before acting
+)
+
+func (m chatMode) String() string {
+	if m == modePlan {
+		return "PLAN"
+	}
+	return "BUILD"
+}
+
 type chatUI struct {
 	app    *tview.Application
 	pages  *tview.Pages
@@ -43,6 +58,7 @@ type chatUI struct {
 	modelName  string
 	sessionKey string
 	agentLoop  *pkgagent.AgentLoop
+	mode       chatMode // Plan vs Build
 
 	mu         sync.Mutex
 	busy       bool
@@ -137,33 +153,50 @@ func (c *chatUI) buildLayout() {
 	c.app.SetFocus(c.input)
 }
 
+func (c *chatUI) modeColor() string {
+	if c.mode == modePlan {
+		return "#F59E0B" // amber for plan
+	}
+	return "#34D399" // green for build
+}
+
 func (c *chatUI) updateHeader() {
+	modeLabel := fmt.Sprintf("[%s::b]%s[-]", c.modeColor(), c.mode.String())
 	c.header.SetText(fmt.Sprintf(
-		"  [#A855F7::b]OCTAI[-]  [#2D1B4E]·[-]  [#7B6F8E]%s[-]  [#2D1B4E]·[-]  [#7B6F8E]session:%s[-]",
-		c.modelName, c.shortSession(),
+		"  [#A855F7::b]OCTAI[-]  [#2D1B4E]·[-]  [#7B6F8E]%s[-]  [#2D1B4E]·[-]  %s  [#2D1B4E]·[-]  [#7B6F8E]session:%s[-]",
+		c.modelName, modeLabel, c.shortSession(),
 	))
 }
 
 func (c *chatUI) updateFooter() {
 	c.footer.SetText(fmt.Sprintf(
-		"  [#7B6F8E]%s[-]  [#2D1B4E]·[-]  [#7B6F8E]session:%s[-]  [#2D1B4E]·[-]  [#A855F7]Ctrl+L[-][#7B6F8E]:models  /help[-]",
+		"  [#7B6F8E]%s[-]  [#2D1B4E]·[-]  [#7B6F8E]session:%s[-]  [#2D1B4E]·[-]  [#A855F7]Tab[-][#7B6F8E]:plan/build  [#A855F7]Ctrl+L[-][#7B6F8E]:models  /help[-]",
 		c.modelName, c.shortSession(),
 	))
 }
 
+func (c *chatUI) toggleMode() {
+	if c.mode == modeBuild {
+		c.mode = modePlan
+	} else {
+		c.mode = modeBuild
+	}
+	c.updateHeader()
+	c.appendSystemMessage(fmt.Sprintf("Mode switched to %s", c.mode.String()))
+}
+
 func (c *chatUI) printWelcome() {
 	fmt.Fprintf(c.chatLog, "\n")
-	fmt.Fprintf(c.chatLog, "[#A855F7::b]  █████╗ ██╗██████╗ ██╗  ██╗ ██████╗ [-]\n")
-	fmt.Fprintf(c.chatLog, "[#A855F7::b] ██╔══██╗██║██╔══██╗██║  ██║██╔═══██╗[-]\n")
-	fmt.Fprintf(c.chatLog, "[#A855F7::b] ███████║██║██████╔╝███████║██║   ██║[-]\n")
-	fmt.Fprintf(c.chatLog, "[#A855F7::b] ██╔══██║██║██╔══██╗██╔══██║██║▄▄ ██║[-]\n")
-	fmt.Fprintf(c.chatLog, "[#A855F7::b] ██║  ██║██║██████╔╝██║  ██║╚██████╔╝[-]\n")
-	fmt.Fprintf(c.chatLog, "[#A855F7::b] ╚═╝  ╚═╝╚═╝╚═════╝ ╚═╝  ╚═╝ ╚══▀▀═╝[-]\n")
+	fmt.Fprintf(c.chatLog, "[#A855F7::b] ██████╗  ██████╗████████╗ █████╗ ██╗[-]\n")
+	fmt.Fprintf(c.chatLog, "[#A855F7::b]██╔═══██╗██╔════╝╚══██╔══╝██╔══██╗██║[-]\n")
+	fmt.Fprintf(c.chatLog, "[#A855F7::b]██║   ██║██║        ██║   ███████║██║[-]\n")
+	fmt.Fprintf(c.chatLog, "[#A855F7::b]╚██████╔╝╚██████╗   ██║   ██╔══██║██║[-]\n")
+	fmt.Fprintf(c.chatLog, "[#A855F7::b] ╚═════╝  ╚═════╝   ╚═╝   ╚═╝  ╚═╝╚═╝[-]\n")
 	fmt.Fprintf(c.chatLog, "\n")
 	fmt.Fprintf(c.chatLog, "  [#2D1B4E]────────────────────────────────────────[-]\n")
 	fmt.Fprintf(c.chatLog, "  [#7B6F8E]model:[-] [#A855F7]%s[-]  [#7B6F8E]· session:[-] [#A855F7]%s[-]\n",
 		c.modelName, c.shortSession())
-	fmt.Fprintf(c.chatLog, "  [#7B6F8E]type a message to begin · / for commands[-]\n")
+	fmt.Fprintf(c.chatLog, "  [#7B6F8E]type a message to begin · / for commands · Tab to toggle Plan/Build[-]\n")
 	fmt.Fprintf(c.chatLog, "  [#2D1B4E]────────────────────────────────────────[-]\n\n")
 }
 
@@ -238,31 +271,63 @@ func (c *chatUI) run(ctx context.Context, loop *pkgagent.AgentLoop) error {
 	})
 
 	// ── Input key capture ─────────────────────────────────────
+	// NOTE: Enter is handled HERE (not in SetDoneFunc) because tview v0.42
+	// routes keys through the internal TextArea which can swallow SetDoneFunc
+	// callbacks. SetInputCapture runs before any internal widget handling.
 	c.input.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-		if c.suggVisible {
-			switch event.Key() {
-			case tcell.KeyUp:
-				c.app.QueueUpdateDraw(func() { c.moveSugg(-1) })
-				return nil
-			case tcell.KeyDown:
-				c.app.QueueUpdateDraw(func() { c.moveSugg(1) })
-				return nil
-			case tcell.KeyTab:
+		switch event.Key() {
+		case tcell.KeyEnter:
+			if c.suggVisible {
 				c.app.QueueUpdateDraw(c.applySugg)
 				return nil
-			case tcell.KeyEscape:
+			}
+			text := strings.TrimSpace(c.input.GetText())
+			if text == "" {
+				return nil
+			}
+			captured := text
+			c.input.SetText("")
+			c.hideSuggestions()
+			if strings.HasPrefix(captured, "/") {
+				c.app.QueueUpdateDraw(func() { c.handleSlashCommand(captured) })
+			} else {
+				c.app.QueueUpdateDraw(func() { c.sendToLoop(captured) })
+			}
+			return nil
+
+		case tcell.KeyTab:
+			if c.suggVisible {
+				c.app.QueueUpdateDraw(c.applySugg)
+				return nil
+			}
+			// Tab with empty input → toggle Plan/Build mode
+			if strings.TrimSpace(c.input.GetText()) == "" {
+				c.app.QueueUpdateDraw(c.toggleMode)
+				return nil
+			}
+			// Tab with typed slash prefix → open suggestions
+			if strings.HasPrefix(c.input.GetText(), "/") {
+				c.app.QueueUpdateDraw(func() { c.updateSuggestions(c.input.GetText()) })
+				return nil
+			}
+			return nil
+
+		case tcell.KeyEscape:
+			if c.suggVisible {
 				c.app.QueueUpdateDraw(c.hideSuggestions)
 				return nil
 			}
 			return event
-		}
-		// History navigation when no suggestions
-		c.mu.Lock()
-		histLen := len(c.history)
-		histIdx := c.histIdx
-		c.mu.Unlock()
-		switch event.Key() {
+
 		case tcell.KeyUp:
+			if c.suggVisible {
+				c.app.QueueUpdateDraw(func() { c.moveSugg(-1) })
+				return nil
+			}
+			// History navigation
+			c.mu.Lock()
+			histIdx := c.histIdx
+			c.mu.Unlock()
 			if histIdx > 0 {
 				newIdx := histIdx - 1
 				c.mu.Lock()
@@ -272,7 +337,17 @@ func (c *chatUI) run(ctx context.Context, loop *pkgagent.AgentLoop) error {
 				c.app.QueueUpdateDraw(func() { c.input.SetText(text) })
 			}
 			return nil
+
 		case tcell.KeyDown:
+			if c.suggVisible {
+				c.app.QueueUpdateDraw(func() { c.moveSugg(1) })
+				return nil
+			}
+			// History navigation
+			c.mu.Lock()
+			histLen := len(c.history)
+			histIdx := c.histIdx
+			c.mu.Unlock()
 			if histIdx < histLen-1 {
 				newIdx := histIdx + 1
 				c.mu.Lock()
@@ -298,29 +373,6 @@ func (c *chatUI) run(ctx context.Context, loop *pkgagent.AgentLoop) error {
 		} else if c.suggVisible {
 			c.app.QueueUpdateDraw(c.hideSuggestions)
 		}
-	})
-
-	// ── Input submit on Enter ─────────────────────────────────
-	c.input.SetDoneFunc(func(key tcell.Key) {
-		if key != tcell.KeyEnter {
-			return
-		}
-		// If suggestions visible: select the highlighted one and fill input
-		if c.suggVisible {
-			c.app.QueueUpdateDraw(c.applySugg)
-			return
-		}
-		text := strings.TrimSpace(c.input.GetText())
-		if text == "" {
-			return
-		}
-		c.input.SetText("")
-		c.hideSuggestions()
-		if strings.HasPrefix(text, "/") {
-			c.app.QueueUpdateDraw(func() { c.handleSlashCommand(text) })
-			return
-		}
-		c.app.QueueUpdateDraw(func() { c.sendToLoop(text) })
 	})
 
 	c.printWelcome()
@@ -472,12 +524,19 @@ func (c *chatUI) sendToLoop(text string) {
 	c.busy = true
 	c.startTime = time.Now()
 	c.lastTool = ""
+	mode := c.mode
 	c.mu.Unlock()
 
 	c.appendUserMessage(text)
 
+	// In plan mode, prepend instruction to output a plan before acting
+	payload := text
+	if mode == modePlan {
+		payload = "Before taking any action, write a clear numbered plan of what you will do. Then execute it step by step.\n\n" + text
+	}
+
 	go func() {
-		resp, err := c.agentLoop.ProcessDirect(c.ctx, text, c.sessionKey)
+		resp, err := c.agentLoop.ProcessDirect(c.ctx, payload, c.sessionKey)
 		c.mu.Lock()
 		c.busy = false
 		c.mu.Unlock()
@@ -514,8 +573,9 @@ func (c *chatUI) showHelp() {
 			"  /memory <query>     search memory\n" +
 			"\n" +
 			"Keys:\n" +
-			"  /                   open command picker\n" +
-			"  Tab                 complete suggestion\n" +
+			"  Tab (empty input)   toggle Plan / Build mode\n" +
+			"  Tab (/ prefix)      open command suggestions\n" +
+			"  Tab (suggestions)   complete highlighted suggestion\n" +
 			"  Ctrl+L              model picker\n" +
 			"  ↑↓                  navigate suggestions / input history\n" +
 			"  Esc                 close popup\n" +

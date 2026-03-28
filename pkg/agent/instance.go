@@ -101,6 +101,9 @@ func NewAgentInstance(
 		toolsRegistry.Register(tools.NewAppendFileTool(workspace, restrict, allowWritePaths))
 	}
 
+	// Reference URL search is always available — read-only lookup against the shared workspace
+	toolsRegistry.Register(tools.NewReferenceURLSearchTool(cfg.WorkspacePath()))
+
 	sessionsDir := filepath.Join(workspace, "sessions")
 	sessions := initSessionStore(sessionsDir)
 

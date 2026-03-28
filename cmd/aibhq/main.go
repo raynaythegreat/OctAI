@@ -39,9 +39,18 @@ func NewPicoclawCommand() *cobra.Command {
 		Example: "octai version",
 	}
 
+	agentCmd := agent.NewAgentCommand()
+
+	// agents is an alias for agent
+	agentsCmd := agent.NewAgentCommand()
+	agentsCmd.Use = "agents"
+	agentsCmd.Short = "Interactive AI chat (alias for 'agent')"
+	agentsCmd.Long = agentsCmd.Short
+
 	cmd.AddCommand(
 		onboard.NewOnboardCommand(),
-		agent.NewAgentCommand(),
+		agentCmd,
+		agentsCmd,
 		auth.NewAuthCommand(),
 		gateway.NewGatewayCommand(),
 		status.NewStatusCommand(),
@@ -71,7 +80,9 @@ const (
 )
 
 func main() {
-	if len(os.Args) < 2 || os.Args[1] != "agent" {
+	// Suppress banner for interactive chat commands
+	suppressBanner := len(os.Args) >= 2 && (os.Args[1] == "agent" || os.Args[1] == "agents" || os.Args[1] == "tui")
+	if !suppressBanner {
 		fmt.Printf("%s", banner)
 	}
 	cmd := NewPicoclawCommand()

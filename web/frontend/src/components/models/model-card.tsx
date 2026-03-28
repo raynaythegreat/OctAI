@@ -6,9 +6,11 @@ import {
   IconStarFilled,
   IconTrash,
 } from "@tabler/icons-react"
+import { useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import type { ModelInfo } from "@/api/models"
+import { testModelKey } from "@/api/models"
 import { Button } from "@/components/ui/button"
 
 interface ModelCardProps {
@@ -16,6 +18,7 @@ interface ModelCardProps {
   onEdit: (model: ModelInfo) => void
   onSetDefault: (model: ModelInfo) => void
   onDelete: (model: ModelInfo) => void
+  onRotateKey: (model: ModelInfo) => void
   settingDefault: boolean
 }
 
@@ -24,12 +27,37 @@ export function ModelCard({
   onEdit,
   onSetDefault,
   onDelete,
+  onRotateKey,
   settingDefault,
 }: ModelCardProps) {
   const { t } = useTranslation()
   const isOAuth = model.auth_method === "oauth"
   const canSetDefault =
     model.configured && !model.is_default && !model.is_virtual
+
+  const [testing, setTesting] = useState(false)
+  const [testResult, setTestResult] = useState<{
+    success: boolean
+    error?: string
+    models?: string[]
+    note?: string
+  } | null>(null)
+
+  const handleTest = async () => {
+    setTesting(true)
+    setTestResult(null)
+    try {
+      const result = await testModelKey(model.index)
+      setTestResult(result)
+    } catch (e) {
+      setTestResult({
+        success: false,
+        error: e instanceof Error ? e.message : "Test failed",
+      })
+    } finally {
+      setTesting(false)
+    }
+  }
 
   return (
     <div
@@ -108,6 +136,18 @@ export function ModelCard({
           <Button
             variant="ghost"
             size="icon-sm"
+            onClick={() => onRotateKey(model)}
+            title={t("models.rotateKey.title", {
+              name: model.model_name,
+              defaultValue: "Rotate API key",
+            })}
+          >
+            <IconKey className="size-3.5" />
+          </Button>
+
+          <Button
+            variant="ghost"
+            size="icon-sm"
             onClick={() => onDelete(model)}
             disabled={model.is_default}
             title={t("models.action.delete")}
@@ -137,7 +177,48 @@ export function ModelCard({
             {t("models.status.unconfigured")}
           </span>
         )}
+
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-muted-foreground hover:text-foreground ml-auto h-6 px-2 text-[11px]"
+          onClick={handleTest}
+          disabled={testing}
+        >
+          {testing && <IconLoader2 className="size-3 animate-spin" />}
+          {t("models.action.test", { defaultValue: "Test" })}
+        </Button>
       </div>
+
+      {testResult && (
+        <div
+          className={`rounded-md px-2.5 py-1.5 text-xs ${testResult.success ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400" : "bg-destructive/10 text-destructive"}`}
+        >
+          {testResult.success ? (
+            <>
+              <span className="font-medium">
+                {t("models.test.success", { defaultValue: "Connected" })}
+              </span>
+              {testResult.models && testResult.models.length > 0 && (
+                <span className="ml-1 opacity-75">
+                  &middot;{" "}
+                  {t("models.test.modelsCount", {
+                    count: testResult.models.length,
+                    defaultValue: `${testResult.models.length} models available`,
+                  })}
+                </span>
+              )}
+              {testResult.note && (
+                <span className="ml-1 opacity-75">
+                  &middot; {testResult.note}
+                </span>
+              )}
+            </>
+          ) : (
+            testResult.error ?? t("models.test.failed", { defaultValue: "Failed" })
+          )}
+        </div>
+      )}
     </div>
   )
 }

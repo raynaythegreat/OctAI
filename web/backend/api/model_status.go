@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"net"
 	"net/http"
 	"net/url"
@@ -324,4 +325,134 @@ func ollamaModelMatches(candidate, want string) bool {
 
 	base, _, _ := strings.Cut(candidate, ":")
 	return strings.EqualFold(base, want)
+}
+
+const testKeyTimeout = 10 * time.Second
+
+// resolveProviderAPIBase returns the best API base URL for a model:
+// uses the model's configured api_base if set, otherwise falls back to
+// the well-known default for the provider's protocol prefix.
+func resolveProviderAPIBase(m *config.ModelConfig) string {
+	if base := strings.TrimSpace(m.APIBase); base != "" {
+		return strings.TrimRight(base, "/")
+	}
+
+	switch modelProtocol(m.Model) {
+	case "openai":
+		return "https://api.openai.com/v1"
+	case "anthropic":
+		return "https://api.anthropic.com/v1"
+	case "gemini":
+		return "https://generativelanguage.googleapis.com/v1beta/openai"
+	case "groq":
+		return "https://api.groq.com/openai/v1"
+	case "deepseek":
+		return "https://api.deepseek.com/v1"
+	case "mistral":
+		return "https://api.mistral.ai/v1"
+	case "openrouter":
+		return "https://openrouter.ai/api/v1"
+	case "grok", "xai":
+		return "https://api.x.ai/v1"
+	case "cerebras":
+		return "https://api.cerebras.ai/v1"
+	case "perplexity":
+		return "https://api.perplexity.ai"
+	case "together":
+		return "https://api.together.xyz/v1"
+	case "moonshot":
+		return "https://api.moonshot.cn/v1"
+	case "nvidia":
+		return "https://integrate.api.nvidia.com/v1"
+	case "zhipu":
+		return "https://open.bigmodel.cn/api/paas/v4"
+	case "qwen":
+		return "https://dashscope.aliyuncs.com/compatible-mode/v1"
+	case "volcengine":
+		return "https://ark.cn-beijing.volces.com/api/v3"
+	case "avian":
+		return "https://api.avian.io/v1"
+	case "minimax":
+		return "https://api.minimaxi.com/v1"
+	case "longcat":
+		return "https://api.longcat.chat/openai"
+	case "modelscope":
+		return "https://api-inference.modelscope.cn/v1"
+	default:
+		return ""
+	}
+}
+
+// listProviderModels calls GET {apiBase}/models with the given API key and returns
+// a list of model IDs. Uses testKeyTimeout (10s) instead of the short probe timeout.
+// Handles both OpenAI-style { data: [{ id }] } and Anthropic-style { models: [{ id }] } responses.
+func listProviderModels(apiBase, apiKey string) ([]string, error) {
+	modelsURL := strings.TrimRight(apiBase, "/") + "/models"
+
+	req, err := http.NewRequest(http.MethodGet, modelsURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	if k := strings.TrimSpace(apiKey); k != "" {
+		req.Header.Set("Authorization", "Bearer "+k)
+	}
+
+	client := &http.Client{Timeout: testKeyTimeout}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("connection failed: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusUnauthorized || resp.StatusCode == http.StatusForbidden {
+		return nil, fmt.Errorf("authentication failed (HTTP %d)", resp.StatusCode)
+	}
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("unexpected HTTP status %d", resp.StatusCode)
+	}
+
+	// Try OpenAI-compatible shape first: { "data": [{ "id": "..." }] }
+	var openAIResp struct {
+		Data []struct {
+			ID string `json:"id"`
+		} `json:"data"`
+	}
+	// Also try Anthropic shape: { "models": [{ "id": "..." }] }
+	var anthropicResp struct {
+		Models []struct {
+			ID string `json:"id"`
+		} `json:"models"`
+	}
+
+	// Read body once and try both shapes
+	bodyBytes, err := io.ReadAll(io.LimitReader(resp.Body, 1<<20))
+	if err != nil {
+		return nil, fmt.Errorf("failed to read response: %w", err)
+	}
+
+	var ids []string
+
+	if err := json.Unmarshal(bodyBytes, &openAIResp); err == nil && len(openAIResp.Data) > 0 {
+		for _, d := range openAIResp.Data {
+			if d.ID != "" {
+				ids = append(ids, d.ID)
+			}
+		}
+	}
+
+	if len(ids) == 0 {
+		if err := json.Unmarshal(bodyBytes, &anthropicResp); err == nil && len(anthropicResp.Models) > 0 {
+			for _, m := range anthropicResp.Models {
+				if m.ID != "" {
+					ids = append(ids, m.ID)
+				}
+			}
+		}
+	}
+
+	if len(ids) == 0 {
+		return nil, fmt.Errorf("no models returned from provider; check API key validity")
+	}
+
+	return ids, nil
 }
