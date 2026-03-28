@@ -137,7 +137,8 @@ builds:
         goarch: arm
 
 dockers_v2:
-  - id: octai
+  # ── GHCR (always pushed) ─────────────────────────────────────────
+  - id: octai-ghcr
     dockerfile: docker/Dockerfile.goreleaser
     extra_files:
       - docker/entrypoint.sh
@@ -145,7 +146,6 @@ dockers_v2:
       - octai
     images:
       - "ghcr.io/{{ .Env.GITHUB_REPOSITORY_OWNER }}/octai"
-      - 'docker.io/{{ .Env.DOCKERHUB_IMAGE_NAME }}'
     tags:
       - '{{ if isEnvSet "NIGHTLY_BUILD" }}nightly{{ else }}{{ .Tag }}{{ end }}'
       - '{{ if isEnvSet "NIGHTLY_BUILD" }}nightly{{ else }}latest{{ end }}'
@@ -154,7 +154,26 @@ dockers_v2:
       - linux/arm64
       - linux/riscv64
 
-  - id: octai-launcher
+  # ── Docker Hub (skipped when PUSH_DOCKERHUB is not set) ──────────
+  - id: octai-dockerhub
+    dockerfile: docker/Dockerfile.goreleaser
+    extra_files:
+      - docker/entrypoint.sh
+    ids:
+      - octai
+    images:
+      - 'docker.io/{{ .Env.DOCKERHUB_IMAGE_NAME }}'
+    tags:
+      - '{{ if isEnvSet "NIGHTLY_BUILD" }}nightly{{ else }}{{ .Tag }}{{ end }}'
+      - '{{ if isEnvSet "NIGHTLY_BUILD" }}nightly{{ else }}latest{{ end }}'
+    skip_push: '{{ not (isEnvSet "PUSH_DOCKERHUB") }}'
+    platforms:
+      - linux/amd64
+      - linux/arm64
+      - linux/riscv64
+
+  # ── Launcher GHCR (always pushed) ────────────────────────────────
+  - id: octai-launcher-ghcr
     dockerfile: docker/Dockerfile.goreleaser.launcher
     ids:
       - octai
@@ -162,10 +181,27 @@ dockers_v2:
       - octai-launcher-tui
     images:
       - "ghcr.io/{{ .Env.GITHUB_REPOSITORY_OWNER }}/octai"
+    tags:
+      - '{{ if isEnvSet "NIGHTLY_BUILD" }}nightly-launcher{{ else }}{{ .Tag }}-launcher{{ end }}'
+      - '{{ if isEnvSet "NIGHTLY_BUILD" }}nightly-launcher{{ else }}launcher{{ end }}'
+    platforms:
+      - linux/amd64
+      - linux/arm64
+      - linux/riscv64
+
+  # ── Launcher Docker Hub (skipped when PUSH_DOCKERHUB is not set) ─
+  - id: octai-launcher-dockerhub
+    dockerfile: docker/Dockerfile.goreleaser.launcher
+    ids:
+      - octai
+      - octai-launcher
+      - octai-launcher-tui
+    images:
       - 'docker.io/{{ .Env.DOCKERHUB_IMAGE_NAME }}'
     tags:
       - '{{ if isEnvSet "NIGHTLY_BUILD" }}nightly-launcher{{ else }}{{ .Tag }}-launcher{{ end }}'
       - '{{ if isEnvSet "NIGHTLY_BUILD" }}nightly-launcher{{ else }}launcher{{ end }}'
+    skip_push: '{{ not (isEnvSet "PUSH_DOCKERHUB") }}'
     platforms:
       - linux/amd64
       - linux/arm64
