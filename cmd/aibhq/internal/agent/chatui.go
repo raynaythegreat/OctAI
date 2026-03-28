@@ -3,6 +3,7 @@ package agent
 import (
 	"context"
 	"fmt"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -18,6 +19,11 @@ const cardWidth = 50
 
 var spinnerFrames = []string{"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"}
 
+type cmdSuggestion struct {
+	cmd  string
+	desc string
+}
+
 type chatUI struct {
 	app    *tview.Application
 	pages  *tview.Pages
@@ -28,6 +34,11 @@ type chatUI struct {
 	statusLine *tview.TextView
 	footer     *tview.TextView
 	input      *tview.InputField
+
+	// slash-command autocomplete
+	suggList    *tview.List
+	suggVisible bool
+	allSugg     []cmdSuggestion
 
 	modelName  string
 	sessionKey string
@@ -82,6 +93,20 @@ func (c *chatUI) buildLayout() {
 	// ── Footer ──────────────────────────────────────────────────
 	c.footer = tview.NewTextView().SetDynamicColors(true)
 	c.footer.SetBackgroundColor(tcell.NewHexColor(0x12101F))
+
+	// ── Suggestion list ─────────────────────────────────────────
+	c.suggList = tview.NewList()
+	c.suggList.ShowSecondaryText(true)
+	c.suggList.SetBackgroundColor(tcell.NewHexColor(0x12101F))
+	c.suggList.SetMainTextColor(tcell.NewHexColor(0xE8E0F0))
+	c.suggList.SetSecondaryTextColor(tcell.NewHexColor(0x7B6F8E))
+	c.suggList.SetSelectedStyle(tcell.StyleDefault.
+		Background(tcell.NewHexColor(0x1E0F3D)).
+		Foreground(tcell.NewHexColor(0xA855F7)))
+	c.suggList.SetHighlightFullLine(true)
+	c.suggList.SetBorder(true)
+	c.suggList.SetBorderColor(tcell.NewHexColor(0x2D1B4E))
+	c.suggList.SetTitle(" [#7B6F8E]↑↓ navigate · Tab: complete · Esc: close[-] ")
 
 	// ── Input field ─────────────────────────────────────────────
 	c.input = tview.NewInputField()
@@ -138,7 +163,7 @@ func (c *chatUI) printWelcome() {
 	fmt.Fprintf(c.chatLog, "  [#2D1B4E]────────────────────────────────────────[-]\n")
 	fmt.Fprintf(c.chatLog, "  [#7B6F8E]model:[-] [#A855F7]%s[-]  [#7B6F8E]· session:[-] [#A855F7]%s[-]\n",
 		c.modelName, c.shortSession())
-	fmt.Fprintf(c.chatLog, "  [#7B6F8E]type a message to begin · /help for commands[-]\n")
+	fmt.Fprintf(c.chatLog, "  [#7B6F8E]type a message to begin · / for commands[-]\n")
 	fmt.Fprintf(c.chatLog, "  [#2D1B4E]────────────────────────────────────────[-]\n\n")
 }
 
@@ -159,13 +184,37 @@ func (c *chatUI) run(ctx context.Context, loop *pkgagent.AgentLoop) error {
 		}
 	}
 
+	// Build suggestion list (static commands + skill shortcuts)
+	c.allSugg = []cmdSuggestion{
+		{"/help",    "show help"},
+		{"/clear",   "clear chat log"},
+		{"/exit",    "exit chat"},
+		{"/quit",    "exit chat"},
+		{"/model",   "show or switch model"},
+		{"/session", "show or change session"},
+		{"/skills",  "list installed skills"},
+		{"/use",     "invoke a skill: /use <skill> [msg]"},
+		{"/status",  "agent status"},
+		{"/think",   "toggle extended thinking"},
+		{"/fast",    "toggle fast mode"},
+		{"/memory",  "search agent memory"},
+		{"/list",    "list resources (models, skills)"},
+		{"/show",    "show current settings"},
+	}
+	skillCmds := make([]cmdSuggestion, 0, len(c.skillNames))
+	for name := range c.skillNames {
+		skillCmds = append(skillCmds, cmdSuggestion{"/" + name, "skill: " + name})
+	}
+	sort.Slice(skillCmds, func(i, j int) bool { return skillCmds[i].cmd < skillCmds[j].cmd })
+	c.allSugg = append(c.allSugg, skillCmds...)
+
 	sub := loop.SubscribeEvents(64)
 	defer loop.UnsubscribeEvents(sub.ID)
 	go c.handleEvents(ctx, sub.C)
 
 	go c.runSpinner(ctx)
 
-	// Global key capture
+	// ── Global key capture ────────────────────────────────────
 	c.app.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		switch event.Key() {
 		case tcell.KeyCtrlC, tcell.KeyCtrlD:
@@ -176,6 +225,10 @@ func (c *chatUI) run(ctx context.Context, loop *pkgagent.AgentLoop) error {
 			c.app.QueueUpdateDraw(func() { c.showModelPicker() })
 			return nil
 		case tcell.KeyEscape:
+			if c.suggVisible {
+				c.app.QueueUpdateDraw(c.hideSuggestions)
+				return nil
+			}
 			if c.pages.HasPage("model-picker") {
 				c.hideModelPicker()
 				return nil
@@ -184,25 +237,53 @@ func (c *chatUI) run(ctx context.Context, loop *pkgagent.AgentLoop) error {
 		return event
 	})
 
-	// Input: up/down history
+	// ── Input key capture ─────────────────────────────────────
 	c.input.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		if c.suggVisible {
+			switch event.Key() {
+			case tcell.KeyUp:
+				c.app.QueueUpdateDraw(func() { c.moveSugg(-1) })
+				return nil
+			case tcell.KeyDown:
+				c.app.QueueUpdateDraw(func() { c.moveSugg(1) })
+				return nil
+			case tcell.KeyTab:
+				c.app.QueueUpdateDraw(c.applySugg)
+				return nil
+			case tcell.KeyEscape:
+				c.app.QueueUpdateDraw(c.hideSuggestions)
+				return nil
+			}
+			return event
+		}
+		// History navigation when no suggestions
 		c.mu.Lock()
-		defer c.mu.Unlock()
+		histLen := len(c.history)
+		histIdx := c.histIdx
+		c.mu.Unlock()
 		switch event.Key() {
 		case tcell.KeyUp:
-			if c.histIdx > 0 {
-				c.histIdx--
-				text := c.history[c.histIdx]
+			if histIdx > 0 {
+				newIdx := histIdx - 1
+				c.mu.Lock()
+				text := c.history[newIdx]
+				c.histIdx = newIdx
+				c.mu.Unlock()
 				c.app.QueueUpdateDraw(func() { c.input.SetText(text) })
 			}
 			return nil
 		case tcell.KeyDown:
-			if c.histIdx < len(c.history)-1 {
-				c.histIdx++
-				text := c.history[c.histIdx]
+			if histIdx < histLen-1 {
+				newIdx := histIdx + 1
+				c.mu.Lock()
+				text := c.history[newIdx]
+				c.histIdx = newIdx
+				c.mu.Unlock()
 				c.app.QueueUpdateDraw(func() { c.input.SetText(text) })
 			} else {
-				c.histIdx = len(c.history)
+				c.mu.Lock()
+				c.histIdx = histLen
+				c.mu.Unlock()
 				c.app.QueueUpdateDraw(func() { c.input.SetText("") })
 			}
 			return nil
@@ -210,9 +291,23 @@ func (c *chatUI) run(ctx context.Context, loop *pkgagent.AgentLoop) error {
 		return event
 	})
 
-	// Input: submit on Enter
+	// ── Input text change → show/filter suggestions ───────────
+	c.input.SetChangedFunc(func(text string) {
+		if strings.HasPrefix(text, "/") {
+			c.app.QueueUpdateDraw(func() { c.updateSuggestions(text) })
+		} else if c.suggVisible {
+			c.app.QueueUpdateDraw(c.hideSuggestions)
+		}
+	})
+
+	// ── Input submit on Enter ─────────────────────────────────
 	c.input.SetDoneFunc(func(key tcell.Key) {
 		if key != tcell.KeyEnter {
+			return
+		}
+		// If suggestions visible: select the highlighted one and fill input
+		if c.suggVisible {
+			c.app.QueueUpdateDraw(c.applySugg)
 			return
 		}
 		text := strings.TrimSpace(c.input.GetText())
@@ -220,6 +315,7 @@ func (c *chatUI) run(ctx context.Context, loop *pkgagent.AgentLoop) error {
 			return
 		}
 		c.input.SetText("")
+		c.hideSuggestions()
 		if strings.HasPrefix(text, "/") {
 			c.app.QueueUpdateDraw(func() { c.handleSlashCommand(text) })
 			return
@@ -231,7 +327,88 @@ func (c *chatUI) run(ctx context.Context, loop *pkgagent.AgentLoop) error {
 	return c.app.Run()
 }
 
-// handleSlashCommand handles TUI-local commands and forwards the rest to the agent loop.
+// ── Suggestion helpers ────────────────────────────────────────────────────────
+
+func (c *chatUI) updateSuggestions(text string) {
+	c.suggList.Clear()
+	lower := strings.ToLower(text)
+	count := 0
+	for _, s := range c.allSugg {
+		if lower == "/" || strings.HasPrefix(strings.ToLower(s.cmd), lower) {
+			cmd, desc := s.cmd, s.desc
+			c.suggList.AddItem(cmd, desc, 0, func() {
+				c.input.SetText(cmd + " ")
+				c.hideSuggestions()
+			})
+			count++
+			if count >= 9 {
+				break
+			}
+		}
+	}
+	if count == 0 {
+		c.hideSuggestions()
+		return
+	}
+	c.showSuggestions()
+}
+
+func (c *chatUI) showSuggestions() {
+	if c.pages.HasPage("suggestions") {
+		c.pages.RemovePage("suggestions")
+	}
+	n := c.suggList.GetItemCount()
+	if n == 0 {
+		c.suggVisible = false
+		return
+	}
+	h := n*2 + 2 // tview List uses 2 rows per item (main+secondary) + 2 for border
+	if h > 22 {
+		h = 22
+	}
+	// Overlay: spacer fills top, list sits above input area (5 rows: status+footer+input)
+	overlay := tview.NewFlex().SetDirection(tview.FlexRow).
+		AddItem(tview.NewBox().SetBackgroundColor(tcell.NewHexColor(0x0A0A12)), 0, 1, false).
+		AddItem(c.suggList, h, 0, false).
+		AddItem(tview.NewBox().SetBackgroundColor(tcell.NewHexColor(0x0A0A12)), 5, 0, false)
+	c.pages.AddPage("suggestions", overlay, true, true)
+	c.app.SetFocus(c.input) // keep typing in input
+	c.suggVisible = true
+}
+
+func (c *chatUI) hideSuggestions() {
+	if c.pages.HasPage("suggestions") {
+		c.pages.RemovePage("suggestions")
+	}
+	c.suggVisible = false
+	c.app.SetFocus(c.input)
+}
+
+func (c *chatUI) moveSugg(delta int) {
+	n := c.suggList.GetItemCount()
+	if n == 0 {
+		return
+	}
+	idx := c.suggList.GetCurrentItem() + delta
+	if idx < 0 {
+		idx = 0
+	} else if idx >= n {
+		idx = n - 1
+	}
+	c.suggList.SetCurrentItem(idx)
+}
+
+func (c *chatUI) applySugg() {
+	if !c.suggVisible || c.suggList.GetItemCount() == 0 {
+		return
+	}
+	main, _ := c.suggList.GetItemText(c.suggList.GetCurrentItem())
+	c.input.SetText(main + " ")
+	c.hideSuggestions()
+}
+
+// ── Slash command handler ─────────────────────────────────────────────────────
+
 func (c *chatUI) handleSlashCommand(raw string) {
 	parts := strings.Fields(raw)
 	if len(parts) == 0 {
@@ -239,7 +416,6 @@ func (c *chatUI) handleSlashCommand(raw string) {
 	}
 	cmd := strings.ToLower(parts[0])
 
-	// ── TUI-local commands (never forwarded to the agent loop) ──
 	switch cmd {
 	case "/help":
 		c.showHelp()
@@ -272,11 +448,10 @@ func (c *chatUI) handleSlashCommand(raw string) {
 		}
 		return
 	case "/skills":
-		// Alias for /list skills
 		raw = "/list skills"
 	}
 
-	// ── Skill shorthand: /<skillname> [msg] → /use <skillname> [msg] ──
+	// Skill shorthand: /<skillname> [msg] → /use <skillname> [msg]
 	cmdWithoutSlash := strings.TrimPrefix(cmd, "/")
 	if c.skillNames[cmdWithoutSlash] {
 		rest := ""
@@ -286,12 +461,10 @@ func (c *chatUI) handleSlashCommand(raw string) {
 		raw = "/use " + cmdWithoutSlash + rest
 	}
 
-	// ── Forward to agent loop (/use, /list, /show, /status, /think, /fast, …) ──
+	// Forward to agent loop
 	c.sendToLoop(raw)
 }
 
-// sendToLoop sends text to the agent loop and displays the response in the chat.
-// Must be called from within a QueueUpdateDraw callback.
 func (c *chatUI) sendToLoop(text string) {
 	c.mu.Lock()
 	c.history = append(c.history, text)
@@ -341,11 +514,16 @@ func (c *chatUI) showHelp() {
 			"  /memory <query>     search memory\n" +
 			"\n" +
 			"Keys:\n" +
+			"  /                   open command picker\n" +
+			"  Tab                 complete suggestion\n" +
 			"  Ctrl+L              model picker\n" +
-			"  ↑↓                  input history\n" +
+			"  ↑↓                  navigate suggestions / input history\n" +
+			"  Esc                 close popup\n" +
 			"  Ctrl+C              quit",
 	)
 }
+
+// ── Model picker ─────────────────────────────────────────────────────────────
 
 func (c *chatUI) showModelPicker() {
 	if c.pages.HasPage("model-picker") {
@@ -379,14 +557,12 @@ func (c *chatUI) showModelPicker() {
 		})
 	}
 
-	// Center at 60% width, capped at 30 rows
 	overlay := tview.NewFlex().
 		AddItem(tview.NewBox(), 0, 1, false).
 		AddItem(tview.NewFlex().SetDirection(tview.FlexRow).
 			AddItem(tview.NewBox(), 0, 1, false).
 			AddItem(list, 30, 0, true).
-			AddItem(tview.NewBox(), 0, 1, false),
-			0, 3, true).
+			AddItem(tview.NewBox(), 0, 1, false), 0, 3, true).
 		AddItem(tview.NewBox(), 0, 1, false)
 
 	c.pages.AddPage("model-picker", overlay, true, true)
@@ -397,6 +573,8 @@ func (c *chatUI) hideModelPicker() {
 	c.pages.RemovePage("model-picker")
 	c.app.SetFocus(c.input)
 }
+
+// ── Event loop ────────────────────────────────────────────────────────────────
 
 func (c *chatUI) handleEvents(ctx context.Context, ch <-chan pkgagent.Event) {
 	for {
@@ -477,6 +655,8 @@ func (c *chatUI) runSpinner(ctx context.Context) {
 	}
 }
 
+// ── Message rendering ─────────────────────────────────────────────────────────
+
 func (c *chatUI) appendUserMessage(text string) {
 	fmt.Fprintf(c.chatLog, "\n[#A855F7:#1E0F3D:b] You [-:-:-]\n")
 	for _, line := range strings.Split(text, "\n") {
@@ -501,28 +681,23 @@ func (c *chatUI) appendSystemMessage(text string) {
 	c.chatLog.ScrollToEnd()
 }
 
-// appendToolStart draws the top border and args line of a tool card.
-// appendToolEnd must be called to close it.
 func (c *chatUI) appendToolStart(tool, args string) {
-	const inner = cardWidth - 2 // inner display width between │ chars
-
-	// Title bar: ┌─ tool_name ──...──┐
+	const inner = cardWidth - 2
 	if len(tool) > inner-6 {
 		tool = tool[:inner-9] + "..."
 	}
 	titlePart := "─ " + tool + " "
-	dashes := inner - 1 - len(titlePart) // -1 for the ┌ char
+	dashes := inner - 1 - len(titlePart)
 	if dashes < 0 {
 		dashes = 0
 	}
 	fmt.Fprintf(c.chatLog, "  [#2D1B4E]┌[#7B6F8E::i]%s[-][#2D1B4E]%s┐[-]\n",
 		titlePart, strings.Repeat("─", dashes))
 
-	// Args row: │ ⟳  args...  │
 	if len(args) > inner-5 {
 		args = args[:inner-8] + "..."
 	}
-	argPad := inner - 5 - len(args) // 5 = len(" ⟳  ")
+	argPad := inner - 5 - len(args)
 	if argPad < 0 {
 		argPad = 0
 	}
@@ -530,17 +705,13 @@ func (c *chatUI) appendToolStart(tool, args string) {
 		tview.Escape(args), strings.Repeat(" ", argPad))
 }
 
-// appendToolEnd draws the result line and bottom border of a tool card.
 func (c *chatUI) appendToolEnd(_ string, dur time.Duration, isErr bool) {
 	const inner = cardWidth - 2
-
 	durStr := fmt.Sprintf("%.2fs", dur.Seconds())
-	// 5 = len(" ✓  ") or len(" ✗  ")
 	durPad := inner - 5 - len(durStr)
 	if durPad < 0 {
 		durPad = 0
 	}
-
 	if isErr {
 		fmt.Fprintf(c.chatLog, "  [#2D1B4E]│[-][#F87171] ✗  %s%s[#2D1B4E]│[-]\n",
 			durStr, strings.Repeat(" ", durPad))

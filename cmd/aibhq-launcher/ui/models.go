@@ -155,7 +155,60 @@ func (a *App) resolveKey(schemeName, userName string) string {
 	return ""
 }
 
+// ollamaTagsResponse is the response format from Ollama's /api/tags endpoint.
+type ollamaTagsResponse struct {
+	Models []struct {
+		Name  string `json:"name"`
+		Model string `json:"model"`
+		Size  int64  `json:"size"`
+	} `json:"models"`
+}
+
+// isOllamaURL returns true when baseURL looks like a local Ollama instance.
+func isOllamaURL(baseURL string) bool {
+	return strings.Contains(baseURL, "11434") || strings.Contains(baseURL, "ollama")
+}
+
+// fetchOllamaModels queries Ollama's /api/tags endpoint and returns all local models.
+func fetchOllamaModels(baseURL string) ([]modelEntry, error) {
+	base := strings.TrimRight(baseURL, "/")
+	base = strings.TrimSuffix(base, "/v1") // strip OpenAI-compat suffix
+	url := base + "/api/tags"
+
+	client := &http.Client{Timeout: 5 * time.Second}
+	resp, err := client.Get(url)
+	if err != nil {
+		return nil, fmt.Errorf("request failed: %w", err)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("read response: %w", err)
+	}
+
+	var result ollamaTagsResponse
+	if err := json.Unmarshal(body, &result); err != nil {
+		return nil, fmt.Errorf("decode: %w", err)
+	}
+
+	entries := make([]modelEntry, 0, len(result.Models))
+	for _, m := range result.Models {
+		name := m.Name
+		entries = append(entries, modelEntry{ID: name, Name: name})
+	}
+	return entries, nil
+}
+
 func fetchModels(baseURL, apiKey string) ([]modelEntry, error) {
+	// Ollama uses a different API — detect and handle separately.
+	if isOllamaURL(baseURL) {
+		entries, err := fetchOllamaModels(baseURL)
+		if err == nil && len(entries) > 0 {
+			return entries, nil
+		}
+	}
+
 	url := strings.TrimRight(baseURL, "/") + "/models"
 
 	client := &http.Client{Timeout: 15 * time.Second}
