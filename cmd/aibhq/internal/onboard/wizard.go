@@ -41,7 +41,7 @@ func runWizard(encrypt bool) {
 
 	// ── Welcome ──────────────────────────────────────────────────────────────
 	fmt.Println()
-	fmt.Printf("%s%s AIBHQ Setup Wizard%s\n", bold, internal.Logo, reset)
+	fmt.Printf("%s%s OctAi Setup Wizard%s\n", bold, internal.Logo, reset)
 	fmt.Println(hr())
 	fmt.Println("This wizard configures your AI providers, models, and tools.")
 	fmt.Println("You can re-run it any time with " + cyan + "octai onboard" + reset + ".")
@@ -81,7 +81,7 @@ func runWizard(encrypt bool) {
 			fmt.Printf("Error: %v\n", err)
 			os.Exit(1)
 		}
-		os.Setenv("PICOCLAW_KEY_PASSPHRASE", passphrase)
+		os.Setenv("OCTAI_KEY_PASSPHRASE", passphrase)
 		if err = setupSSHKey(); err != nil {
 			fmt.Printf("Error generating SSH key: %v\n", err)
 			os.Exit(1)
@@ -248,9 +248,12 @@ func runWizard(encrypt bool) {
 		os.Exit(1)
 	}
 
+	// ── Sync Web UI + TUI configs ─────────────────────────────────────────────
+	syncToTUIConfig(cfg, primary)
+
 	// ── Done ──────────────────────────────────────────────────────────────────
 	fmt.Println(hr())
-	fmt.Printf("\n%s%s octai is ready!%s\n\n", green+bold, internal.Logo, reset)
+	fmt.Printf("\n%s%s OctAi is ready!%s\n\n", green+bold, internal.Logo, reset)
 
 	if cfg.Agents.Defaults.ModelName != "" {
 		fmt.Printf("  Primary model:  %s%s%s\n", cyan, cfg.Agents.Defaults.ModelName, reset)
@@ -261,12 +264,13 @@ func runWizard(encrypt bool) {
 	if cfg.Agents.Defaults.Routing != nil && cfg.Agents.Defaults.Routing.Enabled {
 		fmt.Printf("  Smart routing:  %senabled%s (light model: %s)\n", green, reset, cfg.Agents.Defaults.Routing.LightModel)
 	}
-	fmt.Printf("  Config saved:   %s%s%s\n\n", dim, configPath, reset)
+	fmt.Printf("  Agent config:   %s%s%s\n", dim, configPath, reset)
+	fmt.Println()
 
 	fmt.Println("Next steps:")
-	fmt.Printf("  Chat:       %soctai agent -m \"Hello!\"%s\n", cyan, reset)
-	fmt.Printf("  Web UI:     %soctai web --console%s\n", cyan, reset)
-	fmt.Printf("  TUI editor: %soctai tui%s\n\n", cyan, reset)
+	fmt.Printf("  Chat (CLI):  %soctai agent -m \"Hello!\"%s\n", cyan, reset)
+	fmt.Printf("  Web UI:      %soctai web --console%s  → %shttp://localhost:18800%s\n", cyan, reset, dim, reset)
+	fmt.Printf("  TUI:         %soctai-launcher%s\n\n", cyan, reset)
 }
 
 // ── Provider selection ────────────────────────────────────────────────────────
