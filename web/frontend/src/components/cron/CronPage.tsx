@@ -301,7 +301,7 @@ function StatusBadge({ enabled, lastStatus }: { enabled: boolean; lastStatus?: s
   }
   if (lastStatus === "error") {
     return (
-      <Badge className="bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300 border-transparent">
+      <Badge className="bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-300 border-transparent">
         Error
       </Badge>
     )

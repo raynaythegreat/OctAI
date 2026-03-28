@@ -29,7 +29,7 @@ interface WorkflowListProps {
 
 const statusConfig = {
   completed: { label: "Completed", icon: IconCircleCheck, color: "text-green-500" },
-  failed:    { label: "Failed",    icon: IconCircleX,     color: "text-red-500"   },
+  failed:    { label: "Failed",    icon: IconCircleX,     color: "text-violet-500"   },
   running:   { label: "Running",   icon: IconLoader,       color: "text-blue-500 animate-spin" },
   pending:   { label: "Pending",   icon: IconClock,        color: "text-amber-500" },
 } as const

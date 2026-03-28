@@ -1,5 +1,6 @@
-import { IconArrowUp } from "@tabler/icons-react"
+import { IconArrowUp, IconMicrophone } from "@tabler/icons-react"
 import type { KeyboardEvent } from "react"
+import * as React from "react"
 import { useTranslation } from "react-i18next"
 import TextareaAutosize from "react-textarea-autosize"
 
@@ -14,6 +15,30 @@ interface ChatComposerProps {
   hasDefaultModel: boolean
 }
 
+// Minimal Web Speech API types (not in all TS DOM lib versions)
+type SpeechRecognitionCtor = new () => {
+  continuous: boolean
+  interimResults: boolean
+  onstart: (() => void) | null
+  onend: (() => void) | null
+  onerror: (() => void) | null
+  onresult:
+    | ((ev: {
+        resultIndex: number
+        results: { length: number; [i: number]: { [0]: { transcript: string } } }
+      }) => void)
+    | null
+  start(): void
+  stop(): void
+}
+
+declare global {
+  interface Window {
+    SpeechRecognition?: SpeechRecognitionCtor
+    webkitSpeechRecognition?: SpeechRecognitionCtor
+  }
+}
+
 export function ChatComposer({
   input,
   onInputChange,
@@ -23,6 +48,13 @@ export function ChatComposer({
 }: ChatComposerProps) {
   const { t } = useTranslation()
   const canInput = isConnected && hasDefaultModel
+  const recognitionRef = React.useRef<InstanceType<SpeechRecognitionCtor> | null>(null)
+  const [isListening, setIsListening] = React.useState(false)
+  const [speechSupported] = React.useState(
+    () =>
+      typeof window !== "undefined" &&
+      !!(window.SpeechRecognition || window.webkitSpeechRecognition),
+  )
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.nativeEvent.isComposing) return
@@ -30,6 +62,30 @@ export function ChatComposer({
       e.preventDefault()
       onSend()
     }
+  }
+
+  const toggleListening = () => {
+    if (isListening) {
+      recognitionRef.current?.stop()
+      return
+    }
+    const SR = window.SpeechRecognition ?? window.webkitSpeechRecognition
+    if (!SR) return
+    const rec = new SR()
+    rec.continuous = false
+    rec.interimResults = true
+    rec.onstart = () => setIsListening(true)
+    rec.onend = () => setIsListening(false)
+    rec.onerror = () => setIsListening(false)
+    rec.onresult = (ev) => {
+      let transcript = ""
+      for (let i = ev.resultIndex; i < ev.results.length; i++) {
+        transcript += ev.results[i][0].transcript
+      }
+      onInputChange(transcript)
+    }
+    recognitionRef.current = rec
+    rec.start()
   }
 
   return (
@@ -50,7 +106,26 @@ export function ChatComposer({
         />
 
         <div className="mt-2 flex items-center justify-between px-1">
-          <div className="flex items-center gap-1">{/* action buttons */}</div>
+          <div className="flex items-center gap-1">
+            {speechSupported && (
+              <Button
+                type="button"
+                size="icon"
+                variant="ghost"
+                className={cn(
+                  "size-8 rounded-full transition-all",
+                  isListening
+                    ? "bg-violet-500/20 text-violet-400 animate-pulse"
+                    : "text-muted-foreground hover:text-violet-400 hover:bg-violet-500/10",
+                )}
+                onClick={toggleListening}
+                disabled={!canInput}
+                title={isListening ? "Stop recording" : "Voice input"}
+              >
+                <IconMicrophone className="size-4" />
+              </Button>
+            )}
+          </div>
 
           <Button
             size="icon"

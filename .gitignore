@@ -68,3 +68,4 @@ web/backend/dist/*
 docker/data
 octai
 octai-launcher
+octai-web

@@ -19,7 +19,7 @@ export function ProviderStatusLine({
       : status === "needs_refresh"
         ? "bg-amber-500/10 text-amber-700 dark:text-amber-300"
         : status === "expired"
-          ? "bg-red-500/10 text-red-700 dark:text-red-300"
+          ? "bg-violet-500/10 text-violet-700 dark:text-violet-300"
           : "bg-muted text-muted-foreground"
 
   return (

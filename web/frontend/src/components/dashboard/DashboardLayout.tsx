@@ -103,7 +103,7 @@ export function SummaryCard({
                 className={cn(
                   "font-medium",
                   trend === "up" && "text-emerald-600",
-                  trend === "down" && "text-red-500",
+                  trend === "down" && "text-violet-500",
                   trend === "neutral" && "text-muted-foreground"
                 )}
               >

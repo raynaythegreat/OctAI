@@ -63,7 +63,7 @@ export function AnalyticsPage({ className }: AnalyticsPageProps) {
     if (error) {
       return (
         <div className="flex h-[400px] items-center justify-center">
-          <div className="text-red-500">
+          <div className="text-violet-500">
             Error loading analytics: {error.message}
           </div>
         </div>

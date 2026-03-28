@@ -348,7 +348,7 @@ export function ExecSection({ form, onFieldChange }: ExecSectionProps) {
                     testResult.allowed
                       ? "bg-green-500/10 text-green-600"
                       : testResult.blocked
-                        ? "bg-red-500/10 text-red-600"
+                        ? "bg-violet-500/10 text-violet-600"
                         : "bg-muted text-muted-foreground"
                   }`}
                 >

@@ -71,7 +71,7 @@ function MetricCard({
   const statusColors = {
     good: "text-emerald-600",
     warning: "text-amber-500",
-    critical: "text-red-500",
+    critical: "text-violet-500",
   }
 
   return (
@@ -190,7 +190,7 @@ export function PerformanceMetricsGrid({
               <p className="text-xs text-muted-foreground">Successful</p>
             </div>
             <div>
-              <p className="text-2xl font-semibold text-red-500">
+              <p className="text-2xl font-semibold text-violet-500">
                 {Math.round(metrics.totalRequests * (metrics.errorRate / 100)).toLocaleString()}
               </p>
               <p className="text-xs text-muted-foreground">Failed</p>
