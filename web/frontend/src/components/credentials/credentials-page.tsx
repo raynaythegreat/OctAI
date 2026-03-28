@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useCredentialsPage } from "@/hooks/use-credentials-page"
 
 import { AnthropicCredentialCard } from "./anthropic-credential-card"
+import { AntigravityCredentialCard } from "./antigravity-credential-card"
 import { ApiKeyCredentialCard } from "./apikey-credential-card"
 import { DeviceCodeSheet } from "./device-code-sheet"
 import { LogoutConfirmDialog } from "./logout-confirm-dialog"
@@ -27,6 +28,7 @@ export function CredentialsPage() {
     anthropicToken,
     openaiStatus,
     anthropicStatus,
+    antigravityStatus,
     logoutDialogOpen,
     logoutConfirmProvider,
     logoutProviderLabel,
@@ -136,7 +138,7 @@ export function CredentialsPage() {
                   <h2 className="text-foreground mb-3 text-sm font-semibold">
                     {t("credentials.sections.oauth")}
                   </h2>
-                  <div className="grid grid-cols-1 gap-4 lg:auto-rows-fr lg:grid-cols-2">
+                  <div className="grid grid-cols-1 gap-4 lg:auto-rows-fr lg:grid-cols-3">
                     <OpenAICredentialCard
                       status={openaiStatus}
                       activeAction={activeAction}
@@ -158,6 +160,15 @@ export function CredentialsPage() {
                         void saveToken("anthropic", anthropicToken.trim())
                       }
                       onAskLogout={() => askLogout("anthropic")}
+                    />
+                    <AntigravityCredentialCard
+                      status={antigravityStatus}
+                      activeAction={activeAction}
+                      onStopLoading={stopLoading}
+                      onStartBrowserOAuth={() =>
+                        void startBrowserOAuth("google-antigravity")
+                      }
+                      onAskLogout={() => askLogout("google-antigravity")}
                     />
                   </div>
                 </section>

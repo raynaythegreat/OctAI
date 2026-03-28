@@ -285,7 +285,8 @@
     "tabs": {
       "text": "Chat",
       "image": "Imagen",
-      "video": "Video"
+      "video": "Video",
+      "browse": "Explorar"
     }
   },
   "aiUrl": {

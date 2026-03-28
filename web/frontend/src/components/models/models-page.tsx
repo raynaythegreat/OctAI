@@ -41,6 +41,7 @@ import { Switch } from "@/components/ui/switch"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 import { AddModelSheet } from "./add-model-sheet"
+import { CatalogTab } from "./catalog-tab"
 import { DeleteModelDialog } from "./delete-model-dialog"
 import { EditModelSheet } from "./edit-model-sheet"
 import { getProviderKey, getProviderLabel } from "./provider-label"
@@ -703,6 +704,7 @@ export function ModelsPage() {
           <TabsTrigger value="text">{t("models.tabs.text")}</TabsTrigger>
           <TabsTrigger value="image">{t("models.tabs.image")}</TabsTrigger>
           <TabsTrigger value="video">{t("models.tabs.video")}</TabsTrigger>
+          <TabsTrigger value="browse">{t("models.tabs.browse", { defaultValue: "Browse" })}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="text" className="flex-1 overflow-auto">
@@ -800,6 +802,14 @@ export function ModelsPage() {
               ))}
             </div>
           )}
+        </TabsContent>
+
+        <TabsContent value="browse" className="flex-1 overflow-auto p-4 md:p-6">
+          <CatalogTab
+            configuredModelIds={new Set(models.map((m) => m.model))}
+            existingModelNames={models.map((m) => m.model_name)}
+            onModelAdded={fetchModels}
+          />
         </TabsContent>
       </Tabs>
 

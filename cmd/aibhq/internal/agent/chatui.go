@@ -81,6 +81,7 @@ func newChatUI(modelName, sessionKey string, agentLoop *pkgagent.AgentLoop) *cha
 		modelName:  modelName,
 		sessionKey: sessionKey,
 		agentLoop:  agentLoop,
+		mode:       modeChat,
 	}
 	c.buildLayout()
 	return c
@@ -186,12 +187,12 @@ func (c *chatUI) updateFooter() {
 
 func (c *chatUI) toggleMode() {
 	switch c.mode {
-	case modeBuild:
-		c.mode = modeChat
 	case modeChat:
 		c.mode = modePlan
-	default:
+	case modePlan:
 		c.mode = modeBuild
+	default:
+		c.mode = modeChat
 	}
 	c.updateHeader()
 	c.appendSystemMessage(fmt.Sprintf("Mode switched to %s", c.mode.String()))
@@ -539,8 +540,8 @@ func (c *chatUI) sendToLoop(text string) {
 	switch mode {
 	case modePlan:
 		payload = "Before taking any action, write a clear numbered plan of what you will do. Then execute it step by step.\n\n" + text
-	case modeChat:
-		payload = "You are in conversational mode. Focus on discussion, research, and answering questions. Do not make file changes or run commands unless explicitly asked.\n\n" + text
+	case modeBuild:
+		payload = "Focus on executing tasks efficiently. Write code, run commands, and make changes directly.\n\n" + text
 	}
 
 	go func() {

@@ -716,16 +716,16 @@ func (c *TelegramChannel) handleMessage(ctx context.Context, message *telego.Mes
 	if trimmed == "/mode" || strings.HasPrefix(trimmed, "/mode ") {
 		current := c.chatModes[compositeChatID]
 		if current == "" {
-			current = "build"
+			current = "chat"
 		}
 		var next string
 		switch current {
-		case "build":
-			next = "chat"
 		case "chat":
 			next = "plan"
-		default:
+		case "plan":
 			next = "build"
+		default:
+			next = "chat"
 		}
 		c.chatModes[compositeChatID] = next
 		reply := fmt.Sprintf("Mode switched to *%s*", strings.ToUpper(next))
@@ -734,12 +734,12 @@ func (c *TelegramChannel) handleMessage(ctx context.Context, message *telego.Mes
 	}
 
 	// Apply mode prefix before forwarding to agent
-	if mode := c.chatModes[compositeChatID]; mode != "" && mode != "build" {
+	if mode := c.chatModes[compositeChatID]; mode != "" && mode != "chat" {
 		switch mode {
 		case "plan":
 			content = "Before taking any action, write a clear numbered plan of what you will do. Then execute it step by step.\n\n" + content
-		case "chat":
-			content = "You are in conversational mode. Focus on discussion, research, and answering questions. Do not make file changes or run commands unless explicitly asked.\n\n" + content
+		case "build":
+			content = "Focus on executing tasks efficiently. Write code, run commands, and make changes directly.\n\n" + content
 		}
 	}
 

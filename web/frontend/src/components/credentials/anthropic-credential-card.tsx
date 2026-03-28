@@ -50,7 +50,10 @@ export function AnthropicCredentialCard({
       status={status?.status ?? "not_logged_in"}
       authMethod={status?.auth_method}
       actions={
-        <div className="border-muted flex h-[120px] flex-col justify-center rounded-lg border p-3">
+        <div className="border-muted flex flex-col justify-center rounded-lg border p-3 gap-2">
+          <p className="text-muted-foreground text-xs">
+            {t("credentials.providers.anthropic.hint", { defaultValue: "Paste your Anthropic API key or setup token (run claude setup-token in your terminal)" })}
+          </p>
           <div className="flex h-full flex-col gap-3">
             <div className="flex h-full items-center gap-2">
               <Input

@@ -40,7 +40,7 @@ var providerCatalog = []providerInfo{
 		NeedsKey: true,
 		Desc:     "Claude family — Opus (powerful), Sonnet (balanced), Haiku (fast)",
 		AuthMethods: []authMethod{
-			{Label: "Setup token (from `claude setup-token`)", IsOAuth: true, OAuthArg: "anthropic"},
+			{Label: "Setup token — paste from terminal (run `claude setup-token`)", IsOAuth: true, OAuthArg: "anthropic"},
 			{Label: "API key (from console.anthropic.com)"},
 		},
 	},

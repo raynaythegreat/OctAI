@@ -101,7 +101,10 @@ func authLoginOpenAI(useDeviceCode bool) error {
 }
 
 func authLoginGoogleAntigravity() error {
-	cfg := auth.GoogleAntigravityOAuthConfig()
+	cfg, err := auth.GoogleAntigravityOAuthConfig()
+	if err != nil {
+		return fmt.Errorf("Google OAuth not configured: %w\n\nSet GOOGLE_OAUTH_CLIENT_ID and GOOGLE_OAUTH_CLIENT_SECRET from Google Cloud Console → APIs & Services → Credentials → OAuth 2.0 Client IDs", err)
+	}
 
 	cred, err := auth.LoginBrowser(cfg)
 	if err != nil {
@@ -451,7 +454,10 @@ func authModelsCmd() error {
 
 	// Refresh token if needed
 	if cred.NeedsRefresh() && cred.RefreshToken != "" {
-		oauthCfg := auth.GoogleAntigravityOAuthConfig()
+		oauthCfg, cfgErr := auth.GoogleAntigravityOAuthConfig()
+		if cfgErr != nil {
+			return fmt.Errorf("cannot refresh token: %w", cfgErr)
+		}
 		refreshed, refreshErr := auth.RefreshAccessToken(cred, oauthCfg)
 		if refreshErr == nil {
 			cred = refreshed

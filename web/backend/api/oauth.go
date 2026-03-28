@@ -549,7 +549,7 @@ func oauthConfigForProvider(provider string) (auth.OAuthProviderConfig, error) {
 	case oauthProviderOpenAI:
 		return auth.OpenAIOAuthConfig(), nil
 	case oauthProviderGoogleAntigravity:
-		return auth.GoogleAntigravityOAuthConfig(), nil
+		return auth.GoogleAntigravityOAuthConfig()
 	default:
 		return auth.OAuthProviderConfig{}, fmt.Errorf("provider %q does not support browser oauth", provider)
 	}

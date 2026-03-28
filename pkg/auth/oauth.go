@@ -41,11 +41,17 @@ func OpenAIOAuthConfig() OAuthProviderConfig {
 }
 
 // GoogleAntigravityOAuthConfig returns the OAuth configuration for Google Cloud Code Assist (Antigravity).
-// Client credentials are the same ones used by OpenCode/pi-ai for Cloud Code Assist access.
-func GoogleAntigravityOAuthConfig() OAuthProviderConfig {
-	// Configure your own Google OAuth credentials via environment variables.
+// Client credentials must be provided via environment variables GOOGLE_OAUTH_CLIENT_ID and
+// GOOGLE_OAUTH_CLIENT_SECRET (from Google Cloud Console → APIs & Services → Credentials → OAuth 2.0).
+func GoogleAntigravityOAuthConfig() (OAuthProviderConfig, error) {
 	clientID := os.Getenv("GOOGLE_OAUTH_CLIENT_ID")
 	clientSecret := os.Getenv("GOOGLE_OAUTH_CLIENT_SECRET")
+	if clientID == "" || clientSecret == "" {
+		return OAuthProviderConfig{}, fmt.Errorf(
+			"Google OAuth requires GOOGLE_OAUTH_CLIENT_ID and GOOGLE_OAUTH_CLIENT_SECRET environment variables — " +
+				"get them from Google Cloud Console → APIs & Services → Credentials → OAuth 2.0 Client IDs",
+		)
+	}
 	return OAuthProviderConfig{
 		Issuer:       "https://accounts.google.com/o/oauth2/v2",
 		TokenURL:     "https://oauth2.googleapis.com/token",
@@ -53,7 +59,7 @@ func GoogleAntigravityOAuthConfig() OAuthProviderConfig {
 		ClientSecret: clientSecret,
 		Scopes:       "https://www.googleapis.com/auth/cloud-platform https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/cclog https://www.googleapis.com/auth/experimentsandconfigs",
 		Port:         51121,
-	}
+	}, nil
 }
 
 func decodeBase64(s string) string {

@@ -76,7 +76,7 @@ export function ChatComposer({
   isConnected,
   hasDefaultModel,
   onSendWithAttachments,
-  chatMode = "build",
+  chatMode = "chat",
   onCycleMode,
 }: ChatComposerProps) {
   const { t } = useTranslation()

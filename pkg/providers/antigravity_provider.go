@@ -573,7 +573,10 @@ func createAntigravityTokenSource() func() (string, string, error) {
 
 		// Refresh if needed
 		if cred.NeedsRefresh() && cred.RefreshToken != "" {
-			oauthCfg := auth.GoogleAntigravityOAuthConfig()
+			oauthCfg, cfgErr := auth.GoogleAntigravityOAuthConfig()
+			if cfgErr != nil {
+				return "", "", fmt.Errorf("cannot refresh token: %w", cfgErr)
+			}
 			refreshed, err := auth.RefreshAccessToken(cred, oauthCfg)
 			if err != nil {
 				return "", "", fmt.Errorf("refreshing token: %w", err)

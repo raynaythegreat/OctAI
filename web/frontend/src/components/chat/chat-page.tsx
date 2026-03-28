@@ -27,7 +27,7 @@ export function ChatPage() {
   const [activeChannel, setActiveChannel] = useState("pico")
   const [viewingSessionId, setViewingSessionId] = useState<string | null>(null)
   const [viewingMessages, setViewingMessages] = useState<{ role: string; content: string }[] | null>(null)
-  const [chatMode, setChatMode] = useState<"chat" | "plan" | "build">("build")
+  const [chatMode, setChatMode] = useState<"chat" | "plan" | "build">("chat")
 
   const readOnly = activeChannel !== "pico"
 
@@ -107,14 +107,14 @@ export function ChatPage() {
     if (chatMode === "plan") {
       return `Before taking any action, write a clear numbered plan of what you will do. Then execute it step by step.\n\n${content}`
     }
-    if (chatMode === "chat") {
-      return `You are in conversational mode. Focus on discussion, research, and answering questions. Do not make file changes or run commands unless explicitly asked.\n\n${content}`
+    if (chatMode === "build") {
+      return `Focus on executing tasks efficiently. Write code, run commands, and make changes directly.\n\n${content}`
     }
     return content
   }
 
   const cycleChatMode = () => {
-    setChatMode((m) => (m === "build" ? "chat" : m === "chat" ? "plan" : "build"))
+    setChatMode((m) => (m === "chat" ? "plan" : m === "plan" ? "build" : "chat"))
   }
 
   const handleSend = () => {

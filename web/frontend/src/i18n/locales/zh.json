@@ -285,7 +285,8 @@
     "tabs": {
       "text": "聊天",
       "image": "图像",
-      "video": "视频"
+      "video": "视频",
+      "browse": "浏览"
     }
   },
   "aiUrl": {
