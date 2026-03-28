@@ -46,7 +46,7 @@ var oauthProviderOrder = []string{
 
 var oauthProviderMethods = map[string][]string{
 	oauthProviderOpenAI:            {oauthMethodBrowser, oauthMethodDeviceCode, oauthMethodToken},
-	oauthProviderAnthropic:         {oauthMethodToken},
+	oauthProviderAnthropic:         {oauthMethodToken, oauthMethodBrowser},
 	oauthProviderGoogleAntigravity: {oauthMethodBrowser},
 }
 
@@ -270,7 +270,12 @@ func (h *Handler) handleOAuthLogin(w http.ResponseWriter, r *http.Request) {
 	case oauthMethodBrowser:
 		cfg, err := oauthConfigForProvider(provider)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusBadRequest)
+			_ = json.NewEncoder(w).Encode(map[string]any{
+				"status": "error",
+				"error":  err.Error(),
+			})
 			return
 		}
 
@@ -431,6 +436,12 @@ func (h *Handler) handleOAuthCallback(w http.ResponseWriter, r *http.Request) {
 	cfg, err := oauthConfigForProvider(flow.Provider)
 	if err != nil {
 		h.setOAuthFlowError(flow.ID, err.Error())
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		_ = json.NewEncoder(w).Encode(map[string]any{
+			"status": "error",
+			"error":  err.Error(),
+		})
 		renderOAuthCallbackPage(w, flow.ID, oauthFlowError, "Unsupported provider", err.Error())
 		return
 	}
@@ -548,6 +559,8 @@ func oauthConfigForProvider(provider string) (auth.OAuthProviderConfig, error) {
 	switch provider {
 	case oauthProviderOpenAI:
 		return auth.OpenAIOAuthConfig(), nil
+	case oauthProviderAnthropic:
+		return auth.AnthropicOAuthConfig()
 	case oauthProviderGoogleAntigravity:
 		return auth.GoogleAntigravityOAuthConfig()
 	default:

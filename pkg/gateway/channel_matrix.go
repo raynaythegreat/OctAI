@@ -1,4 +1,4 @@
-//go:build !mipsle && !netbsd && !(freebsd && arm)
+//go:build !mipsle && !netbsd && !(freebsd && arm) && !(linux && (riscv64 || loong64 || s390x))
 
 package gateway
 
@@ -15,6 +15,9 @@ import (
 	// - freebsd/arm: modernc.org/libc v1.67.6 fails to compile due to broken
 	//   generated 32-bit FreeBSD code (size_t/uint64 and int32/int64 mismatches
 	//   in libc_freebsd.go).
+	// - linux/riscv64, linux/loong64, linux/s390x: modernc.org/libc v1.67.6 has
+	//   "build constraints exclude all Go files" for stdlib, sys/types, and time
+	//   packages on these architectures.
 	//
 	// This means Matrix is currently unavailable on those targets. The proper
 	// long-term fix is to split Matrix basic support from its E2EE/sqlite-backed

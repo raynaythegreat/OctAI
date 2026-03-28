@@ -1,6 +1,7 @@
 package providers
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/raynaythegreat/ai-business-hq/pkg/auth"
@@ -72,7 +73,15 @@ func TestCreateProviderReturnsClaudeCliProviderForClaudeCli(t *testing.T) {
 
 func TestCreateProviderReturnsClaudeProviderForAnthropicOAuth(t *testing.T) {
 	originalGetCredential := getCredential
-	t.Cleanup(func() { getCredential = originalGetCredential })
+	originalSetCredential := setCredential
+	originalAnthropicOAuthConfig := anthropicOAuthConfig
+	originalRefreshAccessToken := refreshAccessToken
+	t.Cleanup(func() {
+		getCredential = originalGetCredential
+		setCredential = originalSetCredential
+		anthropicOAuthConfig = originalAnthropicOAuthConfig
+		refreshAccessToken = originalRefreshAccessToken
+	})
 
 	getCredential = func(provider string) (*auth.AuthCredential, error) {
 		if provider != "anthropic" {
@@ -81,6 +90,13 @@ func TestCreateProviderReturnsClaudeProviderForAnthropicOAuth(t *testing.T) {
 		return &auth.AuthCredential{
 			AccessToken: "anthropic-token",
 		}, nil
+	}
+	setCredential = func(string, *auth.AuthCredential) error { return nil }
+	anthropicOAuthConfig = func() (auth.OAuthProviderConfig, error) {
+		return auth.OAuthProviderConfig{}, fmt.Errorf("not configured")
+	}
+	refreshAccessToken = func(*auth.AuthCredential, auth.OAuthProviderConfig) (*auth.AuthCredential, error) {
+		return nil, fmt.Errorf("no refresh token")
 	}
 
 	cfg := config.DefaultConfig()

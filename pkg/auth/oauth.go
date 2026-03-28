@@ -40,6 +40,28 @@ func OpenAIOAuthConfig() OAuthProviderConfig {
 	}
 }
 
+// AnthropicOAuthConfig returns the OAuth configuration for Anthropic browser login.
+// Client credentials must be provided via environment variables ANTHROPIC_OAUTH_CLIENT_ID and
+// ANTHROPIC_OAUTH_CLIENT_SECRET (from Anthropic Console → OAuth Applications).
+func AnthropicOAuthConfig() (OAuthProviderConfig, error) {
+	clientID := os.Getenv("ANTHROPIC_OAUTH_CLIENT_ID")
+	clientSecret := os.Getenv("ANTHROPIC_OAUTH_CLIENT_SECRET")
+	if clientID == "" || clientSecret == "" {
+		return OAuthProviderConfig{}, fmt.Errorf(
+			"Anthropic OAuth requires ANTHROPIC_OAUTH_CLIENT_ID and ANTHROPIC_OAUTH_CLIENT_SECRET environment variables — " +
+				"get them from Anthropic Console → OAuth Applications",
+		)
+	}
+	return OAuthProviderConfig{
+		Issuer:       "https://console.anthropic.com",
+		TokenURL:     "https://console.anthropic.com/oauth/token",
+		ClientID:     clientID,
+		ClientSecret: clientSecret,
+		Scopes:       "openid profile email offline_access",
+		Port:         51122,
+	}, nil
+}
+
 // GoogleAntigravityOAuthConfig returns the OAuth configuration for Google Cloud Code Assist (Antigravity).
 // Client credentials must be provided via environment variables GOOGLE_OAUTH_CLIENT_ID and
 // GOOGLE_OAUTH_CLIENT_SECRET (from Google Cloud Console → APIs & Services → Credentials → OAuth 2.0).
@@ -457,25 +479,27 @@ func buildAuthorizeURL(cfg OAuthProviderConfig, pkce PKCECodes, state, redirectU
 	}
 
 	isGoogle := strings.Contains(strings.ToLower(cfg.Issuer), "accounts.google.com")
-	if isGoogle {
-		// Google OAuth requires these for refresh token support
+	isAnthropic := strings.Contains(strings.ToLower(cfg.Issuer), "console.anthropic.com")
+	if isGoogle || isAnthropic {
 		params.Set("access_type", "offline")
 		params.Set("prompt", "consent")
-	} else {
-		// OpenAI-specific parameters
-		params.Set("id_token_add_organizations", "true")
-		params.Set("codex_cli_simplified_flow", "true")
-		if strings.Contains(strings.ToLower(cfg.Issuer), "auth.openai.com") {
-			params.Set("originator", "octai")
-		}
-		if cfg.Originator != "" {
-			params.Set("originator", cfg.Originator)
-		}
 	}
 
-	// Google uses /auth path, OpenAI uses /oauth/authorize
 	if isGoogle {
 		return cfg.Issuer + "/auth?" + params.Encode()
+	}
+
+	if isAnthropic {
+		return cfg.Issuer + "/oauth/authorize?" + params.Encode()
+	}
+
+	params.Set("id_token_add_organizations", "true")
+	params.Set("codex_cli_simplified_flow", "true")
+	if strings.Contains(strings.ToLower(cfg.Issuer), "auth.openai.com") {
+		params.Set("originator", "octai")
+	}
+	if cfg.Originator != "" {
+		params.Set("originator", cfg.Originator)
 	}
 	return cfg.Issuer + "/oauth/authorize?" + params.Encode()
 }
@@ -502,6 +526,8 @@ func ExchangeCodeForTokens(cfg OAuthProviderConfig, code, codeVerifier, redirect
 	provider := "openai"
 	if cfg.TokenURL != "" && strings.Contains(cfg.TokenURL, "googleapis.com") {
 		provider = "google-antigravity"
+	} else if cfg.TokenURL != "" && strings.Contains(cfg.TokenURL, "console.anthropic.com") {
+		provider = "anthropic"
 	}
 
 	resp, err := http.PostForm(tokenURL, data)

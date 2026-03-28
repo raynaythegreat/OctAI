@@ -5,3 +5,6 @@ import (
 )
 
 var getCredential = auth.GetCredential
+var setCredential = auth.SetCredential
+var anthropicOAuthConfig = auth.AnthropicOAuthConfig
+var refreshAccessToken = auth.RefreshAccessToken

@@ -25,15 +25,18 @@ const (
 // provider is the provider name (e.g. "openai", "anthropic"), useDeviceCode
 // selects the device-code flow over the browser flow, and isOAuth is always
 // true when called from the wizard (kept for API symmetry).
-func LoginProvider(provider string, useDeviceCode bool, isOAuth bool) error {
-	return authLoginCmd(provider, useDeviceCode, isOAuth)
+func LoginProvider(provider string, useDeviceCode bool, isOAuth bool, useBrowserOAuth bool) error {
+	return authLoginCmd(provider, useDeviceCode, isOAuth, useBrowserOAuth)
 }
 
-func authLoginCmd(provider string, useDeviceCode bool, useOauth bool) error {
+func authLoginCmd(provider string, useDeviceCode bool, useOauth bool, useBrowserOAuth bool) error {
 	switch provider {
 	case "openai":
 		return authLoginOpenAI(useDeviceCode)
 	case "anthropic":
+		if useBrowserOAuth {
+			return authLoginAnthropicBrowserOAuth()
+		}
 		return authLoginAnthropic(useOauth)
 	case "google-antigravity", "antigravity":
 		return authLoginGoogleAntigravity()
@@ -229,7 +232,6 @@ func authLoginAnthropicSetupToken() error {
 				Model:      "anthropic/" + defaultAnthropicModel,
 				AuthMethod: "oauth",
 			})
-			// Only set default model if user has no default configured yet
 			if appCfg.Agents.Defaults.GetModelName() == "" {
 				appCfg.Agents.Defaults.ModelName = defaultAnthropicModel
 			}
@@ -241,6 +243,54 @@ func authLoginAnthropicSetupToken() error {
 	}
 
 	fmt.Println("Setup token saved for Anthropic!")
+
+	return nil
+}
+
+func authLoginAnthropicBrowserOAuth() error {
+	cfg, err := auth.AnthropicOAuthConfig()
+	if err != nil {
+		return fmt.Errorf("Anthropic OAuth not configured: %w\n\nSet ANTHROPIC_OAUTH_CLIENT_ID and ANTHROPIC_OAUTH_CLIENT_SECRET from Anthropic Console → OAuth Applications", err)
+	}
+
+	cred, err := auth.LoginBrowser(cfg)
+	if err != nil {
+		return fmt.Errorf("login failed: %w", err)
+	}
+
+	cred.Provider = "anthropic"
+
+	if err = auth.SetCredential("anthropic", cred); err != nil {
+		return fmt.Errorf("failed to save credentials: %w", err)
+	}
+
+	appCfg, err := internal.LoadConfig()
+	if err == nil {
+		found := false
+		for i := range appCfg.ModelList {
+			if isAnthropicModel(appCfg.ModelList[i].Model) {
+				appCfg.ModelList[i].AuthMethod = "oauth"
+				found = true
+				break
+			}
+		}
+		if !found {
+			appCfg.ModelList = append(appCfg.ModelList, &config.ModelConfig{
+				ModelName:  defaultAnthropicModel,
+				Model:      "anthropic/" + defaultAnthropicModel,
+				AuthMethod: "oauth",
+			})
+			if appCfg.Agents.Defaults.GetModelName() == "" {
+				appCfg.Agents.Defaults.ModelName = defaultAnthropicModel
+			}
+		}
+
+		if err := config.SaveConfig(internal.GetConfigPath(), appCfg); err != nil {
+			return fmt.Errorf("could not update config: %w", err)
+		}
+	}
+
+	fmt.Println("Anthropic browser login successful!")
 
 	return nil
 }

@@ -30,6 +30,7 @@ jobs:
   create-tag:
     name: Create Git Tag
     # Skip tag creation when triggered by a tag push (tag already exists)
+    # Also skip phantom runs caused by GitHub bug on workflow file modifications
     if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     permissions:
@@ -54,7 +55,10 @@ jobs:
     name: GoReleaser Release
     needs:
       - create-tag
-    if: always() && (needs.create-tag.result == 'success' || needs.create-tag.result == 'skipped')
+    if: >-
+      always() && 
+      (needs.create-tag.result == 'success' || needs.create-tag.result == 'skipped') &&
+      (github.event_name != 'push' || startsWith(github.ref, 'refs/tags/'))
     runs-on: ubuntu-latest
     permissions:
       contents: write

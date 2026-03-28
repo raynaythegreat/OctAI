@@ -14,7 +14,7 @@ import { LogoutConfirmDialog } from "./logout-confirm-dialog"
 import { OpenAICredentialCard } from "./openai-credential-card"
 
 // Providers that have dedicated OAuth cards — excluded from API key grid
-const OAUTH_PROVIDER_KEYS = new Set(["openai", "antigravity", "google-antigravity"])
+const OAUTH_PROVIDER_KEYS = new Set(["openai", "anthropic", "antigravity", "google-antigravity"])
 
 export function CredentialsPage() {
   const { t } = useTranslation()
@@ -158,6 +158,9 @@ export function CredentialsPage() {
                       onStopLoading={stopLoading}
                       onSaveToken={() =>
                         void saveToken("anthropic", anthropicToken.trim())
+                      }
+                      onStartBrowserOAuth={() =>
+                        void startBrowserOAuth("anthropic")
                       }
                       onAskLogout={() => askLogout("anthropic")}
                     />

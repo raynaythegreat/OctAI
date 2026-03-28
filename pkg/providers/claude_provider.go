@@ -64,6 +64,16 @@ func createClaudeTokenSource() func() (string, error) {
 		if cred == nil {
 			return "", fmt.Errorf("no credentials for anthropic. Run: octai auth login --provider anthropic")
 		}
+		if cred.RefreshToken != "" && (cred.ExpiresAt.IsZero() || cred.NeedsRefresh()) {
+			cfg, cfgErr := anthropicOAuthConfig()
+			if cfgErr == nil {
+				refreshed, refreshErr := refreshAccessToken(cred, cfg)
+				if refreshErr == nil && refreshed != nil {
+					cred = refreshed
+					_ = setCredential("anthropic", cred)
+				}
+			}
+		}
 		return cred.AccessToken, nil
 	}
 }

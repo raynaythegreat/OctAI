@@ -6,10 +6,11 @@ import (
 
 // authMethod describes a single way to authenticate with a provider.
 type authMethod struct {
-	Label     string // shown in menu: "OAuth (browser)", "API key", etc.
-	IsOAuth   bool   // triggers OAuth flow instead of API-key prompt
-	DevCode   bool   // use device-code flow (no browser)
-	OAuthArg  string // provider string passed to auth.LoginProvider
+	Label        string // shown in menu: "OAuth (browser)", "API key", etc.
+	IsOAuth      bool   // triggers OAuth flow instead of API-key prompt
+	BrowserOAuth bool   // use browser OAuth flow (Anthropic, Google)
+	DevCode      bool   // use device-code flow (no browser)
+	OAuthArg     string // provider string passed to auth.LoginProvider
 }
 
 // providerInfo describes a provider entry shown in the wizard.
@@ -40,6 +41,7 @@ var providerCatalog = []providerInfo{
 		NeedsKey: true,
 		Desc:     "Claude family — Opus (powerful), Sonnet (balanced), Haiku (fast)",
 		AuthMethods: []authMethod{
+			{Label: "OAuth — browser login", IsOAuth: true, BrowserOAuth: true, OAuthArg: "anthropic"},
 			{Label: "Setup token — paste from terminal (run `claude setup-token`)", IsOAuth: true, OAuthArg: "anthropic"},
 			{Label: "API key (from console.anthropic.com)"},
 		},
@@ -51,7 +53,7 @@ var providerCatalog = []providerInfo{
 		NeedsKey: true,
 		Desc:     "GPT-5.4, GPT-4o, o3/o4 reasoning models",
 		AuthMethods: []authMethod{
-			{Label: "OAuth — browser login", IsOAuth: true, OAuthArg: "openai"},
+			{Label: "OAuth — browser login", IsOAuth: true, BrowserOAuth: true, OAuthArg: "openai"},
 			{Label: "OAuth — device code (no browser)", IsOAuth: true, DevCode: true, OAuthArg: "openai"},
 			{Label: "API key (from platform.openai.com)"},
 		},
@@ -101,7 +103,7 @@ var providerCatalog = []providerInfo{
 		NeedsKey: true,
 		Desc:     "Gemini 2.0 Flash / 2.5 Pro — fast, multimodal, long context",
 		AuthMethods: []authMethod{
-			{Label: "OAuth — browser login (Google Antigravity)", IsOAuth: true, OAuthArg: "google-antigravity"},
+			{Label: "OAuth — browser login (Google Antigravity)", IsOAuth: true, BrowserOAuth: true, OAuthArg: "google-antigravity"},
 			{Label: "API key (from aistudio.google.com)"},
 		},
 	},

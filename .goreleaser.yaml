@@ -57,6 +57,12 @@ builds:
         goarch: mips64
       - goos: netbsd
         goarch: arm
+      - goos: linux
+        goarch: riscv64
+      - goos: linux
+        goarch: loong64
+      - goos: linux
+        goarch: s390x
 
   - id: octai-launcher
     binary: octai-launcher
@@ -96,6 +102,12 @@ builds:
         goarch: mips64
       - goos: netbsd
         goarch: arm
+      - goos: linux
+        goarch: riscv64
+      - goos: linux
+        goarch: loong64
+      - goos: linux
+        goarch: s390x
 
 
 dockers_v2:

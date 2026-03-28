@@ -1,6 +1,7 @@
 import {
   IconKey,
   IconLoader2,
+  IconLockOpen,
   IconPlayerStopFilled,
   IconSparkles,
 } from "@tabler/icons-react"
@@ -19,6 +20,7 @@ interface AnthropicCredentialCardProps {
   onTokenChange: (value: string) => void
   onStopLoading: () => void
   onSaveToken: () => void
+  onStartBrowserOAuth: () => void
   onAskLogout: () => void
 }
 
@@ -29,11 +31,13 @@ export function AnthropicCredentialCard({
   onTokenChange,
   onStopLoading,
   onSaveToken,
+  onStartBrowserOAuth,
   onAskLogout,
 }: AnthropicCredentialCardProps) {
   const { t } = useTranslation()
   const actionBusy = activeAction !== ""
   const tokenLoading = activeAction === "anthropic:token"
+  const browserLoading = activeAction === "anthropic:browser"
   const stopLabel = t("credentials.actions.stopLoading")
 
   return (
@@ -51,42 +55,66 @@ export function AnthropicCredentialCard({
       authMethod={status?.auth_method}
       actions={
         <div className="border-muted flex flex-col justify-center rounded-lg border p-3 gap-2">
-          <p className="text-muted-foreground text-xs">
-            {t("credentials.providers.anthropic.hint", { defaultValue: "Paste your Anthropic API key or setup token (run claude setup-token in your terminal)" })}
-          </p>
-          <div className="flex h-full flex-col gap-3">
-            <div className="flex h-full items-center gap-2">
-              <Input
-                value={token}
-                onChange={(e) => onTokenChange(e.target.value)}
-                type="password"
-                placeholder={t("credentials.fields.anthropicToken")}
-              />
-              <Button
-                size="sm"
-                className="w-fit"
-                disabled={actionBusy || !token.trim()}
-                onClick={onSaveToken}
-              >
-                {tokenLoading && (
-                  <IconLoader2 className="size-4 animate-spin" />
-                )}
-                <IconKey className="size-4" />
-                {t("credentials.actions.saveToken")}
-              </Button>
-              {tokenLoading && (
-                <Button
-                  size="icon-sm"
-                  variant="ghost"
-                  onClick={onStopLoading}
-                  aria-label={stopLabel}
-                  title={stopLabel}
-                  className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-                >
-                  <IconPlayerStopFilled className="size-4" />
-                </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={actionBusy}
+              onClick={onStartBrowserOAuth}
+            >
+              {browserLoading && (
+                <IconLoader2 className="size-4 animate-spin" />
               )}
-            </div>
+              <IconLockOpen className="size-4" />
+              {t("credentials.actions.browser")}
+            </Button>
+            {browserLoading && (
+              <Button
+                size="icon-xs"
+                variant="secondary"
+                onClick={onStopLoading}
+                className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+              >
+                <IconPlayerStopFilled className="size-3" />
+              </Button>
+            )}
+          </div>
+          <div className="border-muted/50 border-t pt-2">
+            <p className="text-muted-foreground text-xs">
+              {t("credentials.providers.anthropic.hint", { defaultValue: "Or paste your Anthropic API key / setup token" })}
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Input
+              value={token}
+              onChange={(e) => onTokenChange(e.target.value)}
+              type="password"
+              placeholder={t("credentials.fields.anthropicToken")}
+            />
+            <Button
+              size="sm"
+              className="w-fit"
+              disabled={actionBusy || !token.trim()}
+              onClick={onSaveToken}
+            >
+              {tokenLoading && (
+                <IconLoader2 className="size-4 animate-spin" />
+              )}
+              <IconKey className="size-4" />
+              {t("credentials.actions.saveToken")}
+            </Button>
+            {tokenLoading && (
+              <Button
+                size="icon-sm"
+                variant="ghost"
+                onClick={onStopLoading}
+                aria-label={stopLabel}
+                title={stopLabel}
+                className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+              >
+                <IconPlayerStopFilled className="size-4" />
+              </Button>
+            )}
           </div>
         </div>
       }

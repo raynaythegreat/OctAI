@@ -10,8 +10,8 @@ import (
 
 	"golang.org/x/term"
 
-	authpkg "github.com/raynaythegreat/ai-business-hq/cmd/aibhq/internal/auth"
 	"github.com/raynaythegreat/ai-business-hq/cmd/aibhq/internal"
+	authpkg "github.com/raynaythegreat/ai-business-hq/cmd/aibhq/internal/auth"
 	"github.com/raynaythegreat/ai-business-hq/pkg/config"
 )
 
@@ -366,7 +366,7 @@ func enterAPIKeys(sc *bufio.Scanner, cfg *config.Config, selectedIdxs []int) err
 			method := p.AuthMethods[chosen]
 			if method.IsOAuth {
 				fmt.Printf("  %s→ Starting OAuth for %s...%s\n", cyan, p.Name, reset)
-				if err := authpkg.LoginProvider(method.OAuthArg, method.DevCode, true); err != nil {
+				if err := authpkg.LoginProvider(method.OAuthArg, method.DevCode, true, method.BrowserOAuth); err != nil {
 					fmt.Printf("  %s✗ OAuth failed: %v%s\n", red, err, reset)
 					fmt.Printf("  %sskipped%s\n", yellow, reset)
 				} else {

@@ -28,6 +28,29 @@ func TestOAuthLoginRejectsUnsupportedMethod(t *testing.T) {
 	req := httptest.NewRequest(
 		http.MethodPost,
 		"/api/oauth/login",
+		strings.NewReader(`{"provider":"anthropic","method":"device_code"}`),
+	)
+	req.Header.Set("Content-Type", "application/json")
+	mux.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("status = %d, want %d, body=%s", rec.Code, http.StatusBadRequest, rec.Body.String())
+	}
+}
+
+func TestOAuthAnthropicBrowserReturnsJSONError(t *testing.T) {
+	configPath, cleanup := setupOAuthTestEnv(t)
+	defer cleanup()
+	resetOAuthHooks(t)
+
+	h := NewHandler(configPath)
+	mux := http.NewServeMux()
+	h.RegisterRoutes(mux)
+
+	rec := httptest.NewRecorder()
+	req := httptest.NewRequest(
+		http.MethodPost,
+		"/api/oauth/login",
 		strings.NewReader(`{"provider":"anthropic","method":"browser"}`),
 	)
 	req.Header.Set("Content-Type", "application/json")
@@ -35,6 +58,17 @@ func TestOAuthLoginRejectsUnsupportedMethod(t *testing.T) {
 
 	if rec.Code != http.StatusBadRequest {
 		t.Fatalf("status = %d, want %d, body=%s", rec.Code, http.StatusBadRequest, rec.Body.String())
+	}
+
+	var resp map[string]any
+	if err := json.Unmarshal(rec.Body.Bytes(), &resp); err != nil {
+		t.Fatalf("unmarshal error: %v", err)
+	}
+	if resp["status"] != "error" {
+		t.Fatalf("status = %v, want error", resp["status"])
+	}
+	if resp["error"] == nil || resp["error"].(string) == "" {
+		t.Fatalf("expected non-empty error message, got %v", resp["error"])
 	}
 }
 

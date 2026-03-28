@@ -4,9 +4,10 @@ import "github.com/spf13/cobra"
 
 func newLoginCommand() *cobra.Command {
 	var (
-		provider      string
-		useDeviceCode bool
-		useOauth      bool
+		provider        string
+		useDeviceCode   bool
+		useOauth        bool
+		useBrowserOAuth bool
 	)
 
 	cmd := &cobra.Command{
@@ -14,7 +15,7 @@ func newLoginCommand() *cobra.Command {
 		Short: "Login via OAuth or paste token",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			return authLoginCmd(provider, useDeviceCode, useOauth)
+			return authLoginCmd(provider, useDeviceCode, useOauth, useBrowserOAuth)
 		},
 	}
 
@@ -23,6 +24,10 @@ func newLoginCommand() *cobra.Command {
 	cmd.Flags().BoolVar(
 		&useOauth, "setup-token", false,
 		"Use setup-token flow for Anthropic (from `claude setup-token`)",
+	)
+	cmd.Flags().BoolVar(
+		&useBrowserOAuth, "browser-oauth", false,
+		"Use browser OAuth flow (for Anthropic)",
 	)
 	_ = cmd.MarkFlagRequired("provider")
 
