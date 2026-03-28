@@ -77,7 +77,7 @@ const aibhqHome = "OCTAI_HOME"
 const (
 	fileScheme = "file://"
 	encScheme  = "enc://"
-	hkdfInfo   = "aibhq-credential-v1"
+	hkdfInfo   = "octai-credential-v1"
 	saltLen    = 16
 	nonceLen   = 12
 	keyLen     = 32
@@ -281,7 +281,7 @@ func allowedSSHKeyPath(path string) bool {
 // deriveKey derives a 32-byte AES-256 key from passphrase and SSH private key.
 //
 // ikm = HMAC-SHA256(key=SHA256(sshKeyBytes), msg=passphrase)
-// Final key: HKDF-SHA256(ikm, salt, info="aibhq-credential-v1", 32 bytes)
+// Final key: HKDF-SHA256(ikm, salt, info="octai-credential-v1", 32 bytes)
 // sshKeyPath must be non-empty; returns an error otherwise.
 func deriveKey(passphrase, sshKeyPath string, salt []byte) ([]byte, error) {
 	if sshKeyPath == "" {
@@ -329,7 +329,7 @@ func pickSSHKeyPath(override string) string {
 	return findDefaultSSHKey()
 }
 
-// findDefaultSSHKey returns the aibhq-specific SSH key path if it exists.
+// findDefaultSSHKey returns the octai-specific SSH key path if it exists.
 func findDefaultSSHKey() string {
 	p, err := DefaultSSHKeyPath()
 	if err != nil {

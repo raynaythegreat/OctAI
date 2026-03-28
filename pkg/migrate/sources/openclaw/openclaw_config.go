@@ -528,7 +528,7 @@ func (c *OpenClawConfig) ConvertToAIBusinessHQ(sourceHome string) (*AIBusinessHQ
 		warnings = append(
 			warnings,
 			fmt.Sprintf(
-				"Skills (%d entries) not automatically migrated - reinstall via aibhq CLI",
+				"Skills (%d entries) not automatically migrated - reinstall via octai CLI",
 				len(c.Skills.Entries),
 			),
 		)

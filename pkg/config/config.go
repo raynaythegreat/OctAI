@@ -1419,7 +1419,7 @@ func LoadConfig(path string) (*Config, error) {
 			for _, k := range m.apiKeys {
 				if k != "" && !strings.HasPrefix(k, "enc://") && !strings.HasPrefix(k, "file://") {
 					fmt.Fprintf(os.Stderr,
-						"aibhq: warning: model %q has a plaintext api_key; call SaveConfig to encrypt it\n",
+						"octai: warning: model %q has a plaintext api_key; call SaveConfig to encrypt it\n",
 						m.ModelName)
 					break // Only warn once per model
 				}

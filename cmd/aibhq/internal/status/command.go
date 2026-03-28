@@ -8,7 +8,7 @@ func NewStatusCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "status",
 		Aliases: []string{"s"},
-		Short:   "Show aibhq status",
+		Short:   "Show octai status",
 		Run: func(cmd *cobra.Command, args []string) {
 			statusCmd()
 		},

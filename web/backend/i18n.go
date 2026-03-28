@@ -58,7 +58,7 @@ var translations = map[Language]map[TranslationKey]string{
 		MenuQuit:           "Quit",
 		MenuQuitTooltip:    "Exit OctAi",
 		Exiting:            "Exiting OctAi...",
-		DocUrl:             "https://docs.aibhq.io/docs/",
+		DocUrl:             "https://docs.octai.io/docs/",
 	},
 	LanguageChinese: {
 		AppTooltip:         "%s - Web Console",
@@ -75,7 +75,7 @@ var translations = map[Language]map[TranslationKey]string{
 		MenuQuit:           "退出",
 		MenuQuitTooltip:    "退出 OctAi",
 		Exiting:            "正在退出 OctAi...",
-		DocUrl:             "https://docs.aibhq.io/zh-Hans/docs/",
+		DocUrl:             "https://docs.octai.io/zh-Hans/docs/",
 	},
 }
 

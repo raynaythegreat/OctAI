@@ -378,7 +378,7 @@ func (h *Handler) startGatewayLocked(initialStatus string, existingPid int) (int
 	}
 
 	// Start new process
-	// Locate the aibhq executable
+	// Locate the octai executable
 	execPath := utils.FindPicoclawBinary()
 
 	cmd = exec.Command(execPath, "gateway", "-E")
@@ -421,7 +421,7 @@ func (h *Handler) startGatewayLocked(initialStatus string, existingPid int) (int
 	gateway.bootDefaultModel = defaultModelName
 	setGatewayRuntimeStatusLocked(initialStatus)
 	pid = cmd.Process.Pid
-	logger.InfoC("gateway", fmt.Sprintf("Started aibhq gateway (PID: %d) from %s", pid, execPath))
+	logger.InfoC("gateway", fmt.Sprintf("Started octai gateway (PID: %d) from %s", pid, execPath))
 
 	// Capture stdout/stderr in background
 	go scanPipe(stdoutPipe, gateway.logs)
@@ -476,7 +476,7 @@ func (h *Handler) startGatewayLocked(initialStatus string, existingPid int) (int
 	return pid, nil
 }
 
-// handleGatewayStart starts the aibhq gateway subprocess.
+// handleGatewayStart starts the octai gateway subprocess.
 //
 //	POST /api/gateway/start
 func (h *Handler) handleGatewayStart(w http.ResponseWriter, r *http.Request) {

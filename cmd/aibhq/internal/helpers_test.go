@@ -22,18 +22,18 @@ func TestGetConfigPath(t *testing.T) {
 }
 
 func TestGetConfigPath_WithOCTAI_HOME(t *testing.T) {
-	t.Setenv(config.EnvHome, "/custom/aibhq")
+	t.Setenv(config.EnvHome, "/custom/octai")
 	t.Setenv("HOME", "/tmp/home")
 
 	got := GetConfigPath()
-	want := filepath.Join("/custom/aibhq", "config.json")
+	want := filepath.Join("/custom/octai", "config.json")
 
 	assert.Equal(t, want, got)
 }
 
 func TestGetConfigPath_WithOCTAI_CONFIG(t *testing.T) {
 	t.Setenv("OCTAI_CONFIG", "/custom/config.json")
-	t.Setenv(config.EnvHome, "/custom/aibhq")
+	t.Setenv(config.EnvHome, "/custom/octai")
 	t.Setenv("HOME", "/tmp/home")
 
 	got := GetConfigPath()

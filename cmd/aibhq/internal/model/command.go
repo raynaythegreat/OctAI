@@ -22,10 +22,10 @@ If no argument is provided, shows the current default model.
 If a model name is provided, sets it as the default model.
 
 Examples:
-  aibhq model                    # Show current default model
-  aibhq model gpt-5.2           # Set gpt-5.2 as default
-  aibhq model claude-sonnet-4.6 # Set claude-sonnet-4.6 as default
-  aibhq model local-model       # Set local VLLM server as default
+  octai model                    # Show current default model
+  octai model gpt-5.2           # Set gpt-5.2 as default
+  octai model claude-sonnet-4.6 # Set claude-sonnet-4.6 as default
+  octai model local-model       # Set local VLLM server as default
 
 Note: 'local-model' is a special value for using a local VLLM server
 (running at localhost:8000 by default) which does not require an API key.`,

@@ -15,7 +15,7 @@ import (
 
 const (
 	autoStartEntryName = "OctAiLauncher"
-	launchAgentLabel   = "io.aibhq.launcher"
+	launchAgentLabel   = "io.octai.launcher"
 )
 
 type autoStartRequest struct {
@@ -215,7 +215,7 @@ func buildDarwinPlist(exePath string, args []string) string {
 
 func linuxAutoStartPath() string {
 	home, _ := os.UserHomeDir()
-	return filepath.Join(home, ".config", "autostart", "aibhq-web.desktop")
+	return filepath.Join(home, ".config", "autostart", "octai-web.desktop")
 }
 
 func shellQuote(s string) string {

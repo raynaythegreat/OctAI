@@ -11,7 +11,7 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-// DefaultSSHKeyPath returns the canonical path for the aibhq-specific SSH key.
+// DefaultSSHKeyPath returns the canonical path for the octai-specific SSH key.
 // The path is always ~/.ssh/aibhq_ed25519.key (os.UserHomeDir is cross-platform).
 func DefaultSSHKeyPath() (string, error) {
 	home, err := os.UserHomeDir()

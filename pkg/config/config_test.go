@@ -658,7 +658,7 @@ func TestLoadConfig_HooksProcessConfig(t *testing.T) {
       "review-gate": {
         "enabled": true,
         "transport": "stdio",
-        "command": ["uvx", "aibhq-hook-reviewer"],
+        "command": ["uvx", "octai-hook-reviewer"],
         "dir": "/tmp/hooks",
         "env": {
           "HOOK_MODE": "rewrite"
@@ -773,10 +773,10 @@ func TestDefaultConfig_WorkspacePath_Default(t *testing.T) {
 }
 
 func TestDefaultConfig_WorkspacePath_WithPicoclawHome(t *testing.T) {
-	t.Setenv("OCTAI_HOME", "/custom/aibhq/home")
+	t.Setenv("OCTAI_HOME", "/custom/octai/home")
 
 	cfg := DefaultConfig()
-	want := filepath.Join("/custom/aibhq/home", "workspace")
+	want := filepath.Join("/custom/octai/home", "workspace")
 
 	if cfg.Agents.Defaults.Workspace != want {
 		t.Errorf("Workspace path with OCTAI_HOME = %q, want %q", cfg.Agents.Defaults.Workspace, want)

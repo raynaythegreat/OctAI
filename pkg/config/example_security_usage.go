@@ -84,7 +84,7 @@ Note: Sensitive fields are omitted because they're loaded from .security.yml
 	  "version": 1,
 	  "agents": {
 	    "defaults": {
-	      "workspace": "~/aibhq-workspace",
+	      "workspace": "~/octai-workspace",
 	      "model_name": "gpt-5.4"
 	    }
 	  },
@@ -152,7 +152,7 @@ chmod 600 ~/.octai/.security.yml
 ## 5. Verify it works
 
 ```bash
-aibhq --version
+octai --version
 ```
 
 # Supported Fields in .security.yml
@@ -355,7 +355,7 @@ chmod 600 ~/.octai/.security.yml
 
 ## Step 6: Test
 ```bash
-aibhq --version
+octai --version
 ```
 
 If everything works, you can delete the backup:

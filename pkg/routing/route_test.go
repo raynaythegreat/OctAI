@@ -10,7 +10,7 @@ func testConfig(agents []config.AgentConfig, bindings []config.AgentBinding) *co
 	return &config.Config{
 		Agents: config.AgentsConfig{
 			Defaults: config.AgentDefaults{
-				Workspace: "/tmp/aibhq-test",
+				Workspace: "/tmp/octai-test",
 				ModelName: "gpt-4",
 			},
 			List: agents,

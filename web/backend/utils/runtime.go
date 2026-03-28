@@ -21,12 +21,12 @@ func GetPicoclawHome() string {
 	return filepath.Join(home, ".octai")
 }
 
-// GetAIBHQHome returns the aibhq home directory (alias for GetPicoclawHome).
+// GetAIBHQHome returns the octai home directory (alias for GetPicoclawHome).
 func GetAIBHQHome() string {
 	return GetPicoclawHome()
 }
 
-// GetDefaultConfigPath returns the default path to the aibhq config file.
+// GetDefaultConfigPath returns the default path to the octai config file.
 func GetDefaultConfigPath() string {
 	if configPath := os.Getenv(config.EnvConfig); configPath != "" {
 		return configPath

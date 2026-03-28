@@ -1070,7 +1070,7 @@ func TestWebTool_TavilySearch_Success(t *testing.T) {
 }
 
 // TestWebFetchTool_CloudflareChallenge_RetryWithHonestUA verifies that a 403 response
-// with cf-mitigated: challenge triggers a retry using the honest aibhq User-Agent,
+// with cf-mitigated: challenge triggers a retry using the honest octai User-Agent,
 // and that the retry response is returned when it succeeds.
 func TestWebFetchTool_CloudflareChallenge_RetryWithHonestUA(t *testing.T) {
 	withPrivateWebFetchHostsAllowed(t)
@@ -1118,9 +1118,9 @@ func TestWebFetchTool_CloudflareChallenge_RetryWithHonestUA(t *testing.T) {
 	if receivedUAs[0] != userAgent {
 		t.Errorf("first request UA = %q, want %q", receivedUAs[0], userAgent)
 	}
-	// Second request must use the honest aibhq user agent
-	if !strings.Contains(receivedUAs[1], "aibhq") {
-		t.Errorf("retry request UA = %q, want it to contain 'aibhq'", receivedUAs[1])
+	// Second request must use the honest octai user agent
+	if !strings.Contains(receivedUAs[1], "octai") {
+		t.Errorf("retry request UA = %q, want it to contain 'octai'", receivedUAs[1])
 	}
 }
 

@@ -11,7 +11,7 @@ import (
 )
 
 // OpenclawHomeEnvVar is the environment variable that overrides the source
-// openclaw home directory when migrating from openclaw to aibhq.
+// openclaw home directory when migrating from openclaw to octai.
 // Default: ~/.openclaw
 const OpenclawHomeEnvVar = "OPENCLAW_HOME"
 

@@ -46,7 +46,7 @@ func DownloadToFile(ctx context.Context, client *http.Client, req *http.Request,
 	}
 
 	// Create temp file.
-	tmpFile, err := os.CreateTemp("", "aibhq-dl-*")
+	tmpFile, err := os.CreateTemp("", "octai-dl-*")
 	if err != nil {
 		return "", fmt.Errorf("failed to create temp file: %w", err)
 	}

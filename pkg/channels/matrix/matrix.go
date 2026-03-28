@@ -1276,7 +1276,7 @@ func localpartMentionRegexp(localpart string) *regexp.Regexp {
 	}
 
 	// Match Matrix mentions in plain text while avoiding false positives:
-	//   "@aibhq" and "@aibhq:matrix.org" should match,
+	//   "@octai" and "@octai:matrix.org" should match,
 	//   "test@example.com" and "helloaibhqworld" should not.
 	pattern := `(?i)(^|[^[:alnum:]_])@` + regexp.QuoteMeta(localpart) + `(?::[A-Za-z0-9._:-]+)?([^[:alnum:]_]|$)`
 	return regexp.MustCompile(pattern)

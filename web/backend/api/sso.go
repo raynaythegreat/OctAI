@@ -430,7 +430,7 @@ func generateSSOState() (string, error) {
 
 func renderSSOCallbackPage(w http.ResponseWriter, flowID, status, title, errMsg string) {
 	payload := map[string]string{
-		"type":   "aibhq-sso-result",
+		"type":   "octai-sso-result",
 		"flowId": flowID,
 		"status": status,
 	}

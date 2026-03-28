@@ -794,7 +794,7 @@ func (c *WeixinChannel) sendMessageItem(
 	resp, err := c.api.SendMessage(ctx, SendMessageReq{
 		Msg: WeixinMessage{
 			ToUserID:     toUserID,
-			ClientID:     "aibhq-" + uuid.New().String(),
+			ClientID:     "octai-" + uuid.New().String(),
 			MessageType:  MessageTypeBot,
 			MessageState: MessageStateFinish,
 			ItemList:     []MessageItem{item},

@@ -13,12 +13,12 @@ import (
 	"github.com/raynaythegreat/ai-business-hq/pkg/config"
 )
 
-// NewModelsCommand creates the "aibhq models" subcommand.
+// NewModelsCommand creates the "octai models" subcommand.
 // Subcommands:
-//   - aibhq models list      — list all configured models with auth status
-//   - aibhq models scan      — check which models have valid API keys
-//   - aibhq models status    — show model chain + auth health (--check for CI)
-//   - aibhq models fallbacks — manage fallback chains
+//   - octai models list      — list all configured models with auth status
+//   - octai models scan      — check which models have valid API keys
+//   - octai models status    — show model chain + auth health (--check for CI)
+//   - octai models fallbacks — manage fallback chains
 func NewModelsCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "models",
@@ -26,14 +26,14 @@ func NewModelsCommand() *cobra.Command {
 		Long: `List, scan, and manage configured models.
 
 Examples:
-  aibhq models list               # List all configured models with auth status
-  aibhq models scan               # Show which models are ready to use
-  aibhq models status             # Show model chain and auth health
-  aibhq models status --check     # Exit 1 if expired/missing, 2 if expiring soon
-  aibhq models fallbacks list     # List fallback chain for the default model
-  aibhq models fallbacks add claude-haiku-4-5   # Append a fallback
-  aibhq models fallbacks remove claude-haiku-4-5
-  aibhq models fallbacks clear    # Remove all fallbacks`,
+  octai models list               # List all configured models with auth status
+  octai models scan               # Show which models are ready to use
+  octai models status             # Show model chain and auth health
+  octai models status --check     # Exit 1 if expired/missing, 2 if expiring soon
+  octai models fallbacks list     # List fallback chain for the default model
+  octai models fallbacks add claude-haiku-4-5   # Append a fallback
+  octai models fallbacks remove claude-haiku-4-5
+  octai models fallbacks clear    # Remove all fallbacks`,
 	}
 
 	cmd.AddCommand(newListCommand())
@@ -157,7 +157,7 @@ func printModelScan(cfg *config.Config) {
 	fmt.Printf("Summary: %d ready, %d missing API key\n", len(ready), len(missing))
 }
 
-// newStatusCommand implements "aibhq models status [--check]".
+// newStatusCommand implements "octai models status [--check]".
 func newStatusCommand() *cobra.Command {
 	var checkMode bool
 	cmd := &cobra.Command{
@@ -252,7 +252,7 @@ func runModelsStatus(checkMode bool) error {
 			fmt.Printf("  %-20s %s%s%s\n", provider, cred.AuthMethod, tag, email)
 		}
 	} else {
-		fmt.Println("  (no credentials stored — run: aibhq auth login)")
+		fmt.Println("  (no credentials stored — run: octai auth login)")
 		if exitCode < 1 {
 			exitCode = 1
 		}
@@ -264,7 +264,7 @@ func runModelsStatus(checkMode bool) error {
 	return nil
 }
 
-// newFallbacksCommand implements "aibhq models fallbacks <list|add|remove|clear>".
+// newFallbacksCommand implements "octai models fallbacks <list|add|remove|clear>".
 func newFallbacksCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "fallbacks",
@@ -272,10 +272,10 @@ func newFallbacksCommand() *cobra.Command {
 		Long: `Manage ordered fallback models used when the primary model fails.
 
 Examples:
-  aibhq models fallbacks list
-  aibhq models fallbacks add claude-haiku-4-5
-  aibhq models fallbacks remove claude-haiku-4-5
-  aibhq models fallbacks clear`,
+  octai models fallbacks list
+  octai models fallbacks add claude-haiku-4-5
+  octai models fallbacks remove claude-haiku-4-5
+  octai models fallbacks clear`,
 	}
 
 	cmd.AddCommand(

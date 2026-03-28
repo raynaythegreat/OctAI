@@ -164,7 +164,7 @@ func authLoginGoogleAntigravity() error {
 
 	fmt.Println("\n✓ Google Antigravity login successful!")
 	fmt.Println("Default model set to: gemini-flash")
-	fmt.Println("Try it: aibhq agent -m \"Hello world\"")
+	fmt.Println("Try it: octai agent -m \"Hello world\"")
 
 	return nil
 }
@@ -397,7 +397,7 @@ func authStatusCmd() error {
 
 	if len(store.Credentials) == 0 {
 		fmt.Println("No authenticated providers.")
-		fmt.Println("Run: aibhq auth login --provider <name>")
+		fmt.Println("Run: octai auth login --provider <name>")
 		return nil
 	}
 
@@ -445,7 +445,7 @@ func authModelsCmd() error {
 	cred, err := auth.GetCredential("google-antigravity")
 	if err != nil || cred == nil {
 		return fmt.Errorf(
-			"not logged in to Google Antigravity.\nrun: aibhq auth login --provider google-antigravity",
+			"not logged in to Google Antigravity.\nrun: octai auth login --provider google-antigravity",
 		)
 	}
 

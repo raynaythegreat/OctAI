@@ -5,14 +5,14 @@
 
 package config
 
-// Runtime environment variable keys for the aibhq process.
+// Runtime environment variable keys for the octai process.
 // These control the location of files and binaries at runtime and are read
-// directly via os.Getenv / os.LookupEnv. All aibhq-specific keys use the
+// directly via os.Getenv / os.LookupEnv. All octai-specific keys use the
 // OCTAI_ prefix. Reference these constants instead of inline string
 // literals to keep all supported knobs visible in one place and to prevent
 // typos.
 const (
-	// EnvHome overrides the base directory for all aibhq data
+	// EnvHome overrides the base directory for all octai data
 	// (config, workspace, skills, auth store, …).
 	// Default: ~/.octai
 	EnvHome = "OCTAI_HOME"
@@ -26,7 +26,7 @@ const (
 	// Default: <cwd>/skills
 	EnvBuiltinSkills = "OCTAI_BUILTIN_SKILLS"
 
-	// EnvBinary overrides the path to the aibhq executable.
+	// EnvBinary overrides the path to the octai executable.
 	// Used by the web launcher when spawning the gateway subprocess.
 	// Default: resolved from the same directory as the current executable.
 	EnvBinary = "OCTAI_BINARY"

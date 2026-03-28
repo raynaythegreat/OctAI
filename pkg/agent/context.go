@@ -86,9 +86,9 @@ func (cb *ContextBuilder) getIdentity() string {
 	version := config.FormatVersion()
 
 	return fmt.Sprintf(
-		`# aibhq 🦞 (%s)
+		`# octai 🦞 (%s)
 
-You are aibhq, a helpful AI assistant.
+You are octai, a helpful AI assistant.
 
 ## Workspace
 Your workspace is at: %s

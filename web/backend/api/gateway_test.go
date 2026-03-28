@@ -756,7 +756,7 @@ func TestGatewayRestartReturnsErrorStatusWhenReplacementFailsToStart(t *testing.
 		t.Fatalf("SaveConfig() error = %v", err)
 	}
 
-	invalidBinaryPath := filepath.Join(t.TempDir(), "fake-aibhq")
+	invalidBinaryPath := filepath.Join(t.TempDir(), "fake-octai")
 	if err := os.WriteFile(invalidBinaryPath, []byte("#!/bin/sh\n"), 0o644); err != nil {
 		t.Fatalf("WriteFile() error = %v", err)
 	}
@@ -936,7 +936,7 @@ func TestGatewayClearLogsResetsBufferedHistory(t *testing.T) {
 func TestFindPicoclawBinary_EnvOverride(t *testing.T) {
 	// Create a temporary file to act as the mock binary
 	tmpDir := t.TempDir()
-	mockBinary := filepath.Join(tmpDir, "aibhq-mock")
+	mockBinary := filepath.Join(tmpDir, "octai-mock")
 	if err := os.WriteFile(mockBinary, []byte("mock"), 0o755); err != nil {
 		t.Fatalf("WriteFile() error = %v", err)
 	}
@@ -951,11 +951,11 @@ func TestFindPicoclawBinary_EnvOverride(t *testing.T) {
 
 func TestFindPicoclawBinary_EnvOverride_InvalidPath(t *testing.T) {
 	// When OCTAI_BINARY points to a non-existent path, fall through to next strategy
-	t.Setenv("OCTAI_BINARY", "/nonexistent/aibhq-binary")
+	t.Setenv("OCTAI_BINARY", "/nonexistent/octai-binary")
 
 	got := utils.FindPicoclawBinary()
 	// Should not return the invalid path; falls back to "octai" or another found path
-	if got == "/nonexistent/aibhq-binary" {
+	if got == "/nonexistent/octai-binary" {
 		t.Errorf("FindPicoclawBinary() returned invalid env path %q, expected fallback", got)
 	}
 }

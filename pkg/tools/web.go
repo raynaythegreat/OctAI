@@ -23,7 +23,7 @@ import (
 
 const (
 	userAgent       = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-	userAgentHonest = "aibhq/%s (+https://github.com/raynaythegreat/ai-business-hq; AI assistant bot)"
+	userAgentHonest = "octai/%s (+https://github.com/raynaythegreat/ai-business-hq; AI assistant bot)"
 
 	// HTTP client timeouts for web tool providers.
 	searchTimeout     = 10 * time.Second // Brave, Tavily, DuckDuckGo
@@ -1044,7 +1044,7 @@ func (t *WebFetchTool) Execute(ctx context.Context, args map[string]any) *ToolRe
 	}
 
 	// Cloudflare (and similar WAFs) signal bot challenges with 403 + cf-mitigated: challenge.
-	// Retry once with an honest User-Agent that identifies aibhq, which some
+	// Retry once with an honest User-Agent that identifies octai, which some
 	// operators explicitly allow-list for AI assistants.
 	if resp.StatusCode == http.StatusForbidden && resp.Header.Get("Cf-Mitigated") == "challenge" {
 		logger.DebugCF("tool", "Cloudflare challenge detected, retrying with honest User-Agent",

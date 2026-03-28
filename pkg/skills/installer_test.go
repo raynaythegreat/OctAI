@@ -25,17 +25,17 @@ func TestParseGitHubRef(t *testing.T) {
 	}{
 		{
 			name:         "simple owner/repo",
-			repo:         "sipeed/aibhq",
+			repo:         "sipeed/octai",
 			wantOwner:    "sipeed",
-			wantRepoName: "aibhq",
+			wantRepoName: "octai",
 			wantRef:      "main",
 			wantSubPath:  "",
 		},
 		{
 			name:         "owner/repo with subpath",
-			repo:         "sipeed/aibhq/skills/test",
+			repo:         "sipeed/octai/skills/test",
 			wantOwner:    "sipeed",
-			wantRepoName: "aibhq",
+			wantRepoName: "octai",
 			wantRef:      "main",
 			wantSubPath:  "skills/test",
 		},
@@ -43,7 +43,7 @@ func TestParseGitHubRef(t *testing.T) {
 			name:         "full URL with tree",
 			repo:         "https://github.com/raynaythegreat/ai-business-hq/tree/dev/skills/test",
 			wantOwner:    "sipeed",
-			wantRepoName: "aibhq",
+			wantRepoName: "octai",
 			wantRef:      "dev",
 			wantSubPath:  "skills/test",
 		},
@@ -51,7 +51,7 @@ func TestParseGitHubRef(t *testing.T) {
 			name:         "full URL with blob",
 			repo:         "https://github.com/raynaythegreat/ai-business-hq/blob/main/README.md",
 			wantOwner:    "sipeed",
-			wantRepoName: "aibhq",
+			wantRepoName: "octai",
 			wantRef:      "main",
 			wantSubPath:  "README.md",
 		},
@@ -59,7 +59,7 @@ func TestParseGitHubRef(t *testing.T) {
 			name:         "full URL without ref",
 			repo:         "https://github.com/raynaythegreat/ai-business-hq",
 			wantOwner:    "sipeed",
-			wantRepoName: "aibhq",
+			wantRepoName: "octai",
 			wantRef:      "main",
 			wantSubPath:  "",
 		},
@@ -83,9 +83,9 @@ func TestParseGitHubRef(t *testing.T) {
 		},
 		{
 			name:         "with whitespace",
-			repo:         "  sipeed/aibhq  ",
+			repo:         "  sipeed/octai  ",
 			wantOwner:    "sipeed",
-			wantRepoName: "aibhq",
+			wantRepoName: "octai",
 			wantRef:      "main",
 			wantSubPath:  "",
 		},
@@ -431,12 +431,12 @@ func TestSkillInstaller_InstallFromGitHub_SkillAlreadyExists(t *testing.T) {
 	}
 
 	// Create an existing skill directory
-	existingSkill := filepath.Join(skillsDir, "aibhq")
+	existingSkill := filepath.Join(skillsDir, "octai")
 	os.MkdirAll(existingSkill, 0o755)
 	os.WriteFile(filepath.Join(existingSkill, "SKILL.md"), []byte("existing"), 0o644)
 
 	// Try to install the same skill - should fail
-	err = installer.InstallFromGitHub(context.Background(), "sipeed/aibhq")
+	err = installer.InstallFromGitHub(context.Background(), "sipeed/octai")
 	if err == nil {
 		t.Error("InstallFromGitHub() expected error for existing skill, got nil")
 	}

@@ -46,7 +46,7 @@ func TestResolveLaunchCommandUsesConfigFileDefaults(t *testing.T) {
 }
 
 func TestBuildDarwinPlistIncludesRunAtLoad(t *testing.T) {
-	plist := buildDarwinPlist("/tmp/aibhq-web", []string{"-no-browser", "/tmp/config.json"})
+	plist := buildDarwinPlist("/tmp/octai-web", []string{"-no-browser", "/tmp/config.json"})
 	if !strings.Contains(plist, "<key>RunAtLoad</key>") {
 		t.Fatalf("plist missing RunAtLoad key:\n%s", plist)
 	}

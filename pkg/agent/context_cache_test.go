@@ -15,7 +15,7 @@ import (
 // Returns the tmpDir path; caller should defer os.RemoveAll(tmpDir).
 func setupWorkspace(t *testing.T, files map[string]string) string {
 	t.Helper()
-	tmpDir, err := os.MkdirTemp("", "aibhq-test-*")
+	tmpDir, err := os.MkdirTemp("", "octai-test-*")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -102,7 +102,7 @@ func TestSingleSystemMessage(t *testing.T) {
 
 			// System message must contain identity (static) and time (dynamic)
 			sys := msgs[0].Content
-			if !strings.Contains(sys, "aibhq") {
+			if !strings.Contains(sys, "octai") {
 				t.Error("system message missing identity")
 			}
 			if !strings.Contains(sys, "Current Time") {
@@ -632,7 +632,7 @@ func TestConcurrentBuildSystemPromptWithCache(t *testing.T) {
 					errs <- "empty prompt returned"
 					return
 				}
-				if !strings.Contains(result, "aibhq") {
+				if !strings.Contains(result, "octai") {
 					errs <- "prompt missing identity"
 					return
 				}
@@ -709,7 +709,7 @@ func TestEmptyWorkspaceBaselineDetectsNewFiles(t *testing.T) {
 
 // BenchmarkBuildMessagesWithCache measures caching performance.
 func BenchmarkBuildMessagesWithCache(b *testing.B) {
-	tmpDir, _ := os.MkdirTemp("", "aibhq-bench-*")
+	tmpDir, _ := os.MkdirTemp("", "octai-bench-*")
 	defer os.RemoveAll(tmpDir)
 
 	os.MkdirAll(filepath.Join(tmpDir, "memory"), 0o755)
