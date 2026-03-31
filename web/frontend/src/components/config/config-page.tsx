@@ -20,6 +20,7 @@ import {
   ExecSection,
   LauncherSection,
   RuntimeSection,
+  UISettingsSection,
 } from "@/components/config/config-sections"
 import {
   type CoreConfigForm,
@@ -293,7 +294,7 @@ export function ConfigPage() {
   return (
     <div className="flex h-full flex-col">
       <PageHeader
-        title={t("navigation.config")}
+        title={t("navigation.settings")}
         children={
           <Button variant="outline" asChild>
             <Link to="/config/raw">
@@ -337,19 +338,20 @@ export function ConfigPage() {
                 disabled={saving || isLauncherLoading}
               />
 
-              <DevicesSection
-                form={form}
-                onFieldChange={updateField}
-                autoStartEnabled={autoStartEnabled}
-                autoStartHint={autoStartHint}
-                autoStartDisabled={
-                  isAutoStartLoading ||
-                  Boolean(autoStartError) ||
-                  !autoStartSupported ||
-                  saving
-                }
-                onAutoStartChange={setAutoStartEnabled}
-              />
+               <DevicesSection
+                 form={form}
+                 onFieldChange={updateField}
+                 autoStartEnabled={autoStartEnabled}
+                 autoStartHint={autoStartHint}
+                 autoStartDisabled={
+                   isAutoStartLoading ||
+                   Boolean(autoStartError) ||
+                   !autoStartSupported ||
+                   saving
+                 }
+                 onAutoStartChange={setAutoStartEnabled}
+               />
+               <UISettingsSection />
 
               <div className="flex justify-end gap-2">
                 <Button

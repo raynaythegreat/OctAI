@@ -20,6 +20,8 @@ export interface ModelInfo {
   extra_body?: Record<string, unknown>
   // Meta
   configured: boolean
+  available?: boolean
+  chat_enabled: boolean
   is_default: boolean
   is_virtual: boolean
 }
@@ -103,6 +105,20 @@ export async function testModelKey(index: number): Promise<TestModelKeyResult> {
   })
 }
 
+export async function setModelChatEnabled(
+  index: number,
+  enabled: boolean,
+): Promise<{ status: string; chat_enabled: boolean }> {
+  return request<{ status: string; chat_enabled: boolean }>(
+    `/api/models/${index}/chat-enabled`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ enabled }),
+    },
+  )
+}
+
 export async function getImageModels(): Promise<{ models: ModelInfo[]; total: number }> {
   const res = await fetch("/api/image-models")
   if (!res.ok) throw new Error(`Failed to fetch image models: ${res.status}`)
@@ -129,6 +145,20 @@ export async function testImageModelKey(
   return res.json() as Promise<TestModelKeyResult>
 }
 
+export async function setImageModelChatEnabled(
+  index: number,
+  enabled: boolean,
+): Promise<{ status: string; chat_enabled: boolean }> {
+  return request<{ status: string; chat_enabled: boolean }>(
+    `/api/image-models/${index}/chat-enabled`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ enabled }),
+    },
+  )
+}
+
 export async function getVideoModels(): Promise<{ models: ModelInfo[]; total: number }> {
   const res = await fetch("/api/video-models")
   if (!res.ok) throw new Error(`Failed to fetch video models: ${res.status}`)
@@ -153,6 +183,20 @@ export async function testVideoModelKey(
   const res = await fetch(`/api/video-models/${index}/test`, { method: "POST" })
   if (!res.ok) throw new Error(`Failed to test video model key: ${res.status}`)
   return res.json() as Promise<TestModelKeyResult>
+}
+
+export async function setVideoModelChatEnabled(
+  index: number,
+  enabled: boolean,
+): Promise<{ status: string; chat_enabled: boolean }> {
+  return request<{ status: string; chat_enabled: boolean }>(
+    `/api/video-models/${index}/chat-enabled`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ enabled }),
+    },
+  )
 }
 
 // Rotate API key functions
@@ -250,6 +294,10 @@ export interface RoutingConfig {
   threshold: number
 }
 
+export interface ModelFallbackConfig {
+  fallback_model: string
+}
+
 export async function getAutoRouting(): Promise<RoutingConfig> {
   return request<RoutingConfig>("/api/models/auto")
 }
@@ -262,6 +310,26 @@ export async function setAutoRouting(
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(routingConfig),
   })
+}
+
+export async function getModelFallback(): Promise<ModelFallbackConfig> {
+  return request<ModelFallbackConfig>("/api/models/fallback")
+}
+
+export async function setModelFallback(
+  modelName: string,
+): Promise<{ status: string; fallback_model: string }> {
+  const response = await request<{ status: string; fallback_model: string }>(
+    "/api/models/fallback",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ model_name: modelName }),
+    },
+  )
+
+  await refreshGatewayState()
+  return response
 }
 
 export type { ModelsListResponse, ModelActionResponse }

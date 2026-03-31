@@ -102,7 +102,7 @@ func (h *Handler) handleListLoops(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) handleCreateLoop(w http.ResponseWriter, r *http.Request) {
 	var req LoopCreateRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err := decodeJSON(r, &req); err != nil {
 		http.Error(w, "invalid request body", http.StatusBadRequest)
 		return
 	}

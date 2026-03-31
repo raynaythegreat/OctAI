@@ -83,20 +83,20 @@ const CurrentVersion = 1
 
 // Config is the current config structure with version support
 type Config struct {
-	Version   int             `json:"version"` // Config schema version for migration
-	Agents    AgentsConfig    `json:"agents"`
-	Bindings  []AgentBinding  `json:"bindings,omitempty"`
-	Session   SessionConfig   `json:"session,omitempty"`
-	Channels  ChannelsConfig  `json:"channels"`
-	ModelList      []*ModelConfig `json:"model_list"`                 // New model-centric provider configuration
-	ImageModelList []*ModelConfig `json:"image_model_list,omitempty"` // Image generation model configurations
-	VideoModelList []*ModelConfig `json:"video_model_list,omitempty"` // Video generation model configurations
-	Gateway        GatewayConfig  `json:"gateway"`
-	Hooks     HooksConfig     `json:"hooks,omitempty"`
-	Tools     ToolsConfig     `json:"tools"`
-	Heartbeat HeartbeatConfig `json:"heartbeat"`
-	Devices   DevicesConfig   `json:"devices"`
-	Voice     VoiceConfig     `json:"voice"`
+	Version        int             `json:"version"` // Config schema version for migration
+	Agents         AgentsConfig    `json:"agents"`
+	Bindings       []AgentBinding  `json:"bindings,omitempty"`
+	Session        SessionConfig   `json:"session,omitempty"`
+	Channels       ChannelsConfig  `json:"channels"`
+	ModelList      []*ModelConfig  `json:"model_list"`                 // New model-centric provider configuration
+	ImageModelList []*ModelConfig  `json:"image_model_list,omitempty"` // Image generation model configurations
+	VideoModelList []*ModelConfig  `json:"video_model_list,omitempty"` // Video generation model configurations
+	Gateway        GatewayConfig   `json:"gateway"`
+	Hooks          HooksConfig     `json:"hooks,omitempty"`
+	Tools          ToolsConfig     `json:"tools"`
+	Heartbeat      HeartbeatConfig `json:"heartbeat"`
+	Devices        DevicesConfig   `json:"devices"`
+	Voice          VoiceConfig     `json:"voice"`
 	// BuildInfo contains build-time version information
 	BuildInfo BuildInfo `json:"build_info,omitempty"`
 
@@ -304,12 +304,12 @@ type AgentBudgetConfig struct {
 }
 
 type AgentConfig struct {
-	ID           string               `json:"id"`
-	Default      bool                 `json:"default,omitempty"`
-	Name         string               `json:"name,omitempty"`
+	ID      string `json:"id"`
+	Default bool   `json:"default,omitempty"`
+	Name    string `json:"name,omitempty"`
 	// Role specifies the agent's specialization within a team.
 	// Built-in values: orchestrator, sales, support, research, content, analytics, admin, custom.
-	Role         string               `json:"role,omitempty"`
+	Role string `json:"role,omitempty"`
 	// TeamID links this agent to a TeamConfig by ID.
 	TeamID       string               `json:"team_id,omitempty"`
 	Workspace    string               `json:"workspace,omitempty"`
@@ -418,7 +418,7 @@ type AgentDefaults struct {
 	AutoMode                  AgentAutoModeConfig `json:"auto_mode,omitempty"`
 	AutoAssist                AutoAssistConfig    `json:"auto_assist,omitempty"`
 	Budget                    AgentBudgetConfig   `json:"budget,omitempty"`
-	LLMStreaming               bool               `json:"llm_streaming,omitempty"`
+	LLMStreaming              bool                `json:"llm_streaming,omitempty"`
 	Session                   AgentSessionConfig  `json:"session,omitempty"`
 }
 
@@ -936,6 +936,9 @@ type ModelConfig struct {
 	// Required fields
 	ModelName string `json:"model_name"` // User-facing alias for the model
 	Model     string `json:"model"`      // Protocol/model-identifier (e.g., "openai/gpt-4o", "anthropic/claude-sonnet-4.6")
+
+	// UI selection state
+	ChatEnabled *bool `json:"chat_enabled,omitempty"` // Whether this model should appear in chat-related model menus
 
 	// HTTP-based providers
 	APIBase   string   `json:"api_base,omitempty"`  // API endpoint URL

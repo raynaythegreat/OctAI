@@ -11,10 +11,19 @@ import { AntigravityCredentialCard } from "./antigravity-credential-card"
 import { ApiKeyCredentialCard } from "./apikey-credential-card"
 import { DeviceCodeSheet } from "./device-code-sheet"
 import { LogoutConfirmDialog } from "./logout-confirm-dialog"
+import { MiniMaxCredentialCard } from "./minimax-credential-card"
 import { OpenAICredentialCard } from "./openai-credential-card"
+import { QwenCredentialCard } from "./qwen-credential-card"
 
 // Providers that have dedicated OAuth cards — excluded from API key grid
-const OAUTH_PROVIDER_KEYS = new Set(["openai", "anthropic", "antigravity", "google-antigravity"])
+const OAUTH_PROVIDER_KEYS = new Set([
+  "openai",
+  "anthropic",
+  "antigravity",
+  "google-antigravity",
+  "qwen",
+  "minimax",
+])
 
 export function CredentialsPage() {
   const { t } = useTranslation()
@@ -29,6 +38,8 @@ export function CredentialsPage() {
     openaiStatus,
     anthropicStatus,
     antigravityStatus,
+    qwenStatus,
+    minimaxStatus,
     logoutDialogOpen,
     logoutConfirmProvider,
     logoutProviderLabel,
@@ -38,6 +49,7 @@ export function CredentialsPage() {
     setAnthropicToken,
     startBrowserOAuth,
     startOpenAIDeviceCode,
+    startDeviceCode,
     stopLoading,
     saveToken,
     askLogout,
@@ -138,7 +150,7 @@ export function CredentialsPage() {
                   <h2 className="text-foreground mb-3 text-sm font-semibold">
                     {t("credentials.sections.oauth")}
                   </h2>
-                  <div className="grid grid-cols-1 gap-4 lg:auto-rows-fr lg:grid-cols-3">
+                  <div className="grid grid-cols-1 gap-4 lg:auto-rows-fr lg:grid-cols-3 xl:grid-cols-5">
                     <OpenAICredentialCard
                       status={openaiStatus}
                       activeAction={activeAction}
@@ -172,6 +184,20 @@ export function CredentialsPage() {
                         void startBrowserOAuth("google-antigravity")
                       }
                       onAskLogout={() => askLogout("google-antigravity")}
+                    />
+                    <QwenCredentialCard
+                      status={qwenStatus}
+                      activeAction={activeAction}
+                      onStartDeviceCode={() => void startDeviceCode("qwen")}
+                      onStopLoading={stopLoading}
+                      onAskLogout={() => askLogout("qwen")}
+                    />
+                    <MiniMaxCredentialCard
+                      status={minimaxStatus}
+                      activeAction={activeAction}
+                      onStartDeviceCode={() => void startDeviceCode("minimax")}
+                      onStopLoading={stopLoading}
+                      onAskLogout={() => askLogout("minimax")}
                     />
                   </div>
                 </section>

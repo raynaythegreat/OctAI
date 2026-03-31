@@ -35,7 +35,10 @@ type scannerItem struct {
 
 // analyzeRequest is the body for POST /api/scanner/analyze.
 type analyzeRequest struct {
-	URL string `json:"url"`
+	URL        string `json:"url"`
+	CrawlDepth int    `json:"crawlDepth,omitempty"`
+	MaxPages   int    `json:"maxPages,omitempty"`
+	SameDomain bool   `json:"sameDomain,omitempty"`
 }
 
 // analyzeResponse is the response for POST /api/scanner/analyze.
@@ -75,7 +78,11 @@ type conflictItem struct {
 	Type string `json:"type"`
 }
 
-var httpClient = &http.Client{Timeout: 30 * time.Second}
+var (
+	httpClient   = &http.Client{Timeout: 30 * time.Second}
+	htmlTagRe    = regexp.MustCompile(`(?s)<[^>]*>`)
+	multiSpaceRe = regexp.MustCompile(`\s+`)
+)
 
 // handleScannerAnalyze fetches and analyzes a URL for MCP servers, skills, tools, and plugins.
 //
@@ -111,6 +118,9 @@ func (h *Handler) handleScannerAnalyze(w http.ResponseWriter, r *http.Request) {
 	if strings.Contains(parsedURL.Host, "github.com") {
 		urlType = "github"
 		content, err = fetchGitHubContent(req.URL)
+	} else if req.CrawlDepth > 0 || req.MaxPages > 1 {
+		urlType = "website"
+		content, err = fetchWebContentCrawl(req.URL, req.CrawlDepth, req.MaxPages, req.SameDomain)
 	} else {
 		urlType = "website"
 		content, err = fetchWebContent(req.URL)
@@ -509,7 +519,7 @@ func integrateReferenceURL(cfg *config.Config, item integrateRequestItem) error 
 	if err != nil {
 		return fmt.Errorf("marshalling references: %w", err)
 	}
-	if err := os.WriteFile(filePath, data, 0o644); err != nil {
+	if err := os.WriteFile(filePath, data, 0o600); err != nil {
 		return fmt.Errorf("writing references: %w", err)
 	}
 	return nil
@@ -530,10 +540,13 @@ func saveDiscoveredItem(cfg *config.Config, item integrateRequestItem) error {
 
 	// Read existing entries
 	type entry struct {
-		Type        string         `json:"type"`
-		Name        string         `json:"name"`
-		Description string         `json:"description,omitempty"`
-		Config      map[string]any `json:"config,omitempty"`
+		Type              string         `json:"type"`
+		Name              string         `json:"name"`
+		Description       string         `json:"description,omitempty"`
+		Config            map[string]any `json:"config,omitempty"`
+		SourceURL         string         `json:"source_url,omitempty"`
+		LastChecked       string         `json:"last_checked,omitempty"`
+		VersionIdentifier string         `json:"version_identifier,omitempty"`
 	}
 
 	var entries []entry
@@ -559,7 +572,7 @@ func saveDiscoveredItem(cfg *config.Config, item integrateRequestItem) error {
 	if err != nil {
 		return fmt.Errorf("marshalling entries: %w", err)
 	}
-	if err := os.WriteFile(filePath, data, 0o644); err != nil {
+	if err := os.WriteFile(filePath, data, 0o600); err != nil {
 		return fmt.Errorf("writing discovered integrations: %w", err)
 	}
 	return nil
@@ -823,8 +836,86 @@ func fetchWebContent(pageURL string) (string, error) {
 	return text, nil
 }
 
-var htmlTagRe = regexp.MustCompile(`<[^>]+>`)
-var multiSpaceRe = regexp.MustCompile(`\s{3,}`)
+var linkRe = regexp.MustCompile(`href=["']?([^"'>\s]+)["']?`)
+
+func extractLinks(content string, baseURL string) []string {
+	matches := linkRe.FindAllStringSubmatch(content, -1)
+	var links []string
+	base, _ := url.Parse(baseURL)
+	for _, match := range matches {
+		if len(match) > 1 {
+			u, err := url.Parse(match[1])
+			if err != nil {
+				continue
+			}
+			resolved := base.ResolveReference(u)
+			links = append(links, resolved.String())
+		}
+	}
+	return links
+}
+
+func isAllowedURL(link string, startURL string, sameDomain bool) bool {
+	u, err := url.Parse(link)
+	if err != nil {
+		return false
+	}
+	if !strings.HasPrefix(u.Scheme, "http") {
+		return false
+	}
+	if sameDomain {
+		start, _ := url.Parse(startURL)
+		return u.Host == start.Host
+	}
+	return true
+}
+
+func fetchWebContentCrawl(startURL string, depth int, maxPages int, sameDomain bool) (string, error) {
+	visited := make(map[string]bool)
+	toVisit := []string{startURL}
+	var allContent strings.Builder
+
+	// Default values if not specified
+	if depth <= 0 {
+		depth = 0
+	}
+	if maxPages <= 0 {
+		maxPages = 1
+	}
+
+	for len(toVisit) > 0 && len(visited) < maxPages {
+		current := toVisit[0]
+		toVisit = toVisit[1:]
+
+		if visited[current] {
+			continue
+		}
+		visited[current] = true
+
+		content, err := fetchWebContent(current)
+		if err != nil {
+			continue // Skip failed pages
+		}
+		allContent.WriteString("=== Page: " + current + " ===\n")
+		allContent.WriteString(content)
+		allContent.WriteString("\n\n---\n\n")
+
+		// Extract links if we haven't reached max depth
+		if depth > 0 {
+			links := extractLinks(content, current)
+			for _, link := range links {
+				if isAllowedURL(link, startURL, sameDomain) && !visited[link] {
+					toVisit = append(toVisit, link)
+				}
+			}
+		}
+
+		// Simple rate limiting
+		time.Sleep(200 * time.Millisecond)
+	}
+
+	return allContent.String(), nil
+}
 
 // stripHTMLTags removes HTML tags and collapses whitespace.
 func stripHTMLTags(html string) string {

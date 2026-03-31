@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+	"sync"
 
 	"github.com/raynaythegreat/ai-business-hq/pkg/config"
 	"github.com/raynaythegreat/ai-business-hq/pkg/logger"
@@ -41,6 +42,7 @@ type AgentInstance struct {
 	SkillsFilter              []string
 	AutoAssist                config.AutoAssistConfig
 	Candidates                []providers.FallbackCandidate
+	ModelMu                   *sync.RWMutex
 
 	// Router is non-nil when model routing is configured and the light model
 	// was successfully resolved. It scores each incoming message and decides
@@ -212,6 +214,7 @@ func NewAgentInstance(
 		Candidates:                candidates,
 		Router:                    router,
 		LightCandidates:           lightCandidates,
+		ModelMu:                   &sync.RWMutex{},
 	}
 }
 

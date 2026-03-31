@@ -1,4 +1,5 @@
-import { IconBrain, IconBug, IconHammer, IconMessageCircle, IconPlus, IconSparkles, IconSearch } from "@tabler/icons-react"
+import { IconPlus } from "@tabler/icons-react"
+import { useAtomValue } from "jotai"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 
@@ -9,6 +10,7 @@ import { ChatComposer } from "@/components/chat/chat-composer"
 import { ChatEmptyState } from "@/components/chat/chat-empty-state"
 import { ModelSelector } from "@/components/chat/model-selector"
 import { SessionHistoryMenu } from "@/components/chat/session-history-menu"
+import { ThinkingLevelSelector } from "@/components/chat/thinking-level-selector"
 import { TypingIndicator } from "@/components/chat/typing-indicator"
 import { UserMessage } from "@/components/chat/user-message"
 import { PageHeader } from "@/components/page-header"
@@ -17,6 +19,7 @@ import { useChatModels } from "@/hooks/use-chat-models"
 import { useGateway } from "@/hooks/use-gateway"
 import { usePicoChat } from "@/hooks/use-pico-chat"
 import { useSessionHistory } from "@/hooks/use-session-history"
+import { chatAtom, setThinkingLevel, type ThinkingLevel } from "@/store/chat"
 
 export function ChatPage() {
   const { t } = useTranslation()
@@ -28,6 +31,7 @@ export function ChatPage() {
   const [viewingSessionId, setViewingSessionId] = useState<string | null>(null)
   const [viewingMessages, setViewingMessages] = useState<{ role: string; content: string }[] | null>(null)
   const [chatMode, setChatMode] = useState<"chat" | "plan" | "build">("chat")
+  const [webSearch, setWebSearch] = useState(false)
 
   const readOnly = activeChannel !== "pico"
 
@@ -47,7 +51,9 @@ export function ChatPage() {
 
   const {
     defaultModelName,
-    hasConfiguredModels,
+    hasSavedModels,
+    hasChatEnabledModels,
+    hasAvailableModels,
     apiKeyModels,
     oauthModels,
     localModels,
@@ -55,7 +61,10 @@ export function ChatPage() {
     isAutoMode,
     toggleAutoMode,
   } = useChatModels({ isConnected: isGatewayRunning })
-  const canSend = isChatConnected && Boolean(defaultModelName)
+  const canSend = isChatConnected && (isAutoMode || Boolean(defaultModelName))
+
+  const { thinkingLevel } = useAtomValue(chatAtom)
+  const allModels = [...apiKeyModels, ...oauthModels, ...localModels]
 
   const {
     sessions,
@@ -119,7 +128,7 @@ export function ChatPage() {
 
   const handleSend = () => {
     if (!input.trim() || !canSend) return
-    if (sendMessage(applyModePrefix(input.trim()))) {
+    if (sendMessage(applyModePrefix(input.trim()), { webSearch })) {
       setInput("")
     }
   }
@@ -144,7 +153,7 @@ export function ChatPage() {
         }
       }
     }
-    if (sendMessage(applyModePrefix(fullContent))) {
+    if (sendMessage(applyModePrefix(fullContent), { webSearch })) {
       setInput("")
     }
   }
@@ -158,16 +167,25 @@ export function ChatPage() {
         }`}
         titleExtra={
           <div className="flex items-center gap-2">
-            {hasConfiguredModels && (
-              <ModelSelector
-                defaultModelName={defaultModelName}
-                apiKeyModels={apiKeyModels}
-                oauthModels={oauthModels}
-                localModels={localModels}
-                onValueChange={handleSetDefault}
-                isAutoMode={isAutoMode}
-                toggleAutoMode={toggleAutoMode}
-              />
+            {hasAvailableModels && (
+              <>
+                <ModelSelector
+                  defaultModelName={defaultModelName}
+                  apiKeyModels={apiKeyModels}
+                  oauthModels={oauthModels}
+                  localModels={localModels}
+                  onValueChange={handleSetDefault}
+                  isAutoMode={isAutoMode}
+                  toggleAutoMode={toggleAutoMode}
+                />
+                <ThinkingLevelSelector
+                  models={allModels}
+                  defaultModelName={defaultModelName}
+                  isAutoMode={isAutoMode}
+                  thinkingLevel={thinkingLevel}
+                  onThinkingLevelChange={(level: ThinkingLevel) => setThinkingLevel(level)}
+                />
+              </>
             )}
             <ChannelSelector
               activeChannel={activeChannel}
@@ -217,74 +235,23 @@ export function ChatPage() {
       <div
         ref={scrollRef}
         onScroll={handleScroll}
-        className="min-h-0 flex-1 overflow-y-auto px-4 py-6 md:px-8 lg:px-24 xl:px-48"
+        className="min-h-0 flex-1 overflow-y-auto px-4 py-6 md:px-6 lg:px-10 xl:px-16"
       >
-        <div className="mx-auto flex w-full max-w-250 flex-col gap-8 pb-8">
+        <div className={`mx-auto flex w-full max-w-[1040px] flex-col gap-5 pb-6 ${!readOnly && messages.length === 0 && !isTyping ? 'h-full' : ''}`}>
           {!readOnly && messages.length === 0 && !isTyping && (
-            <>
-              <ChatEmptyState
-                hasConfiguredModels={hasConfiguredModels}
-                defaultModelName={defaultModelName}
-                isConnected={isGatewayRunning}
-              />
-              {canSend && (
-                <div className="flex flex-wrap justify-center gap-2 px-4">
-                  <button
-                    type="button"
-                    className="flex items-center gap-2 rounded-full border border-violet-500/30 bg-violet-500/5 px-4 py-2 text-sm text-violet-400 transition-colors hover:bg-violet-500/10"
-                    onClick={() => { setChatMode("chat"); setInput("Research: ") }}
-                  >
-                    <IconSearch className="size-3.5" />
-                    Research a topic
-                  </button>
-                  <button
-                    type="button"
-                    className="flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/5 px-4 py-2 text-sm text-amber-400 transition-colors hover:bg-amber-500/10"
-                    onClick={() => { setChatMode("plan"); setInput("") }}
-                  >
-                    <IconBrain className="size-3.5" />
-                    Write a plan
-                  </button>
-                  <button
-                    type="button"
-                    className="flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/5 px-4 py-2 text-sm text-emerald-400 transition-colors hover:bg-emerald-500/10"
-                    onClick={() => { setChatMode("build"); setInput("") }}
-                  >
-                    <IconHammer className="size-3.5" />
-                    Build something
-                  </button>
-                  <button
-                    type="button"
-                    className="flex items-center gap-2 rounded-full border border-violet-500/30 bg-violet-500/5 px-4 py-2 text-sm text-violet-400 transition-colors hover:bg-violet-500/10"
-                    onClick={() => setInput("/use brainstorming ")}
-                  >
-                    <IconSparkles className="size-3.5" />
-                    Brainstorm ideas
-                  </button>
-                  <button
-                    type="button"
-                    className="flex items-center gap-2 rounded-full border border-rose-500/30 bg-rose-500/5 px-4 py-2 text-sm text-rose-400 transition-colors hover:bg-rose-500/10"
-                    onClick={() => setInput("/use systematic-debugging ")}
-                  >
-                    <IconBug className="size-3.5" />
-                    Debug an issue
-                  </button>
-                  <button
-                    type="button"
-                    className="flex items-center gap-2 rounded-full border border-violet-500/30 bg-violet-500/5 px-4 py-2 text-sm text-violet-400 transition-colors hover:bg-violet-500/10"
-                    onClick={() => { setChatMode("chat"); setInput("") }}
-                  >
-                    <IconMessageCircle className="size-3.5" />
-                    Just chat
-                  </button>
-                </div>
-              )}
-            </>
+            <ChatEmptyState
+              hasSavedModels={hasSavedModels}
+              hasChatEnabledModels={hasChatEnabledModels}
+              hasAvailableModels={hasAvailableModels}
+              defaultModelName={defaultModelName}
+              isAutoMode={isAutoMode}
+              isConnected={isGatewayRunning}
+            />
           )}
 
           {!readOnly &&
             messages.map((msg) => (
-              <div key={msg.id} className="flex w-full">
+              <div key={msg.id} className="flex w-full justify-center">
                 {msg.role === "assistant" ? (
                   <AssistantMessage
                     content={msg.content}
@@ -308,7 +275,7 @@ export function ChatPage() {
           {readOnly &&
             viewingMessages &&
             viewingMessages.map((msg, i) => (
-              <div key={i} className="flex w-full">
+              <div key={i} className="flex w-full justify-center">
                 {msg.role === "assistant" ? (
                   <AssistantMessage content={msg.content} />
                 ) : (
@@ -329,12 +296,14 @@ export function ChatPage() {
           onInputChange={setInput}
           onSend={handleSend}
           isConnected={isChatConnected}
-          hasDefaultModel={Boolean(defaultModelName)}
+          hasDefaultModel={hasAvailableModels && (isAutoMode || Boolean(defaultModelName))}
           onSendWithAttachments={(content, attachments) => {
             void handleSendWithAttachments(content, attachments)
           }}
           chatMode={chatMode}
           onCycleMode={cycleChatMode}
+          webSearch={webSearch}
+          onToggleWebSearch={() => setWebSearch((v) => !v)}
         />
       )}
     </div>

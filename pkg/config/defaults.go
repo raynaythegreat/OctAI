@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 
 	"github.com/raynaythegreat/ai-business-hq/pkg"
 )
@@ -576,12 +577,56 @@ func DefaultConfig() *Config {
 					UseRegex:         false,
 				},
 				Servers: map[string]MCPServerConfig{
-				"notebooklm": {
-					Enabled: false,
-					Command: "uvx",
-					Args:    []string{"--from", "notebooklm-mcp-cli", "notebooklm-mcp"},
+					"notebooklm": {
+						Enabled: false,
+						Command: "uvx",
+						Args:    []string{"--from", "notebooklm-mcp-cli", "notebooklm-mcp"},
+					},
+					"filesystem": {
+						Enabled:  false,
+						Deferred: boolPtr(true),
+						Command:  "npx",
+						Args:     []string{"-y", "@anthropic/mcp-server-filesystem", "<workspace>"},
+					},
+					"sequential-thinking": {
+						Enabled:  false,
+						Deferred: boolPtr(true),
+						Command:  "npx",
+						Args:     []string{"-y", "@anthropic/mcp-server-sequential-thinking"},
+					},
+					"memory": {
+						Enabled:  false,
+						Deferred: boolPtr(true),
+						Command:  "npx",
+						Args:     []string{"-y", "@anthropic/mcp-server-memory"},
+					},
+					"github": {
+						Enabled:  false,
+						Deferred: boolPtr(true),
+						Command:  "npx",
+						Args:     []string{"-y", "@anthropic/mcp-server-github"},
+						EnvFile:  ".env.github",
+					},
+					"brave-search": {
+						Enabled:  false,
+						Deferred: boolPtr(true),
+						Command:  "npx",
+						Args:     []string{"-y", "@anthropic/mcp-server-brave-search"},
+						EnvFile:  ".env.brave",
+					},
+					"puppeteer": {
+						Enabled:  false,
+						Deferred: boolPtr(true),
+						Command:  "npx",
+						Args:     []string{"-y", "@anthropic/mcp-server-puppeteer"},
+					},
+					"fetch": {
+						Enabled:  false,
+						Deferred: boolPtr(true),
+						Command:  "npx",
+						Args:     []string{"-y", "@anthropic/mcp-server-fetch"},
+					},
 				},
-			},
 			},
 			AppendFile: ToolConfig{
 				Enabled: true,
@@ -656,7 +701,13 @@ func DefaultConfig() *Config {
 
 // ModelNamesForProvider returns the ordered list of model names from DefaultModelConfigs
 // whose Model field starts with the given schemePrefix (e.g. "openai", "gemini").
+var modelNamesCache sync.Map
+
 func ModelNamesForProvider(schemePrefix string) []string {
+	if cached, ok := modelNamesCache.Load(schemePrefix); ok {
+		return cached.([]string)
+	}
+
 	var names []string
 	prefix := schemePrefix + "/"
 	for _, m := range DefaultConfig().ModelList {
@@ -664,5 +715,13 @@ func ModelNamesForProvider(schemePrefix string) []string {
 			names = append(names, m.ModelName)
 		}
 	}
-	return names
+
+	result := make([]string, len(names))
+	copy(result, names)
+	modelNamesCache.Store(schemePrefix, result)
+	return result
+}
+
+func boolPtr(v bool) *bool {
+	return &v
 }

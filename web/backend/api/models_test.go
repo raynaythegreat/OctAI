@@ -117,25 +117,42 @@ func TestHandleListModels_ConfiguredStatusUsesRuntimeProbesForLocalModels(t *tes
 		t.Fatalf("Unmarshal() error = %v", err)
 	}
 
-	got := make(map[string]bool, len(resp.Models))
+	gotConfigured := make(map[string]bool, len(resp.Models))
+	gotAvailable := make(map[string]bool, len(resp.Models))
 	for _, model := range resp.Models {
-		got[model.ModelName] = model.Configured
+		gotConfigured[model.ModelName] = model.Configured
+		gotAvailable[model.ModelName] = model.Available
 	}
 
-	if got["openai-oauth"] {
+	if gotConfigured["openai-oauth"] {
 		t.Fatalf("openai oauth model configured = true, want false without stored credential")
 	}
-	if !got["vllm-local"] {
-		t.Fatalf("vllm local model configured = false, want true when local probe succeeds")
+	if gotAvailable["openai-oauth"] {
+		t.Fatalf("openai oauth model configured = true, want false without stored credential")
 	}
-	if !got["ollama-default"] {
-		t.Fatalf("ollama default model configured = false, want true when default local probe succeeds")
+	if !gotConfigured["vllm-local"] {
+		t.Fatalf("vllm local model configured = false, want true when local provider is present")
 	}
-	if !got["vllm-remote"] {
+	if !gotAvailable["vllm-local"] {
+		t.Fatalf("vllm local model available = false, want true when local probe succeeds")
+	}
+	if !gotConfigured["ollama-default"] {
+		t.Fatalf("ollama default model configured = false, want true when default local provider is present")
+	}
+	if !gotAvailable["ollama-default"] {
+		t.Fatalf("ollama default model available = false, want true when default local probe succeeds")
+	}
+	if !gotConfigured["vllm-remote"] {
 		t.Fatalf("remote vllm model configured = false, want true with api_key")
 	}
-	if !got["copilot-gpt-5.4"] {
-		t.Fatalf("copilot model configured = false, want true when local bridge probe succeeds")
+	if !gotAvailable["vllm-remote"] {
+		t.Fatalf("remote vllm model available = false, want true with api_key")
+	}
+	if !gotConfigured["copilot-gpt-5.4"] {
+		t.Fatalf("copilot model configured = false, want true when local bridge is configured")
+	}
+	if !gotAvailable["copilot-gpt-5.4"] {
+		t.Fatalf("copilot model available = false, want true when local bridge probe succeeds")
 	}
 	if len(openAIProbes) != 1 || openAIProbes[0] != "http://127.0.0.1:8000/v1|custom-model|" {
 		t.Fatalf("openAI probes = %#v, want only local vllm probe", openAIProbes)
@@ -199,6 +216,64 @@ func TestHandleListModels_ConfiguredStatusForOAuthModelWithCredential(t *testing
 	}
 	if !resp.Models[0].Configured {
 		t.Fatalf("oauth model configured = false, want true with stored credential")
+	}
+	if !resp.Models[0].Available {
+		t.Fatalf("oauth model available = false, want true with stored credential")
+	}
+}
+
+func TestHandleListModels_ConfiguredStatusForImplicitOAuthCredential(t *testing.T) {
+	configPath, cleanup := setupOAuthTestEnv(t)
+	defer cleanup()
+	resetOAuthHooks(t)
+	resetModelProbeHooks(t)
+
+	cfg, err := config.LoadConfig(configPath)
+	if err != nil {
+		t.Fatalf("LoadConfig() error = %v", err)
+	}
+	cfg.ModelList = []*config.ModelConfig{{
+		ModelName: "openai-default-auth",
+		Model:     "openai/gpt-5.4",
+	}}
+	if err := config.SaveConfig(configPath, cfg); err != nil {
+		t.Fatalf("SaveConfig() error = %v", err)
+	}
+
+	if err := auth.SetCredential(oauthProviderOpenAI, &auth.AuthCredential{
+		AccessToken: "openai-token",
+		Provider:    oauthProviderOpenAI,
+		AuthMethod:  "oauth",
+	}); err != nil {
+		t.Fatalf("SetCredential() error = %v", err)
+	}
+
+	h := NewHandler(configPath)
+	mux := http.NewServeMux()
+	h.RegisterRoutes(mux)
+
+	rec := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/api/models", nil)
+	mux.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want %d, body=%s", rec.Code, http.StatusOK, rec.Body.String())
+	}
+
+	var resp struct {
+		Models []modelResponse `json:"models"`
+	}
+	if err := json.Unmarshal(rec.Body.Bytes(), &resp); err != nil {
+		t.Fatalf("Unmarshal() error = %v", err)
+	}
+	if len(resp.Models) != 1 {
+		t.Fatalf("len(models) = %d, want 1", len(resp.Models))
+	}
+	if !resp.Models[0].Configured {
+		t.Fatalf("implicit oauth model configured = false, want true with stored OpenAI credential")
+	}
+	if !resp.Models[0].Available {
+		t.Fatalf("implicit oauth model available = false, want true with stored OpenAI credential")
 	}
 }
 
@@ -264,6 +339,134 @@ func TestHandleListModels_ProbesLocalModelsConcurrently(t *testing.T) {
 	}
 }
 
+func TestHandleListModels_ReturnsChatEnabledDefaults(t *testing.T) {
+	configPath, cleanup := setupOAuthTestEnv(t)
+	defer cleanup()
+	resetOAuthHooks(t)
+	resetModelProbeHooks(t)
+
+	probeOllamaModelFunc = func(apiBase, modelID string) bool {
+		return apiBase == "http://localhost:11434/v1" && modelID == "llama3"
+	}
+
+	cfg, err := config.LoadConfig(configPath)
+	if err != nil {
+		t.Fatalf("LoadConfig() error = %v", err)
+	}
+	openAIEnabled := false
+	cfg.ModelList = []*config.ModelConfig{
+		{
+			ModelName:   "openai-selected",
+			Model:       "openai/gpt-4o",
+			ChatEnabled: &openAIEnabled,
+		},
+		{
+			ModelName: "ollama-defaulted",
+			Model:     "ollama/llama3",
+		},
+		{
+			ModelName: "anthropic-hidden",
+			Model:     "anthropic/claude-sonnet-4.6",
+		},
+	}
+	cfg.WithSecurity(&config.SecurityConfig{ModelList: map[string]config.ModelSecurityEntry{
+		"openai-selected": {
+			APIKeys: []string{"sk-test"},
+		},
+		"anthropic-hidden": {
+			APIKeys: []string{"sk-other"},
+		},
+	}})
+	if err := config.SaveConfig(configPath, cfg); err != nil {
+		t.Fatalf("SaveConfig() error = %v", err)
+	}
+
+	h := NewHandler(configPath)
+	mux := http.NewServeMux()
+	h.RegisterRoutes(mux)
+
+	rec := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/api/models", nil)
+	mux.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want %d, body=%s", rec.Code, http.StatusOK, rec.Body.String())
+	}
+
+	var resp struct {
+		Models []modelResponse `json:"models"`
+	}
+	if err := json.Unmarshal(rec.Body.Bytes(), &resp); err != nil {
+		t.Fatalf("Unmarshal() error = %v", err)
+	}
+
+	got := map[string]bool{}
+	for _, model := range resp.Models {
+		got[model.ModelName] = model.ChatEnabled
+	}
+
+	if got["openai-selected"] {
+		t.Fatalf("openai-selected chat_enabled = true, want false from persisted override")
+	}
+	if !got["ollama-defaulted"] {
+		t.Fatalf("ollama-defaulted chat_enabled = false, want true by default for configured ollama")
+	}
+	if got["anthropic-hidden"] {
+		t.Fatalf("anthropic-hidden chat_enabled = true, want false by default")
+	}
+}
+
+func TestHandleUpdateModel_PreservesChatEnabledWhenOmitted(t *testing.T) {
+	configPath, cleanup := setupOAuthTestEnv(t)
+	defer cleanup()
+	resetOAuthHooks(t)
+	resetModelProbeHooks(t)
+
+	enabled := true
+	cfg, err := config.LoadConfig(configPath)
+	if err != nil {
+		t.Fatalf("LoadConfig() error = %v", err)
+	}
+	cfg.ModelList = []*config.ModelConfig{
+		{
+			ModelName:   "custom-model",
+			Model:       "openai/gpt-4o",
+			APIBase:     "https://api.example.com/v1",
+			ChatEnabled: &enabled,
+		},
+	}
+	cfg.WithSecurity(&config.SecurityConfig{ModelList: map[string]config.ModelSecurityEntry{
+		"custom-model": {
+			APIKeys: []string{"sk-test"},
+		},
+	}})
+	if err := config.SaveConfig(configPath, cfg); err != nil {
+		t.Fatalf("SaveConfig() error = %v", err)
+	}
+
+	h := NewHandler(configPath)
+	mux := http.NewServeMux()
+	h.RegisterRoutes(mux)
+
+	body := bytes.NewBufferString(`{"model_name":"custom-model","model":"openai/gpt-4o","api_base":"https://api.changed.example/v1"}`)
+	rec := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodPut, "/api/models/0", body)
+	req.Header.Set("Content-Type", "application/json")
+	mux.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want %d, body=%s", rec.Code, http.StatusOK, rec.Body.String())
+	}
+
+	updated, err := config.LoadConfig(configPath)
+	if err != nil {
+		t.Fatalf("LoadConfig() error = %v", err)
+	}
+	if updated.ModelList[0].ChatEnabled == nil || !*updated.ModelList[0].ChatEnabled {
+		t.Fatalf("chat_enabled lost after update, want true")
+	}
+}
+
 func TestHandleListModels_NormalizesWildcardLocalAPIBaseForProbe(t *testing.T) {
 	configPath, cleanup := setupOAuthTestEnv(t)
 	defer cleanup()
@@ -311,7 +514,10 @@ func TestHandleListModels_NormalizesWildcardLocalAPIBaseForProbe(t *testing.T) {
 		t.Fatalf("len(models) = %d, want 1", len(resp.Models))
 	}
 	if !resp.Models[0].Configured {
-		t.Fatal("wildcard-bound local model configured = false, want true after probe host normalization")
+		t.Fatal("wildcard-bound local model configured = false, want true after host normalization")
+	}
+	if !resp.Models[0].Available {
+		t.Fatal("wildcard-bound local model available = false, want true after probe host normalization")
 	}
 	if gotProbe != "http://127.0.0.1:8000/v1|custom-model|" {
 		t.Fatalf("probe api base = %q, want %q", gotProbe, "http://127.0.0.1:8000/v1|custom-model|")
@@ -464,5 +670,333 @@ func TestMaskAPIKey(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestHandleSetAutoRouting_NormalizesUsableDefaultAndLightModel(t *testing.T) {
+	configPath, cleanup := setupOAuthTestEnv(t)
+	defer cleanup()
+	resetOAuthHooks(t)
+	resetModelProbeHooks(t)
+
+	enabled := true
+	cfg, err := config.LoadConfig(configPath)
+	if err != nil {
+		t.Fatalf("LoadConfig() error = %v", err)
+	}
+	cfg.ModelList = []*config.ModelConfig{
+		{
+			ModelName: "broken-gemini",
+			Model:     "gemini/gemini-2.5-pro",
+		},
+		{
+			ModelName:   "gpt-5.4",
+			Model:       "openai/gpt-5.4",
+			ChatEnabled: &enabled,
+		},
+		{
+			ModelName:   "gpt-5.4-mini",
+			Model:       "openai/gpt-5.4-mini",
+			ChatEnabled: &enabled,
+		},
+	}
+	cfg.WithSecurity(&config.SecurityConfig{ModelList: map[string]config.ModelSecurityEntry{
+		"gpt-5.4": {
+			APIKeys: []string{"sk-primary"},
+		},
+		"gpt-5.4-mini": {
+			APIKeys: []string{"sk-light"},
+		},
+	}})
+	cfg.Agents.Defaults.ModelName = "broken-gemini"
+	cfg.Agents.Defaults.Routing = &config.RoutingConfig{Enabled: false}
+	if err := config.SaveConfig(configPath, cfg); err != nil {
+		t.Fatalf("SaveConfig() error = %v", err)
+	}
+
+	h := NewHandler(configPath)
+	mux := http.NewServeMux()
+	h.RegisterRoutes(mux)
+
+	rec := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodPost, "/api/models/auto", strings.NewReader(`{"enabled":true}`))
+	req.Header.Set("Content-Type", "application/json")
+	mux.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want %d, body=%s", rec.Code, http.StatusOK, rec.Body.String())
+	}
+
+	updated, err := config.LoadConfig(configPath)
+	if err != nil {
+		t.Fatalf("LoadConfig() error = %v", err)
+	}
+	if updated.Agents.Defaults.ModelName != "gpt-5.4" {
+		t.Fatalf("default model = %q, want %q", updated.Agents.Defaults.ModelName, "gpt-5.4")
+	}
+	if updated.Agents.Defaults.Routing == nil || !updated.Agents.Defaults.Routing.Enabled {
+		t.Fatalf("routing = %#v, want enabled auto routing", updated.Agents.Defaults.Routing)
+	}
+	if got := updated.Agents.Defaults.Routing.LightModel; got != "gpt-5.4-mini" {
+		t.Fatalf("light model = %q, want %q", got, "gpt-5.4-mini")
+	}
+	if got := updated.Agents.Defaults.Routing.Threshold; got != defaultAutoRoutingThreshold {
+		t.Fatalf("threshold = %v, want %v", got, defaultAutoRoutingThreshold)
+	}
+}
+
+func TestHandleSetAutoRouting_PreservesOmittedLightModelAndThreshold(t *testing.T) {
+	configPath, cleanup := setupOAuthTestEnv(t)
+	defer cleanup()
+	resetOAuthHooks(t)
+	resetModelProbeHooks(t)
+
+	cfg, err := config.LoadConfig(configPath)
+	if err != nil {
+		t.Fatalf("LoadConfig() error = %v", err)
+	}
+	cfg.Agents.Defaults.Routing = &config.RoutingConfig{
+		Enabled:    true,
+		LightModel: "gpt-5.4-mini",
+		Threshold:  0.42,
+	}
+	if err := config.SaveConfig(configPath, cfg); err != nil {
+		t.Fatalf("SaveConfig() error = %v", err)
+	}
+
+	h := NewHandler(configPath)
+	mux := http.NewServeMux()
+	h.RegisterRoutes(mux)
+
+	rec := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodPost, "/api/models/auto", strings.NewReader(`{"enabled":false}`))
+	req.Header.Set("Content-Type", "application/json")
+	mux.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want %d, body=%s", rec.Code, http.StatusOK, rec.Body.String())
+	}
+
+	updated, err := config.LoadConfig(configPath)
+	if err != nil {
+		t.Fatalf("LoadConfig() error = %v", err)
+	}
+	if updated.Agents.Defaults.Routing == nil {
+		t.Fatal("routing = nil, want preserved config")
+	}
+	if updated.Agents.Defaults.Routing.Enabled {
+		t.Fatal("routing enabled = true, want false")
+	}
+	if updated.Agents.Defaults.Routing.LightModel != "gpt-5.4-mini" {
+		t.Fatalf("light model = %q, want preserved value", updated.Agents.Defaults.Routing.LightModel)
+	}
+	if updated.Agents.Defaults.Routing.Threshold != 0.42 {
+		t.Fatalf("threshold = %v, want preserved value", updated.Agents.Defaults.Routing.Threshold)
+	}
+}
+
+func TestHandleSetModelFallback_UpdatesFirstFallback(t *testing.T) {
+	configPath, cleanup := setupOAuthTestEnv(t)
+	defer cleanup()
+	resetOAuthHooks(t)
+	resetModelProbeHooks(t)
+
+	enabled := true
+	cfg, err := config.LoadConfig(configPath)
+	if err != nil {
+		t.Fatalf("LoadConfig() error = %v", err)
+	}
+	cfg.ModelList = []*config.ModelConfig{
+		{
+			ModelName:   "gpt-5.4",
+			Model:       "openai/gpt-5.4",
+			ChatEnabled: &enabled,
+		},
+		{
+			ModelName:   "gpt-5.4-mini",
+			Model:       "openai/gpt-5.4-mini",
+			ChatEnabled: &enabled,
+		},
+	}
+	cfg.WithSecurity(&config.SecurityConfig{ModelList: map[string]config.ModelSecurityEntry{
+		"gpt-5.4": {
+			APIKeys: []string{"sk-primary"},
+		},
+		"gpt-5.4-mini": {
+			APIKeys: []string{"sk-fallback"},
+		},
+	}})
+	if err := config.SaveConfig(configPath, cfg); err != nil {
+		t.Fatalf("SaveConfig() error = %v", err)
+	}
+
+	h := NewHandler(configPath)
+	mux := http.NewServeMux()
+	h.RegisterRoutes(mux)
+
+	rec := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodPost, "/api/models/fallback", strings.NewReader(`{"model_name":"gpt-5.4-mini"}`))
+	req.Header.Set("Content-Type", "application/json")
+	mux.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want %d, body=%s", rec.Code, http.StatusOK, rec.Body.String())
+	}
+
+	updated, err := config.LoadConfig(configPath)
+	if err != nil {
+		t.Fatalf("LoadConfig() error = %v", err)
+	}
+	if len(updated.Agents.Defaults.ModelFallbacks) != 1 || updated.Agents.Defaults.ModelFallbacks[0] != "gpt-5.4-mini" {
+		t.Fatalf("fallbacks = %#v, want [gpt-5.4-mini]", updated.Agents.Defaults.ModelFallbacks)
+	}
+}
+
+func TestHandleSetModelChatEnabled_ClearsDependentSelections(t *testing.T) {
+	configPath, cleanup := setupOAuthTestEnv(t)
+	defer cleanup()
+	resetOAuthHooks(t)
+	resetModelProbeHooks(t)
+
+	enabled := true
+	cfg, err := config.LoadConfig(configPath)
+	if err != nil {
+		t.Fatalf("LoadConfig() error = %v", err)
+	}
+	cfg.ModelList = []*config.ModelConfig{
+		{
+			ModelName:   "gpt-5.4",
+			Model:       "openai/gpt-5.4",
+			ChatEnabled: &enabled,
+		},
+		{
+			ModelName:   "gpt-5.4-mini",
+			Model:       "openai/gpt-5.4-mini",
+			ChatEnabled: &enabled,
+		},
+		{
+			ModelName:   "gpt-5.4-nano",
+			Model:       "openai/gpt-5.4-nano",
+			ChatEnabled: &enabled,
+		},
+	}
+	cfg.WithSecurity(&config.SecurityConfig{ModelList: map[string]config.ModelSecurityEntry{
+		"gpt-5.4":      {APIKeys: []string{"sk-primary"}},
+		"gpt-5.4-mini": {APIKeys: []string{"sk-light"}},
+		"gpt-5.4-nano": {APIKeys: []string{"sk-fallback"}},
+	}})
+	cfg.Agents.Defaults.ModelName = "gpt-5.4"
+	cfg.Agents.Defaults.Routing = &config.RoutingConfig{
+		Enabled:    true,
+		LightModel: "gpt-5.4-mini",
+		Threshold:  0.35,
+	}
+	cfg.Agents.Defaults.ModelFallbacks = []string{"gpt-5.4-mini", "gpt-5.4-nano"}
+	if err := config.SaveConfig(configPath, cfg); err != nil {
+		t.Fatalf("SaveConfig() error = %v", err)
+	}
+
+	h := NewHandler(configPath)
+	mux := http.NewServeMux()
+	h.RegisterRoutes(mux)
+
+	rec := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodPost, "/api/models/1/chat-enabled", strings.NewReader(`{"enabled":false}`))
+	req.Header.Set("Content-Type", "application/json")
+	mux.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want %d, body=%s", rec.Code, http.StatusOK, rec.Body.String())
+	}
+
+	updated, err := config.LoadConfig(configPath)
+	if err != nil {
+		t.Fatalf("LoadConfig() error = %v", err)
+	}
+	if updated.ModelList[1].ChatEnabled == nil || *updated.ModelList[1].ChatEnabled {
+		t.Fatalf("chat_enabled = %#v, want false", updated.ModelList[1].ChatEnabled)
+	}
+	if updated.Agents.Defaults.Routing == nil {
+		t.Fatal("routing = nil, want preserved routing")
+	}
+	if updated.Agents.Defaults.Routing.LightModel != "gpt-5.4-nano" {
+		t.Fatalf("light model = %q, want %q", updated.Agents.Defaults.Routing.LightModel, "gpt-5.4-nano")
+	}
+	if len(updated.Agents.Defaults.ModelFallbacks) != 1 || updated.Agents.Defaults.ModelFallbacks[0] != "gpt-5.4-nano" {
+		t.Fatalf("fallbacks = %#v, want [gpt-5.4-nano]", updated.Agents.Defaults.ModelFallbacks)
+	}
+}
+
+func TestHandleDeleteModel_ClearsDependentSelections(t *testing.T) {
+	configPath, cleanup := setupOAuthTestEnv(t)
+	defer cleanup()
+	resetOAuthHooks(t)
+	resetModelProbeHooks(t)
+
+	enabled := true
+	cfg, err := config.LoadConfig(configPath)
+	if err != nil {
+		t.Fatalf("LoadConfig() error = %v", err)
+	}
+	cfg.ModelList = []*config.ModelConfig{
+		{
+			ModelName:   "gpt-5.4",
+			Model:       "openai/gpt-5.4",
+			ChatEnabled: &enabled,
+		},
+		{
+			ModelName:   "gpt-5.4-mini",
+			Model:       "openai/gpt-5.4-mini",
+			ChatEnabled: &enabled,
+		},
+		{
+			ModelName:   "gpt-5.4-nano",
+			Model:       "openai/gpt-5.4-nano",
+			ChatEnabled: &enabled,
+		},
+	}
+	cfg.WithSecurity(&config.SecurityConfig{ModelList: map[string]config.ModelSecurityEntry{
+		"gpt-5.4":      {APIKeys: []string{"sk-primary"}},
+		"gpt-5.4-mini": {APIKeys: []string{"sk-light"}},
+		"gpt-5.4-nano": {APIKeys: []string{"sk-fallback"}},
+	}})
+	cfg.Agents.Defaults.ModelName = "gpt-5.4"
+	cfg.Agents.Defaults.Routing = &config.RoutingConfig{
+		Enabled:    true,
+		LightModel: "gpt-5.4-mini",
+		Threshold:  0.35,
+	}
+	cfg.Agents.Defaults.ModelFallbacks = []string{"gpt-5.4-mini", "gpt-5.4-nano"}
+	if err := config.SaveConfig(configPath, cfg); err != nil {
+		t.Fatalf("SaveConfig() error = %v", err)
+	}
+
+	h := NewHandler(configPath)
+	mux := http.NewServeMux()
+	h.RegisterRoutes(mux)
+
+	rec := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodDelete, "/api/models/1", nil)
+	mux.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want %d, body=%s", rec.Code, http.StatusOK, rec.Body.String())
+	}
+
+	updated, err := config.LoadConfig(configPath)
+	if err != nil {
+		t.Fatalf("LoadConfig() error = %v", err)
+	}
+	if len(updated.ModelList) != 2 {
+		t.Fatalf("len(model_list) = %d, want 2", len(updated.ModelList))
+	}
+	if updated.Agents.Defaults.Routing == nil {
+		t.Fatal("routing = nil, want preserved routing")
+	}
+	if updated.Agents.Defaults.Routing.LightModel != "gpt-5.4-nano" {
+		t.Fatalf("light model = %q, want %q", updated.Agents.Defaults.Routing.LightModel, "gpt-5.4-nano")
+	}
+	if len(updated.Agents.Defaults.ModelFallbacks) != 1 || updated.Agents.Defaults.ModelFallbacks[0] != "gpt-5.4-nano" {
+		t.Fatalf("fallbacks = %#v, want [gpt-5.4-nano]", updated.Agents.Defaults.ModelFallbacks)
 	}
 }

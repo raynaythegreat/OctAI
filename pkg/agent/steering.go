@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/raynaythegreat/ai-business-hq/pkg/logger"
 	"github.com/raynaythegreat/ai-business-hq/pkg/providers"
@@ -459,6 +460,25 @@ func (al *AgentLoop) HardAbort(sessionKey string) error {
 	// where rollback happens while children are still writing.
 	// Use isHardAbort=true for hard abort to immediately cancel all children.
 	ts.Finish(true)
+
+	// Wait for all child SubTurns to finish before rolling back history.
+	// This prevents the race where a child adds messages after rollback.
+	ts.mu.RLock()
+	children := append([]string(nil), ts.childTurnIDs...)
+	ts.mu.RUnlock()
+	for _, childID := range children {
+		if val, ok := al.activeTurnStates.Load(childID); ok {
+			childTS := val.(*turnState)
+			if ch := childTS.Finished(); ch != nil {
+				select {
+				case <-ch:
+				case <-time.After(5 * time.Second):
+					logger.WarnCF("agent", "timed out waiting for child SubTurn to finish during hard abort",
+						map[string]any{"child_id": childID, "session_key": sessionKey})
+				}
+			}
+		}
+	}
 
 	// Roll back session history to the state before the turn started.
 	if ts.session != nil {

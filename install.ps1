@@ -231,7 +231,7 @@ try {
     Write-Host "     " -NoNewline; Write-Host "octai auth login -p anthropic --browser-oauth" -ForegroundColor DarkGray -NoNewline; Write-Host "  # Anthropic OAuth"
     Write-Host ""
     Write-Host "  2. Start using OctAi:" -ForegroundColor Cyan
-    Write-Host "     " -NoNewline; Write-Host "octai web" -ForegroundColor DarkGray -NoNewline; Write-Host "                  # Web dashboard (http://localhost:18800)"
+    Write-Host "     " -NoNewline; Write-Host "octai serve" -ForegroundColor DarkGray -NoNewline; Write-Host "                # Web dashboard & gateway (http://localhost:18800)"
     Write-Host "     " -NoNewline; Write-Host "octai tui" -ForegroundColor DarkGray -NoNewline; Write-Host "                  # Terminal UI"
     Write-Host "     " -NoNewline; Write-Host "octai agent" -ForegroundColor DarkGray -NoNewline; Write-Host "                # AI chat session"
     Write-Host ""

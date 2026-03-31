@@ -8,6 +8,7 @@ package webconsole
 import (
 	"errors"
 	"fmt"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -100,6 +101,9 @@ func Run(opts Options) error {
 	if err = utils.EnsureOnboarded(absPath); err != nil {
 		logger.Errorf("Warning: Failed to initialize OctAi config automatically: %v", err)
 	}
+	if err = utils.ImportLegacyConfigIfNeeded(absPath); err != nil {
+		logger.Errorf("Warning: Failed to import legacy model config automatically: %v", err)
+	}
 
 	launcherPath := launcherconfig.PathForAppConfig(absPath)
 	launcherCfg, err := launcherconfig.Load(launcherPath, launcherconfig.Default())
@@ -135,6 +139,12 @@ func Run(opts Options) error {
 		addr = "127.0.0.1:" + effectivePort
 	}
 
+	ln, err := net.Listen("tcp", addr)
+	if err != nil {
+		return fmt.Errorf("port %s is already in use — is another OctAi instance running?\n  Tip: use a different port with --port <port>, or kill the existing process:\n  lsof -i :%s", effectivePort, effectivePort)
+	}
+	ln.Close()
+
 	// Initialize server components
 	mux := http.NewServeMux()
 
@@ -154,7 +164,13 @@ func Run(opts Options) error {
 
 	handler := middleware.Recoverer(
 		middleware.Logger(
-			middleware.JSONContentType(accessControlledMux),
+			middleware.CSRF(
+				middleware.SecurityHeaders(middleware.SecurityHeadersConfig{})(
+					middleware.RateLimit(60, 120)(
+						middleware.JSONContentType(accessControlledMux),
+					),
+				),
+			),
 		),
 	)
 
@@ -204,10 +220,17 @@ func Run(opts Options) error {
 		}
 
 		sigChan := make(chan os.Signal, 1)
-		signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
-		<-sigChan
-		logger.Info("Shutting down...")
-		return nil
+		signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM, syscall.SIGHUP)
+
+		for {
+			sig := <-sigChan
+			if sig == syscall.SIGHUP {
+				logger.Info("SIGHUP received, continuing to run")
+				continue
+			}
+			logger.Info("Shutting down...")
+			return nil
+		}
 	}
 
 	// GUI mode: start system tray

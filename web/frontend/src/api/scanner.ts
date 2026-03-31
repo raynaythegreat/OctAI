@@ -22,11 +22,11 @@ export interface IntegrateResultItem {
   error?: string
 }
 
-export async function analyzeURL(url: string): Promise<AnalyzeResult> {
+export async function analyzeURL(url: string, crawlDepth?: number, maxPages?: number, sameDomain?: boolean): Promise<AnalyzeResult> {
   const res = await fetch("/api/scanner/analyze", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ url }),
+    body: JSON.stringify({ url, crawlDepth, maxPages, sameDomain }),
   })
   if (!res.ok) {
     const text = await res.text()

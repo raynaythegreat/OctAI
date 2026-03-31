@@ -4,6 +4,7 @@
     "capabilities": "Capabilities",
     "chat": "Chat",
     "config": "Config",
+    "settings": "Settings",
     "credentials": "Credentials",
     "agent_group": "Agent",
     "history": "History",
@@ -121,6 +122,12 @@
       },
       "antigravity": {
         "description": "Uses browser OAuth for Google Cloud Code Assist."
+      },
+      "qwen": {
+        "description": "Uses device code login for Qwen Portal access."
+      },
+      "minimax": {
+        "description": "Uses device code login for MiniMax Platform access."
       }
     },
     "status": {
@@ -171,7 +178,7 @@
       "expired": "Authentication session expired"
     },
     "device": {
-      "title": "OpenAI Device Login",
+      "title": "Device Login",
       "description": "Open the verification page and enter the code below. This page will refresh automatically.",
       "code": "User Code",
       "url": "Verification URL",
@@ -186,6 +193,12 @@
       "configured": "Configured",
       "notConfigured": "Not configured",
       "keyPlaceholder": "Enter API key"
+    },
+    "local": {
+      "connected": "Connected",
+      "notRunning": "Not running",
+      "connectedDesc": "Local server detected — no API key required. Models auto-discovered.",
+      "notRunningDesc": "Local server not detected. Start the server and refresh to auto-discover models."
     },
     "updateModels": {
       "success": "Found {{count}} models from {{provider}}",
@@ -202,9 +215,9 @@
       "failure": "Verification failed: {{error}}"
     },
     "tabs": {
-      "text": "API Keys",
+      "text": "Chat",
       "image": "Image",
-      "video": "Video"
+      "video": "Voice"
     }
   },
   "models": {
@@ -308,14 +321,9 @@
       "analyzeFailed": "Failed to analyze URL",
       "integrateFailed": "Failed to integrate selected items"
     },
-    "types": {
-      "mcp_server": "MCP Server",
-      "skill": "Skill",
-      "tool": "Tool",
-      "plugin": "Plugin",
-      "connection": "Connection",
-      "other": "Other"
-    }
+    "crawlDepth": "Crawl Depth",
+    "maxPages": "Max Pages",
+    "sameDomain": "Same Domain Only"
   },
   "channels": {
     "loadError": "Failed to load channels",

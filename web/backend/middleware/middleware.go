@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"runtime/debug"
+	"strings"
 	"time"
 
 	"github.com/raynaythegreat/ai-business-hq/pkg/logger"
@@ -50,7 +51,9 @@ func Logger(next http.Handler) http.Handler {
 		start := time.Now()
 		rec := &responseRecorder{ResponseWriter: w, statusCode: http.StatusOK}
 		next.ServeHTTP(rec, r)
-		logger.DebugC("http", fmt.Sprintf("%s %s %d %s", r.Method, r.URL.Path, rec.statusCode, time.Since(start)))
+		sanitizedPath := strings.ReplaceAll(r.URL.Path, "\n", "")
+		sanitizedPath = strings.ReplaceAll(sanitizedPath, "\r", "")
+		logger.DebugC("http", fmt.Sprintf("%s %s %d %s", r.Method, sanitizedPath, rec.statusCode, time.Since(start)))
 	})
 }
 

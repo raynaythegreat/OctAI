@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"html"
 	"io"
 	"net/http"
 	"os"
@@ -306,7 +307,7 @@ func (h *Handler) handleOIDCLogin(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) handleOIDCCallback(w http.ResponseWriter, r *http.Request) {
 	code := strings.TrimSpace(r.URL.Query().Get("code"))
-	state := strings.TrimSpace(r.URL.Query().Get("code"))
+	state := strings.TrimSpace(r.URL.Query().Get("state"))
 
 	if code == "" {
 		renderSSOCallbackPage(w, "", ssoFlowError, "Missing authorization code", "missing_code")
@@ -455,8 +456,8 @@ func renderSSOCallbackPage(w http.ResponseWriter, flowID, status, title, errMsg 
 		w,
 		`<!doctype html><html><head><meta charset="utf-8"><title>OctAi SSO</title></head><body><script>(function(){var payload=%s;var hasOpener=false;try{if(window.opener&&!window.opener.closed){window.opener.postMessage(payload,window.location.origin);hasOpener=true}}catch(e){}var target='/sso/callback?flow_id='+encodeURIComponent(payload.flowId||'')+'&status='+encodeURIComponent(payload.status||'');setTimeout(function(){if(hasOpener){window.close();return}window.location.replace(target)},800)})();</script><div style="font-family:Inter,system-ui,sans-serif;padding:24px"><h2>%s</h2><p>%s</p><p>You can close this window.</p></div></body></html>`,
 		string(payloadJSON),
-		title,
-		message,
+		html.EscapeString(title),
+		html.EscapeString(message),
 	)
 }
 

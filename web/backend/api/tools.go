@@ -176,7 +176,7 @@ func (h *Handler) handleUpdateToolState(w http.ResponseWriter, r *http.Request) 
 	}
 
 	var req toolStateRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err := decodeJSON(r, &req); err != nil {
 		http.Error(w, fmt.Sprintf("Invalid JSON: %v", err), http.StatusBadRequest)
 		return
 	}

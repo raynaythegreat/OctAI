@@ -14,7 +14,9 @@ interface ProviderSectionProps {
   onSetDefault: (model: ModelInfo) => void
   onDelete: (model: ModelInfo) => void
   onRotateKey: (model: ModelInfo) => void
+  onToggleChat: (model: ModelInfo, enabled: boolean) => void
   settingDefaultIndex: number | null
+  togglingChatIndex: number | null
 }
 
 export function ProviderSection({
@@ -25,7 +27,9 @@ export function ProviderSection({
   onSetDefault,
   onDelete,
   onRotateKey,
+  onToggleChat,
   settingDefaultIndex,
+  togglingChatIndex,
 }: ProviderSectionProps) {
   const [open, setOpen] = useState(true)
 
@@ -65,7 +69,9 @@ export function ProviderSection({
               onSetDefault={onSetDefault}
               onDelete={onDelete}
               onRotateKey={onRotateKey}
+              onToggleChat={onToggleChat}
               settingDefault={settingDefaultIndex === model.index}
+              togglingChat={togglingChatIndex === model.index}
             />
           ))}
         </div>

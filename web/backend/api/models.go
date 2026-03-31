@@ -18,6 +18,9 @@ func (h *Handler) registerModelRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /api/models", h.handleListModels)
 	mux.HandleFunc("POST /api/models", h.handleAddModel)
 	mux.HandleFunc("POST /api/models/default", h.handleSetDefaultModel)
+	mux.HandleFunc("GET /api/models/fallback", h.handleGetModelFallback)
+	mux.HandleFunc("POST /api/models/fallback", h.handleSetModelFallback)
+	mux.HandleFunc("POST /api/models/{index}/chat-enabled", h.handleSetModelChatEnabled)
 	mux.HandleFunc("POST /api/models/{index}/test", h.handleTestModelKey)
 	mux.HandleFunc("POST /api/models/{index}/rotate-key", h.handleRotateModelKey)
 	mux.HandleFunc("PUT /api/models/{index}", h.handleUpdateModel)
@@ -45,9 +48,226 @@ type modelResponse struct {
 	ThinkingLevel  string         `json:"thinking_level,omitempty"`
 	ExtraBody      map[string]any `json:"extra_body,omitempty"`
 	// Meta
-	Configured bool `json:"configured"`
-	IsDefault  bool `json:"is_default"`
-	IsVirtual  bool `json:"is_virtual"`
+	Configured  bool `json:"configured"`
+	Available   bool `json:"available"`
+	ChatEnabled bool `json:"chat_enabled"`
+	IsDefault   bool `json:"is_default"`
+	IsVirtual   bool `json:"is_virtual"`
+}
+
+const defaultAutoRoutingThreshold = 0.35
+
+func defaultChatEnabled(m *config.ModelConfig, configured bool, mediaType string) bool {
+	if m.ChatEnabled != nil {
+		return *m.ChatEnabled
+	}
+	if mediaType != "text" || !configured {
+		return false
+	}
+	switch modelProtocol(m.Model) {
+	case "openai", "ollama":
+		return true
+	default:
+		return false
+	}
+}
+
+func setChatEnabledFlag(m *config.ModelConfig, enabled bool) {
+	if m == nil {
+		return
+	}
+	value := enabled
+	m.ChatEnabled = &value
+}
+
+func removeModelName(values []string, target string) []string {
+	target = strings.TrimSpace(target)
+	if target == "" || len(values) == 0 {
+		return values
+	}
+	filtered := make([]string, 0, len(values))
+	for _, value := range values {
+		if strings.TrimSpace(value) == target {
+			continue
+		}
+		filtered = append(filtered, value)
+	}
+	if len(filtered) == 0 {
+		return nil
+	}
+	return filtered
+}
+
+func clearModelReferences(cfg *config.Config, modelName string) bool {
+	modelName = strings.TrimSpace(modelName)
+	if cfg == nil || modelName == "" {
+		return false
+	}
+
+	changed := false
+	if strings.TrimSpace(cfg.Agents.Defaults.ModelName) == modelName {
+		cfg.Agents.Defaults.ModelName = ""
+		changed = true
+	}
+	if cfg.Agents.Defaults.Routing != nil && strings.TrimSpace(cfg.Agents.Defaults.Routing.LightModel) == modelName {
+		cfg.Agents.Defaults.Routing.LightModel = ""
+		changed = true
+	}
+	filtered := removeModelName(cfg.Agents.Defaults.ModelFallbacks, modelName)
+	if len(filtered) != len(cfg.Agents.Defaults.ModelFallbacks) {
+		cfg.Agents.Defaults.ModelFallbacks = filtered
+		changed = true
+	}
+
+	return changed
+}
+
+func selectableChatModelByName(cfg *config.Config, modelName string) *config.ModelConfig {
+	modelName = strings.TrimSpace(modelName)
+	if cfg == nil || modelName == "" {
+		return nil
+	}
+	for _, m := range cfg.ModelList {
+		if m == nil || m.IsVirtual() || m.ModelName != modelName {
+			continue
+		}
+		if !defaultChatEnabled(m, hasModelConfiguration(m), "text") {
+			continue
+		}
+		if !isModelConfigured(m) {
+			continue
+		}
+		return m
+	}
+	return nil
+}
+
+func isUsableAutoRoutingModel(m *config.ModelConfig) bool {
+	if m == nil || m.IsVirtual() {
+		return false
+	}
+	if !defaultChatEnabled(m, hasModelConfiguration(m), "text") {
+		return false
+	}
+	return isModelConfigured(m)
+}
+
+func autoRoutingCandidates(cfg *config.Config) []*config.ModelConfig {
+	if cfg == nil {
+		return nil
+	}
+	candidates := make([]*config.ModelConfig, 0, len(cfg.ModelList))
+	for _, m := range cfg.ModelList {
+		if isUsableAutoRoutingModel(m) {
+			candidates = append(candidates, m)
+		}
+	}
+	return candidates
+}
+
+func autoRoutingCandidateByName(cfg *config.Config, modelName string) *config.ModelConfig {
+	modelName = strings.TrimSpace(modelName)
+	if cfg == nil || modelName == "" {
+		return nil
+	}
+	for _, m := range cfg.ModelList {
+		if m != nil && m.ModelName == modelName && isUsableAutoRoutingModel(m) {
+			return m
+		}
+	}
+	return nil
+}
+
+func scoreAutoLightCandidate(modelName string) int {
+	name := strings.ToLower(strings.TrimSpace(modelName))
+	score := 0
+	switch {
+	case strings.Contains(name, "nano"):
+		score += 50
+	case strings.Contains(name, "mini"):
+		score += 45
+	case strings.Contains(name, "flash-lite"):
+		score += 42
+	case strings.Contains(name, "flash"):
+		score += 40
+	case strings.Contains(name, "small"):
+		score += 35
+	case strings.Contains(name, "haiku"):
+		score += 30
+	case strings.Contains(name, "fast"):
+		score += 25
+	}
+	switch {
+	case strings.HasPrefix(name, "gpt-5.4-nano"):
+		score += 25
+	case strings.HasPrefix(name, "gpt-5.4-mini"):
+		score += 20
+	case strings.HasPrefix(name, "gpt-5"):
+		score += 10
+	}
+	return score
+}
+
+func selectAutoLightModel(cfg *config.Config, primary string) string {
+	candidates := autoRoutingCandidates(cfg)
+	bestName := strings.TrimSpace(primary)
+	bestScore := -1
+	for _, candidate := range candidates {
+		if candidate == nil {
+			continue
+		}
+		if candidate.ModelName == primary {
+			continue
+		}
+		score := scoreAutoLightCandidate(candidate.ModelName)
+		if score > bestScore {
+			bestScore = score
+			bestName = candidate.ModelName
+		}
+	}
+	if bestName != "" {
+		return bestName
+	}
+	if len(candidates) == 0 {
+		return ""
+	}
+	return candidates[0].ModelName
+}
+
+func normalizeAutoRoutingConfig(cfg *config.Config) bool {
+	if cfg == nil {
+		return false
+	}
+	changed := false
+	candidates := autoRoutingCandidates(cfg)
+	if len(candidates) == 0 {
+		return false
+	}
+
+	currentDefault := strings.TrimSpace(cfg.Agents.Defaults.GetModelName())
+	if autoRoutingCandidateByName(cfg, currentDefault) == nil {
+		cfg.Agents.Defaults.ModelName = candidates[0].ModelName
+		currentDefault = cfg.Agents.Defaults.ModelName
+		changed = true
+	}
+
+	if cfg.Agents.Defaults.Routing == nil {
+		cfg.Agents.Defaults.Routing = &config.RoutingConfig{}
+		changed = true
+	}
+	if cfg.Agents.Defaults.Routing.Enabled {
+		if cfg.Agents.Defaults.Routing.Threshold <= 0 {
+			cfg.Agents.Defaults.Routing.Threshold = defaultAutoRoutingThreshold
+			changed = true
+		}
+		lightModel := strings.TrimSpace(cfg.Agents.Defaults.Routing.LightModel)
+		if autoRoutingCandidateByName(cfg, lightModel) == nil || lightModel == currentDefault {
+			cfg.Agents.Defaults.Routing.LightModel = selectAutoLightModel(cfg, currentDefault)
+			changed = true
+		}
+	}
+
+	return changed
 }
 
 // handleListModels returns all model_list entries with masked API keys.
@@ -62,13 +282,15 @@ func (h *Handler) handleListModels(w http.ResponseWriter, r *http.Request) {
 
 	defaultModel := cfg.Agents.Defaults.GetModelName()
 	configured := make([]bool, len(cfg.ModelList))
+	available := make([]bool, len(cfg.ModelList))
 
 	var wg sync.WaitGroup
 	wg.Add(len(cfg.ModelList))
 	for i, m := range cfg.ModelList {
 		go func(i int, m *config.ModelConfig) {
 			defer wg.Done()
-			configured[i] = isModelConfigured(m)
+			configured[i] = hasModelConfiguration(m)
+			available[i] = isModelConfigured(m)
 		}(i, m)
 	}
 	wg.Wait()
@@ -95,6 +317,8 @@ func (h *Handler) handleListModels(w http.ResponseWriter, r *http.Request) {
 			ThinkingLevel:  m.ThinkingLevel,
 			ExtraBody:      m.ExtraBody,
 			Configured:     configured[i],
+			Available:      available[i],
+			ChatEnabled:    defaultChatEnabled(m, configured[i], "text"),
 			IsDefault:      m.ModelName == defaultModel,
 			IsVirtual:      m.IsVirtual(),
 		})
@@ -150,6 +374,10 @@ func (h *Handler) handleAddModel(w http.ResponseWriter, r *http.Request) {
 	if err := config.SaveConfig(h.configPath, cfg); err != nil {
 		http.Error(w, fmt.Sprintf("Failed to save config: %v", err), http.StatusInternalServerError)
 		return
+	}
+
+	if mc.APIKey != "" {
+		triggerMCPLinker(mc.ModelConfig.Model, mc.APIKey)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -213,6 +441,9 @@ func (h *Handler) handleUpdateModel(w http.ResponseWriter, r *http.Request) {
 	} else {
 		mc.ModelConfig.SetAPIKey(mc.APIKey)
 	}
+	if mc.ChatEnabled == nil {
+		mc.ChatEnabled = cfg.ModelList[idx].ChatEnabled
+	}
 	// Preserve existing ExtraBody when omitted (nil), but clear it when
 	// the frontend sends an empty object {} to indicate the field should
 	// be removed.
@@ -231,8 +462,71 @@ func (h *Handler) handleUpdateModel(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if mc.APIKey != "" {
+		triggerMCPLinker(mc.ModelConfig.Model, mc.APIKey)
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
+}
+
+// handleSetModelChatEnabled updates whether a text model should appear in chat menus.
+//
+//	POST /api/models/{index}/chat-enabled
+func (h *Handler) handleSetModelChatEnabled(w http.ResponseWriter, r *http.Request) {
+	idx, err := strconv.Atoi(r.PathValue("index"))
+	if err != nil {
+		http.Error(w, "Invalid index", http.StatusBadRequest)
+		return
+	}
+
+	body, err := io.ReadAll(io.LimitReader(r.Body, 1<<20))
+	if err != nil {
+		http.Error(w, "Failed to read request body", http.StatusBadRequest)
+		return
+	}
+	defer r.Body.Close()
+
+	var req struct {
+		Enabled bool `json:"enabled"`
+	}
+	if err = json.Unmarshal(body, &req); err != nil {
+		http.Error(w, fmt.Sprintf("Invalid JSON: %v", err), http.StatusBadRequest)
+		return
+	}
+
+	cfg, err := config.LoadConfig(h.configPath)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to load config: %v", err), http.StatusInternalServerError)
+		return
+	}
+	if idx < 0 || idx >= len(cfg.ModelList) {
+		http.Error(w, fmt.Sprintf("Index %d out of range (0-%d)", idx, len(cfg.ModelList)-1), http.StatusNotFound)
+		return
+	}
+	if cfg.ModelList[idx].IsVirtual() {
+		http.Error(w, "Virtual models cannot be shown in chat", http.StatusBadRequest)
+		return
+	}
+
+	setChatEnabledFlag(cfg.ModelList[idx], req.Enabled)
+	if !req.Enabled {
+		clearModelReferences(cfg, cfg.ModelList[idx].ModelName)
+		if cfg.Agents.Defaults.Routing != nil && cfg.Agents.Defaults.Routing.Enabled {
+			normalizeAutoRoutingConfig(cfg)
+		}
+	}
+
+	if err := config.SaveConfig(h.configPath, cfg); err != nil {
+		http.Error(w, fmt.Sprintf("Failed to save config: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]any{
+		"status":       "ok",
+		"chat_enabled": req.Enabled,
+	})
 }
 
 // handleDeleteModel removes a model configuration entry at the given index.
@@ -259,10 +553,9 @@ func (h *Handler) handleDeleteModel(w http.ResponseWriter, r *http.Request) {
 	deletedModelName := cfg.ModelList[idx].ModelName
 
 	cfg.ModelList = append(cfg.ModelList[:idx], cfg.ModelList[idx+1:]...)
-
-	// If the deleted model was the default, clear it.
-	if cfg.Agents.Defaults.ModelName == deletedModelName {
-		cfg.Agents.Defaults.ModelName = ""
+	clearModelReferences(cfg, deletedModelName)
+	if cfg.Agents.Defaults.Routing != nil && cfg.Agents.Defaults.Routing.Enabled {
+		normalizeAutoRoutingConfig(cfg)
 	}
 
 	if err := config.SaveConfig(h.configPath, cfg); err != nil {
@@ -324,6 +617,9 @@ func (h *Handler) handleSetDefaultModel(w http.ResponseWriter, r *http.Request) 
 	}
 
 	cfg.Agents.Defaults.ModelName = req.ModelName
+	if cfg.Agents.Defaults.Routing != nil && cfg.Agents.Defaults.Routing.Enabled {
+		normalizeAutoRoutingConfig(cfg)
+	}
 
 	if err := config.SaveConfig(h.configPath, cfg); err != nil {
 		http.Error(w, fmt.Sprintf("Failed to save config: %v", err), http.StatusInternalServerError)
@@ -334,6 +630,76 @@ func (h *Handler) handleSetDefaultModel(w http.ResponseWriter, r *http.Request) 
 	json.NewEncoder(w).Encode(map[string]string{
 		"status":        "ok",
 		"default_model": req.ModelName,
+	})
+}
+
+// handleGetModelFallback returns the first configured text fallback model.
+//
+//	GET /api/models/fallback
+func (h *Handler) handleGetModelFallback(w http.ResponseWriter, r *http.Request) {
+	cfg, err := config.LoadConfig(h.configPath)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to load config: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	fallback := ""
+	if len(cfg.Agents.Defaults.ModelFallbacks) > 0 {
+		fallback = strings.TrimSpace(cfg.Agents.Defaults.ModelFallbacks[0])
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{
+		"fallback_model": fallback,
+	})
+}
+
+// handleSetModelFallback updates the first text fallback model.
+//
+//	POST /api/models/fallback
+func (h *Handler) handleSetModelFallback(w http.ResponseWriter, r *http.Request) {
+	body, err := io.ReadAll(io.LimitReader(r.Body, 1<<20))
+	if err != nil {
+		http.Error(w, "Failed to read request body", http.StatusBadRequest)
+		return
+	}
+	defer r.Body.Close()
+
+	var req struct {
+		ModelName string `json:"model_name"`
+	}
+	if err = json.Unmarshal(body, &req); err != nil {
+		http.Error(w, fmt.Sprintf("Invalid JSON: %v", err), http.StatusBadRequest)
+		return
+	}
+
+	cfg, err := config.LoadConfig(h.configPath)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to load config: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	modelName := strings.TrimSpace(req.ModelName)
+	if modelName != "" && selectableChatModelByName(cfg, modelName) == nil {
+		http.Error(w, fmt.Sprintf("Model %q is not available for chat fallback", modelName), http.StatusBadRequest)
+		return
+	}
+
+	if modelName == "" {
+		cfg.Agents.Defaults.ModelFallbacks = nil
+	} else {
+		cfg.Agents.Defaults.ModelFallbacks = []string{modelName}
+	}
+
+	if err := config.SaveConfig(h.configPath, cfg); err != nil {
+		http.Error(w, fmt.Sprintf("Failed to save config: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{
+		"status":         "ok",
+		"fallback_model": modelName,
 	})
 }
 
@@ -508,6 +874,14 @@ func (h *Handler) handleGetAutoRouting(w http.ResponseWriter, r *http.Request) {
 	var enabled bool
 	var lightModel string
 	var threshold float64
+	if routing != nil && routing.Enabled {
+		if normalizeAutoRoutingConfig(cfg) {
+			if saveErr := config.SaveConfig(h.configPath, cfg); saveErr != nil {
+				logger.ErrorC("models", fmt.Sprintf("failed to normalize auto routing config: %v", saveErr))
+			}
+		}
+		routing = cfg.Agents.Defaults.Routing
+	}
 	if routing != nil {
 		enabled = routing.Enabled
 		lightModel = routing.LightModel
@@ -534,9 +908,9 @@ func (h *Handler) handleSetAutoRouting(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	var req struct {
-		Enabled    bool    `json:"enabled"`
-		LightModel string  `json:"light_model"`
-		Threshold  float64 `json:"threshold"`
+		Enabled    *bool    `json:"enabled"`
+		LightModel *string  `json:"light_model"`
+		Threshold  *float64 `json:"threshold"`
 	}
 	if err = json.Unmarshal(body, &req); err != nil {
 		http.Error(w, fmt.Sprintf("Invalid JSON: %v", err), http.StatusBadRequest)
@@ -552,9 +926,18 @@ func (h *Handler) handleSetAutoRouting(w http.ResponseWriter, r *http.Request) {
 	if cfg.Agents.Defaults.Routing == nil {
 		cfg.Agents.Defaults.Routing = &config.RoutingConfig{}
 	}
-	cfg.Agents.Defaults.Routing.Enabled = req.Enabled
-	cfg.Agents.Defaults.Routing.LightModel = req.LightModel
-	cfg.Agents.Defaults.Routing.Threshold = req.Threshold
+	if req.Enabled != nil {
+		cfg.Agents.Defaults.Routing.Enabled = *req.Enabled
+	}
+	if req.LightModel != nil {
+		cfg.Agents.Defaults.Routing.LightModel = strings.TrimSpace(*req.LightModel)
+	}
+	if req.Threshold != nil {
+		cfg.Agents.Defaults.Routing.Threshold = *req.Threshold
+	}
+	if cfg.Agents.Defaults.Routing.Enabled {
+		normalizeAutoRoutingConfig(cfg)
+	}
 
 	if err := config.SaveConfig(h.configPath, cfg); err != nil {
 		http.Error(w, fmt.Sprintf("Failed to save config: %v", err), http.StatusInternalServerError)
@@ -575,6 +958,7 @@ func (h *Handler) registerImageModelRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /api/image-models", h.handleListImageModels)
 	mux.HandleFunc("POST /api/image-models", h.handleAddImageModel)
 	mux.HandleFunc("POST /api/image-models/default", h.handleSetDefaultImageModel)
+	mux.HandleFunc("POST /api/image-models/{index}/chat-enabled", h.handleSetImageModelChatEnabled)
 	mux.HandleFunc("POST /api/image-models/{index}/test", h.handleTestImageModelKey)
 	mux.HandleFunc("POST /api/image-models/{index}/rotate-key", h.handleRotateImageModelKey)
 	mux.HandleFunc("PUT /api/image-models/{index}", h.handleUpdateImageModel)
@@ -592,13 +976,15 @@ func (h *Handler) handleListImageModels(w http.ResponseWriter, r *http.Request) 
 	}
 
 	configured := make([]bool, len(cfg.ImageModelList))
+	available := make([]bool, len(cfg.ImageModelList))
 
 	var wg sync.WaitGroup
 	wg.Add(len(cfg.ImageModelList))
 	for i, m := range cfg.ImageModelList {
 		go func(i int, m *config.ModelConfig) {
 			defer wg.Done()
-			configured[i] = isModelConfigured(m)
+			configured[i] = hasModelConfiguration(m)
+			available[i] = isModelConfigured(m)
 		}(i, m)
 	}
 	wg.Wait()
@@ -625,6 +1011,8 @@ func (h *Handler) handleListImageModels(w http.ResponseWriter, r *http.Request) 
 			ThinkingLevel:  m.ThinkingLevel,
 			ExtraBody:      m.ExtraBody,
 			Configured:     configured[i],
+			Available:      available[i],
+			ChatEnabled:    defaultChatEnabled(m, configured[i], "image"),
 			IsDefault:      false,
 			IsVirtual:      m.IsVirtual(),
 		})
@@ -788,6 +1176,9 @@ func (h *Handler) handleUpdateImageModel(w http.ResponseWriter, r *http.Request)
 	} else {
 		mc.ModelConfig.SetAPIKey(mc.APIKey)
 	}
+	if mc.ChatEnabled == nil {
+		mc.ChatEnabled = cfg.ImageModelList[idx].ChatEnabled
+	}
 	if mc.ExtraBody == nil {
 		mc.ExtraBody = cfg.ImageModelList[idx].ExtraBody
 	} else if len(mc.ExtraBody) == 0 {
@@ -803,6 +1194,59 @@ func (h *Handler) handleUpdateImageModel(w http.ResponseWriter, r *http.Request)
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
+}
+
+// handleSetImageModelChatEnabled updates whether an image model should appear in chat media menus.
+//
+//	POST /api/image-models/{index}/chat-enabled
+func (h *Handler) handleSetImageModelChatEnabled(w http.ResponseWriter, r *http.Request) {
+	idx, err := strconv.Atoi(r.PathValue("index"))
+	if err != nil {
+		http.Error(w, "Invalid index", http.StatusBadRequest)
+		return
+	}
+
+	body, err := io.ReadAll(io.LimitReader(r.Body, 1<<20))
+	if err != nil {
+		http.Error(w, "Failed to read request body", http.StatusBadRequest)
+		return
+	}
+	defer r.Body.Close()
+
+	var req struct {
+		Enabled bool `json:"enabled"`
+	}
+	if err = json.Unmarshal(body, &req); err != nil {
+		http.Error(w, fmt.Sprintf("Invalid JSON: %v", err), http.StatusBadRequest)
+		return
+	}
+
+	cfg, err := config.LoadConfig(h.configPath)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to load config: %v", err), http.StatusInternalServerError)
+		return
+	}
+	if idx < 0 || idx >= len(cfg.ImageModelList) {
+		http.Error(w, fmt.Sprintf("Index %d out of range (0-%d)", idx, len(cfg.ImageModelList)-1), http.StatusNotFound)
+		return
+	}
+	if cfg.ImageModelList[idx].IsVirtual() {
+		http.Error(w, "Virtual models cannot be shown in chat", http.StatusBadRequest)
+		return
+	}
+
+	setChatEnabledFlag(cfg.ImageModelList[idx], req.Enabled)
+
+	if err := config.SaveConfig(h.configPath, cfg); err != nil {
+		http.Error(w, fmt.Sprintf("Failed to save config: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]any{
+		"status":       "ok",
+		"chat_enabled": req.Enabled,
+	})
 }
 
 // handleDeleteImageModel removes an image model configuration entry at the given index.
@@ -928,6 +1372,7 @@ func (h *Handler) registerVideoModelRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /api/video-models", h.handleListVideoModels)
 	mux.HandleFunc("POST /api/video-models", h.handleAddVideoModel)
 	mux.HandleFunc("POST /api/video-models/default", h.handleSetDefaultVideoModel)
+	mux.HandleFunc("POST /api/video-models/{index}/chat-enabled", h.handleSetVideoModelChatEnabled)
 	mux.HandleFunc("POST /api/video-models/{index}/test", h.handleTestVideoModelKey)
 	mux.HandleFunc("POST /api/video-models/{index}/rotate-key", h.handleRotateVideoModelKey)
 	mux.HandleFunc("PUT /api/video-models/{index}", h.handleUpdateVideoModel)
@@ -945,13 +1390,15 @@ func (h *Handler) handleListVideoModels(w http.ResponseWriter, r *http.Request) 
 	}
 
 	configured := make([]bool, len(cfg.VideoModelList))
+	available := make([]bool, len(cfg.VideoModelList))
 
 	var wg sync.WaitGroup
 	wg.Add(len(cfg.VideoModelList))
 	for i, m := range cfg.VideoModelList {
 		go func(i int, m *config.ModelConfig) {
 			defer wg.Done()
-			configured[i] = isModelConfigured(m)
+			configured[i] = hasModelConfiguration(m)
+			available[i] = isModelConfigured(m)
 		}(i, m)
 	}
 	wg.Wait()
@@ -978,6 +1425,8 @@ func (h *Handler) handleListVideoModels(w http.ResponseWriter, r *http.Request) 
 			ThinkingLevel:  m.ThinkingLevel,
 			ExtraBody:      m.ExtraBody,
 			Configured:     configured[i],
+			Available:      available[i],
+			ChatEnabled:    defaultChatEnabled(m, configured[i], "video"),
 			IsDefault:      false,
 			IsVirtual:      m.IsVirtual(),
 		})
@@ -1141,6 +1590,9 @@ func (h *Handler) handleUpdateVideoModel(w http.ResponseWriter, r *http.Request)
 	} else {
 		mc.ModelConfig.SetAPIKey(mc.APIKey)
 	}
+	if mc.ChatEnabled == nil {
+		mc.ChatEnabled = cfg.VideoModelList[idx].ChatEnabled
+	}
 	if mc.ExtraBody == nil {
 		mc.ExtraBody = cfg.VideoModelList[idx].ExtraBody
 	} else if len(mc.ExtraBody) == 0 {
@@ -1156,6 +1608,59 @@ func (h *Handler) handleUpdateVideoModel(w http.ResponseWriter, r *http.Request)
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
+}
+
+// handleSetVideoModelChatEnabled updates whether a video model should appear in chat media menus.
+//
+//	POST /api/video-models/{index}/chat-enabled
+func (h *Handler) handleSetVideoModelChatEnabled(w http.ResponseWriter, r *http.Request) {
+	idx, err := strconv.Atoi(r.PathValue("index"))
+	if err != nil {
+		http.Error(w, "Invalid index", http.StatusBadRequest)
+		return
+	}
+
+	body, err := io.ReadAll(io.LimitReader(r.Body, 1<<20))
+	if err != nil {
+		http.Error(w, "Failed to read request body", http.StatusBadRequest)
+		return
+	}
+	defer r.Body.Close()
+
+	var req struct {
+		Enabled bool `json:"enabled"`
+	}
+	if err = json.Unmarshal(body, &req); err != nil {
+		http.Error(w, fmt.Sprintf("Invalid JSON: %v", err), http.StatusBadRequest)
+		return
+	}
+
+	cfg, err := config.LoadConfig(h.configPath)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to load config: %v", err), http.StatusInternalServerError)
+		return
+	}
+	if idx < 0 || idx >= len(cfg.VideoModelList) {
+		http.Error(w, fmt.Sprintf("Index %d out of range (0-%d)", idx, len(cfg.VideoModelList)-1), http.StatusNotFound)
+		return
+	}
+	if cfg.VideoModelList[idx].IsVirtual() {
+		http.Error(w, "Virtual models cannot be shown in chat", http.StatusBadRequest)
+		return
+	}
+
+	setChatEnabledFlag(cfg.VideoModelList[idx], req.Enabled)
+
+	if err := config.SaveConfig(h.configPath, cfg); err != nil {
+		http.Error(w, fmt.Sprintf("Failed to save config: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]any{
+		"status":       "ok",
+		"chat_enabled": req.Enabled,
+	})
 }
 
 // handleDeleteVideoModel removes a video model configuration entry at the given index.

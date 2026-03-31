@@ -395,7 +395,7 @@ install_from_source() {
     (cd "$src_dir/web/frontend" && pnpm install --frozen-lockfile 2>/dev/null || pnpm install && pnpm run build:backend)
     (cd "$src_dir" && go build -mod=mod -tags "$go_tags" -ldflags "-s -w" -o "${TMPDIR}/${LAUNCHER_NAME}" ./web/backend)
   else
-    warn "Node.js/pnpm not found — skipping launcher build. Run 'octai web' for the web console instead."
+    warn "Node.js/pnpm not found — skipping launcher build. Run 'octai serve' for the web console instead."
   fi
 }
 
@@ -514,7 +514,7 @@ main() {
   printf "     ${DIM}octai auth login -p anthropic --browser-oauth${RESET}  ${DIM}# Anthropic OAuth${RESET}\n"
   printf "\n"
   printf "  ${CYAN}2. Start using OctAi:${RESET}\n"
-  printf "     ${DIM}octai web${RESET}                  ${DIM}# Web dashboard (http://localhost:18800)${RESET}\n"
+  printf "     ${DIM}octai serve${RESET}                ${DIM}# Web dashboard & gateway (http://localhost:18800)${RESET}\n"
   printf "     ${DIM}octai tui${RESET}                  ${DIM}# Terminal UI${RESET}\n"
   printf "     ${DIM}octai agent${RESET}                ${DIM}# AI chat session${RESET}\n"
   printf "\n"

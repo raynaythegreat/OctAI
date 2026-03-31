@@ -80,6 +80,9 @@ function needsManualConfig(item: DiscoveredItem): boolean {
 export function AiUrlPage() {
   const { t } = useTranslation()
   const [url, setUrl] = React.useState("")
+  const [crawlDepth, setCrawlDepth] = React.useState(1)
+  const [maxPages, setMaxPages] = React.useState(10)
+  const [sameDomain, setSameDomain] = React.useState(true)
   const [scanning, setScanning] = React.useState(false)
   const [items, setItems] = React.useState<DiscoveredItem[] | null>(null)
   const [selected, setSelected] = React.useState<Set<number>>(new Set())
@@ -97,7 +100,7 @@ export function AiUrlPage() {
     setItems(null)
     setSelected(new Set())
     try {
-      const result = await analyzeURL(trimmed)
+      const result = await analyzeURL(trimmed, crawlDepth, maxPages, sameDomain)
       setItems(result.items)
     } catch (err) {
       toast.error(
@@ -493,6 +496,36 @@ export function AiUrlPage() {
               t("aiUrl.scanButton")
             )}
           </Button>
+        </div>
+
+        {/* Crawl Options */}
+        <div className="flex flex-wrap gap-4 shrink-0 items-center">
+          <div className="flex items-center gap-2">
+            <Label className="text-xs">{t("aiUrl.crawlDepth")}</Label>
+            <Input
+              type="number"
+              className="w-16"
+              value={crawlDepth}
+              onChange={(e) => setCrawlDepth(Number(e.target.value))}
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <Label className="text-xs">{t("aiUrl.maxPages")}</Label>
+            <Input
+              type="number"
+              className="w-16"
+              value={maxPages}
+              onChange={(e) => setMaxPages(Number(e.target.value))}
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <Checkbox
+              checked={sameDomain}
+              onCheckedChange={(checked) => setSameDomain(!!checked)}
+              id="same-domain"
+            />
+            <Label htmlFor="same-domain" className="text-xs">{t("aiUrl.sameDomain")}</Label>
+          </div>
         </div>
 
         {/* Scanning state */}

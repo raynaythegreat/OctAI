@@ -23,16 +23,17 @@ export default defineConfig({
   build: {
     chunkSizeWarningLimit: 2048,
   },
-  server: {
-    proxy: {
-      "/api": {
-        target: "http://localhost:18800",
-        changeOrigin: true,
-      },
-      "/ws": {
-        target: "ws://localhost:18800",
-        ws: true,
-      },
-    },
-  },
+   server: {
+     port: 18800,
+     proxy: {
+       "/api": {
+         target: "http://localhost:18790",
+         changeOrigin: true,
+       },
+       "/ws": {
+         target: "ws://localhost:18790",
+         ws: true,
+       },
+     },
+   },
 })

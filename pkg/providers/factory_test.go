@@ -121,7 +121,73 @@ func TestCreateProviderReturnsClaudeProviderForAnthropicOAuth(t *testing.T) {
 }
 
 func TestCreateProviderReturnsCodexProviderForOpenAIOAuth(t *testing.T) {
-	// TODO: This test requires openai protocol to support auth_method: "oauth"
-	// which is not yet implemented in the new factory_provider.go
-	t.Skip("OpenAI OAuth via model_list not yet implemented")
+	originalGetCredential := getCredential
+	t.Cleanup(func() {
+		getCredential = originalGetCredential
+	})
+
+	getCredential = func(provider string) (*auth.AuthCredential, error) {
+		if provider != "openai" {
+			t.Fatalf("provider = %q, want openai", provider)
+		}
+		return &auth.AuthCredential{
+			AccessToken: "openai-token",
+			AccountID:   "acct_123",
+		}, nil
+	}
+
+	cfg := config.DefaultConfig()
+	cfg.Agents.Defaults.ModelName = "test-openai-oauth"
+	cfg.ModelList = []*config.ModelConfig{
+		{
+			ModelName:  "test-openai-oauth",
+			Model:      "openai/gpt-5.4",
+			AuthMethod: "oauth",
+		},
+	}
+
+	provider, _, err := CreateProvider(cfg)
+	if err != nil {
+		t.Fatalf("CreateProvider() error = %v", err)
+	}
+
+	if _, ok := provider.(*CodexProvider); !ok {
+		t.Fatalf("provider type = %T, want *CodexProvider", provider)
+	}
+}
+
+func TestCreateProviderReturnsCodexProviderForImplicitOpenAICredential(t *testing.T) {
+	originalGetCredential := getCredential
+	t.Cleanup(func() {
+		getCredential = originalGetCredential
+	})
+
+	getCredential = func(provider string) (*auth.AuthCredential, error) {
+		if provider != "openai" {
+			t.Fatalf("provider = %q, want openai", provider)
+		}
+		return &auth.AuthCredential{
+			AccessToken: "openai-token",
+			AccountID:   "acct_123",
+		}, nil
+	}
+
+	cfg := config.DefaultConfig()
+	cfg.Agents.Defaults.ModelName = "test-openai-implicit"
+	cfg.ModelList = []*config.ModelConfig{
+		{
+			ModelName: "test-openai-implicit",
+			Model:     "openai/gpt-5.4",
+			APIBase:   "https://api.openai.com/v1",
+		},
+	}
+
+	provider, _, err := CreateProvider(cfg)
+	if err != nil {
+		t.Fatalf("CreateProvider() error = %v", err)
+	}
+
+	if _, ok := provider.(*CodexProvider); !ok {
+		t.Fatalf("provider type = %T, want *CodexProvider", provider)
+	}
 }

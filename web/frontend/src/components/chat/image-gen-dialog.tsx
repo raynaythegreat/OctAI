@@ -31,9 +31,19 @@ export function ImageGenDialog({ open, onClose, onInsert }: ImageGenDialogProps)
   React.useEffect(() => {
     if (!open) return
     getImageModels()
-      .then((res) => setImageModels(res.models))
+      .then((res) =>
+        setImageModels(
+          res.models.filter((model) => model.chat_enabled && model.configured),
+        ),
+      )
       .catch(() => setImageModels([]))
   }, [open])
+
+  React.useEffect(() => {
+    if (modelIndex >= imageModels.length) {
+      setModelIndex(0)
+    }
+  }, [imageModels.length, modelIndex])
 
   // Reset state when dialog closes
   React.useEffect(() => {
@@ -214,6 +224,12 @@ export function ImageGenDialog({ open, onClose, onInsert }: ImageGenDialogProps)
             </div>
           )}
 
+          {!error && imageModels.length === 0 && (
+            <div className="mb-4 rounded-lg bg-amber-500/10 px-3 py-2 text-sm text-amber-600 dark:text-amber-400">
+              Enable and configure at least one image model on the Models page to use image generation in chat.
+            </div>
+          )}
+
           {/* Result image */}
           {resultDataUrl && !isLoading && (
             <div className="mb-4">
@@ -261,7 +277,7 @@ export function ImageGenDialog({ open, onClose, onInsert }: ImageGenDialogProps)
               <Button
                 className="bg-violet-500 text-white hover:bg-violet-600"
                 onClick={() => void handleGenerate()}
-                disabled={!prompt.trim() || isLoading}
+                disabled={!prompt.trim() || isLoading || imageModels.length === 0}
               >
                 {isLoading ? (
                   <>

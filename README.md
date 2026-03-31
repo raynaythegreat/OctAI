@@ -97,8 +97,8 @@ make build-all
 # Interactive setup wizard — pick your AI provider, configure channels
 octai onboard
 
-# Start the web dashboard (http://localhost:18800)
-octai web
+# Start the web dashboard and gateway (http://localhost:18800)
+octai serve
 
 # Or jump straight into the TUI
 octai tui
@@ -287,7 +287,7 @@ Full-featured terminal UI with:
 ```
 octai onboard              Interactive setup wizard
 octai agent                Start AI chat session
-octai web                  Start web dashboard (port 18800)
+octai serve                Start web dashboard and gateway (port 18800)
 octai tui                  Start terminal UI
 octai gateway              Start long-running gateway server
 octai auth login           OAuth login (--provider openai|anthropic|google-antigravity)

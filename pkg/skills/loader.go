@@ -187,11 +187,20 @@ func (sl *SkillsLoader) LoadSkillsForContext(skillNames []string) string {
 	for _, name := range skillNames {
 		content, ok := sl.LoadSkill(name)
 		if ok {
-			parts = append(parts, fmt.Sprintf("### Skill: %s\n\n%s", name, content))
+			sanitized := sanitizeSkillContent(content)
+			parts = append(parts, fmt.Sprintf("### Skill: %s\n\n%s", name, sanitized))
 		}
 	}
 
 	return strings.Join(parts, "\n\n---\n\n")
+}
+
+func sanitizeSkillContent(content string) string {
+	content = strings.ReplaceAll(content, "```system", "```blocked-system")
+	content = strings.ReplaceAll(content, "```instruction", "```blocked-instruction")
+	content = strings.ReplaceAll(content, "```user", "```blocked-user")
+	content = strings.ReplaceAll(content, "```assistant", "```blocked-assistant")
+	return content
 }
 
 func (sl *SkillsLoader) BuildSkillsSummary() string {

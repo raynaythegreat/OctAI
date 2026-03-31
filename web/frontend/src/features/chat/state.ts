@@ -1,4 +1,6 @@
 const LAST_SESSION_STORAGE_KEY = "octai:last-session-id"
+const SHOW_DETAILED_STEPS_STORAGE_KEY = "octai:show-detailed-steps"
+const THINKING_LEVEL_STORAGE_KEY = "octai:thinking-level"
 const UNIX_MS_THRESHOLD = 1e12
 
 function readStorageValue() {
@@ -22,6 +24,15 @@ export function writeStoredSessionId(sessionId: string) {
 
 export function clearStoredSessionId() {
   globalThis.localStorage?.removeItem(LAST_SESSION_STORAGE_KEY)
+}
+
+export function readStoredShowDetailedSteps(): boolean {
+  const stored = globalThis.localStorage?.getItem(SHOW_DETAILED_STEPS_STORAGE_KEY)
+  return stored !== null ? stored === "true" : true
+}
+
+export function writeStoredShowDetailedSteps(showDetailedSteps: boolean) {
+  globalThis.localStorage?.setItem(SHOW_DETAILED_STEPS_STORAGE_KEY, String(showDetailedSteps))
 }
 
 export function generateSessionId(): string {
@@ -52,6 +63,30 @@ export function generateSessionId(): string {
 
 export function getInitialActiveSessionId(): string {
   return readStorageValue() || generateSessionId()
+}
+
+export function getInitialShowDetailedSteps(): boolean {
+  return readStoredShowDetailedSteps()
+}
+
+export type ThinkingLevel = "off" | "low" | "medium" | "high" | "extra_high"
+
+const VALID_THINKING_LEVELS: ThinkingLevel[] = ["off", "low", "medium", "high", "extra_high"]
+
+export function readStoredThinkingLevel(): ThinkingLevel {
+  const stored = globalThis.localStorage?.getItem(THINKING_LEVEL_STORAGE_KEY)
+  if (stored && VALID_THINKING_LEVELS.includes(stored as ThinkingLevel)) {
+    return stored as ThinkingLevel
+  }
+  return "medium"
+}
+
+export function writeStoredThinkingLevel(thinkingLevel: ThinkingLevel) {
+  globalThis.localStorage?.setItem(THINKING_LEVEL_STORAGE_KEY, thinkingLevel)
+}
+
+export function getInitialThinkingLevel(): ThinkingLevel {
+  return readStoredThinkingLevel()
 }
 
 export function normalizeUnixTimestamp(timestamp: number): number {

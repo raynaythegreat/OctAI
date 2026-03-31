@@ -12,16 +12,24 @@ import { toast } from "sonner"
 import {
   type ModelFormData,
   type ModelInfo,
+  type RoutingConfig,
   addImageModel,
   addVideoModel,
   deleteImageModel,
   deleteVideoModel,
+  getAutoRouting,
   getImageModelsFiltered,
+  getModelFallback,
   getModels,
   getVideoModelsFiltered,
   rotateImageModelKey,
   rotateModelKey,
   rotateVideoModelKey,
+  setAutoRouting,
+  setImageModelChatEnabled,
+  setModelFallback,
+  setModelChatEnabled,
+  setVideoModelChatEnabled,
   setDefaultModel,
   testImageModelKey,
   testVideoModelKey,
@@ -31,14 +39,22 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { Switch } from "@/components/ui/switch"
+import {
   Sheet,
   SheetContent,
   SheetFooter,
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet"
-import { Switch } from "@/components/ui/switch"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { getGatewayStatus, restartGateway, startGateway } from "@/api/gateway"
 
 import { AddModelSheet } from "./add-model-sheet"
 import { CatalogTab } from "./catalog-tab"
@@ -318,6 +334,8 @@ interface MediaModelCardProps {
   type: "image" | "video"
   onDeleted: () => void
   onRotateKey: (model: ModelInfo) => void
+  onToggleChat: (model: ModelInfo, enabled: boolean) => void
+  togglingChat: boolean
 }
 
 function MediaModelCard({
@@ -325,6 +343,8 @@ function MediaModelCard({
   type,
   onDeleted,
   onRotateKey,
+  onToggleChat,
+  togglingChat,
 }: MediaModelCardProps) {
   const { t } = useTranslation()
   const [testing, setTesting] = useState(false)
@@ -456,6 +476,30 @@ function MediaModelCard({
           <IconTrash className="size-3.5" />
         </Button>
       </div>
+
+      <div className="border-border/50 mt-3 flex items-center justify-between gap-3 border-t pt-3">
+        <div className="min-w-0">
+          <p className="text-sm font-medium">
+            {t("models.chatVisibility.label", {
+              defaultValue: "Show in chat",
+            })}
+          </p>
+          <p className="text-muted-foreground text-xs">
+            {t("models.chatVisibility.mediaDescription", {
+              defaultValue:
+                "Only enabled and configured media models appear in chat tools.",
+            })}
+          </p>
+        </div>
+        <Switch
+          checked={model.chat_enabled}
+          onCheckedChange={(enabled) => onToggleChat(model, enabled)}
+          disabled={togglingChat || model.is_virtual}
+          aria-label={t("models.chatVisibility.label", {
+            defaultValue: "Show in chat",
+          })}
+        />
+      </div>
     </div>
   )
 }
@@ -475,6 +519,9 @@ export function ModelsPage() {
   const [settingDefaultIndex, setSettingDefaultIndex] = useState<number | null>(
     null,
   )
+  const [togglingChatIndex, setTogglingChatIndex] = useState<number | null>(
+    null,
+  )
 
   // Rotate key state
   const [rotatingModel, setRotatingModel] = useState<{
@@ -487,10 +534,34 @@ export function ModelsPage() {
   const [videoModels, setVideoModels] = useState<ModelInfo[]>([])
   const [imageModelsLoading, setImageModelsLoading] = useState(false)
   const [videoModelsLoading, setVideoModelsLoading] = useState(false)
+  const [togglingImageChatIndex, setTogglingImageChatIndex] = useState<number | null>(
+    null,
+  )
+  const [togglingVideoChatIndex, setTogglingVideoChatIndex] = useState<number | null>(
+    null,
+  )
+  const [routingConfig, setRoutingConfig] = useState<RoutingConfig | null>(null)
+  const [fallbackModelName, setFallbackModelName] = useState("")
+  const [savingPrimaryModel, setSavingPrimaryModel] = useState(false)
+  const [savingLightModel, setSavingLightModel] = useState(false)
+  const [savingFallbackModel, setSavingFallbackModel] = useState(false)
 
   // Add media model sheets
   const [addImageOpen, setAddImageOpen] = useState(false)
   const [addVideoOpen, setAddVideoOpen] = useState(false)
+
+  // Web search configuration
+  const [webSearchConfig, setWebSearchConfig] = useState({
+    braveEnabled: false,
+    braveApiKey: "",
+    serpapiEnabled: false,
+    serpapiKey: "",
+    duckduckgoEnabled: false,
+  })
+
+  // Mark as used for TypeScript (webSearchConfig is read in save handler)
+  void webSearchConfig
+  void setWebSearchConfig
 
   const fetchModels = useCallback(async () => {
     try {
@@ -539,9 +610,44 @@ export function ModelsPage() {
     }
   }, [configuredOnly])
 
+  const fetchModelPreferences = useCallback(async () => {
+    try {
+      const [routing, fallback] = await Promise.all([
+        getAutoRouting(),
+        getModelFallback(),
+      ])
+      setRoutingConfig(routing)
+      setFallbackModelName(fallback.fallback_model)
+    } catch {
+      // silently fail
+    }
+  }, [])
+
+  const syncGatewayForModelSettings = useCallback(async () => {
+    try {
+      const status = await getGatewayStatus()
+      if (status.gateway_status === "running") {
+        await restartGateway()
+        return
+      }
+      if (
+        (status.gateway_status === "stopped" || status.gateway_status === "error") &&
+        status.gateway_start_allowed
+      ) {
+        await startGateway()
+      }
+    } catch (err) {
+      console.error("Failed to sync gateway after model settings change:", err)
+    }
+  }, [])
+
   useEffect(() => {
     void fetchModels()
   }, [fetchModels])
+
+  useEffect(() => {
+    void fetchModelPreferences()
+  }, [fetchModelPreferences])
 
   useEffect(() => {
     if (activeTab === "image") {
@@ -557,11 +663,85 @@ export function ModelsPage() {
     setSettingDefaultIndex(model.index)
     try {
       await setDefaultModel(model.model_name)
+      await syncGatewayForModelSettings()
       await fetchModels()
+      await fetchModelPreferences()
     } catch {
       // ignore
     } finally {
       setSettingDefaultIndex(null)
+    }
+  }
+
+  const handlePrimaryModelChange = async (modelName: string) => {
+    if (!modelName || models.find((model) => model.is_default)?.model_name === modelName) {
+      return
+    }
+
+    setSavingPrimaryModel(true)
+    try {
+      await setDefaultModel(modelName)
+      await syncGatewayForModelSettings()
+      await fetchModels()
+      await fetchModelPreferences()
+      toast.success(
+        t("models.preferences.primarySaved", {
+          defaultValue: "Primary model updated",
+        }),
+      )
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to update primary model")
+    } finally {
+      setSavingPrimaryModel(false)
+    }
+  }
+
+  const handleLightModelChange = async (modelName: string) => {
+    if (!modelName || routingConfig?.light_model === modelName) {
+      return
+    }
+
+    setSavingLightModel(true)
+    try {
+      await setAutoRouting({
+        enabled: routingConfig?.enabled ?? true,
+        light_model: modelName,
+        threshold: routingConfig?.threshold ?? 0.35,
+      })
+      await syncGatewayForModelSettings()
+      await fetchModelPreferences()
+      toast.success(
+        t("models.preferences.lightSaved", {
+          defaultValue: "Light model updated",
+        }),
+      )
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to update light model")
+    } finally {
+      setSavingLightModel(false)
+    }
+  }
+
+  const handleFallbackModelChange = async (modelName: string) => {
+    const nextModel = modelName === "__none__" ? "" : modelName
+    if (fallbackModelName === nextModel) {
+      return
+    }
+
+    setSavingFallbackModel(true)
+    try {
+      const response = await setModelFallback(nextModel)
+      setFallbackModelName(response.fallback_model)
+      await syncGatewayForModelSettings()
+      toast.success(
+        t("models.preferences.fallbackSaved", {
+          defaultValue: "Fallback model updated",
+        }),
+      )
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to update fallback model")
+    } finally {
+      setSavingFallbackModel(false)
     }
   }
 
@@ -588,6 +768,56 @@ export function ModelsPage() {
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Failed to rotate key")
       throw e
+    }
+  }
+
+  const handleToggleTextChat = async (model: ModelInfo, enabled: boolean) => {
+    setTogglingChatIndex(model.index)
+    try {
+      await setModelChatEnabled(model.index, enabled)
+      await fetchModels()
+      await fetchModelPreferences()
+      if (enabled && model.configured && !model.is_default && !defaultModel) {
+        await handleSetDefault(model)
+      } else {
+        await syncGatewayForModelSettings()
+      }
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to update chat visibility")
+    } finally {
+      setTogglingChatIndex(null)
+    }
+  }
+
+  const handleToggleImageChat = async (model: ModelInfo, enabled: boolean) => {
+    setTogglingImageChatIndex(model.index)
+    try {
+      await setImageModelChatEnabled(model.index, enabled)
+      setImageModels((current) =>
+        current.map((item) =>
+          item.index === model.index ? { ...item, chat_enabled: enabled } : item,
+        ),
+      )
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to update chat visibility")
+    } finally {
+      setTogglingImageChatIndex(null)
+    }
+  }
+
+  const handleToggleVideoChat = async (model: ModelInfo, enabled: boolean) => {
+    setTogglingVideoChatIndex(model.index)
+    try {
+      await setVideoModelChatEnabled(model.index, enabled)
+      setVideoModels((current) =>
+        current.map((item) =>
+          item.index === model.index ? { ...item, chat_enabled: enabled } : item,
+        ),
+      )
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to update chat visibility")
+    } finally {
+      setTogglingVideoChatIndex(null)
     }
   }
 
@@ -634,6 +864,9 @@ export function ModelsPage() {
     })
 
   const defaultModel = models.find((model) => model.is_default)
+  const selectableChatModels = models.filter(
+    (model) => model.chat_enabled && model.configured && !model.is_virtual,
+  )
 
   // Configured-only toggle (shared between tabs)
   const ConfiguredOnlyToggle = (
@@ -663,7 +896,9 @@ export function ModelsPage() {
             {ConfiguredOnlyToggle}
             <Button size="sm" variant="outline" onClick={() => setAddOpen(true)}>
               <IconPlus className="size-4" />
-              {t("models.add.button")}
+              {t("models.customProvider.button", {
+                defaultValue: "Custom Provider",
+              })}
             </Button>
           </div>
         )}
@@ -693,6 +928,21 @@ export function ModelsPage() {
             </Button>
           </div>
         )}
+        {activeTab === "web" && (
+          <div className="flex items-center gap-3">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                // Save web search config
+                localStorage.setItem("web_search_config", JSON.stringify(webSearchConfig))
+                toast.success(t("models.web.saved", { defaultValue: "Web search settings saved" }))
+              }}
+            >
+              {t("common.save", { defaultValue: "Save" })}
+            </Button>
+          </div>
+        )}
       </PageHeader>
 
       <Tabs
@@ -705,6 +955,7 @@ export function ModelsPage() {
           <TabsTrigger value="image">{t("models.tabs.image")}</TabsTrigger>
           <TabsTrigger value="video">{t("models.tabs.video")}</TabsTrigger>
           <TabsTrigger value="browse">{t("models.tabs.browse", { defaultValue: "Browse" })}</TabsTrigger>
+          <TabsTrigger value="web">{t("models.tabs.web", { defaultValue: "Web" })}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="text" className="flex-1 overflow-auto">
@@ -720,6 +971,146 @@ export function ModelsPage() {
               <p className="text-muted-foreground mt-1 text-sm">
                 {t("models.description")}
               </p>
+            </div>
+
+            <div className="mt-4 grid gap-3 lg:grid-cols-3">
+              <div className="bg-card border-border/60 rounded-xl border p-4 shadow-sm">
+                <Label className="text-xs font-semibold tracking-wide uppercase">
+                  {t("models.preferences.primaryLabel", {
+                    defaultValue: "Primary model",
+                  })}
+                </Label>
+                <p className="text-muted-foreground mt-1 text-xs">
+                  {t("models.preferences.primaryDescription", {
+                    defaultValue: "Main model used for full responses.",
+                  })}
+                </p>
+                <Select
+                  value={defaultModel?.model_name ?? ""}
+                  onValueChange={handlePrimaryModelChange}
+                  disabled={savingPrimaryModel || selectableChatModels.length === 0}
+                >
+                  <SelectTrigger className="mt-3 w-full">
+                    <SelectValue
+                      placeholder={t("models.preferences.primaryPlaceholder", {
+                        defaultValue: "Choose a primary model",
+                      })}
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {selectableChatModels.map((model) => (
+                      <SelectItem key={`primary-${model.index}`} value={model.model_name}>
+                        {model.model_name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="bg-card border-border/60 rounded-xl border p-4 shadow-sm">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <Label className="text-xs font-semibold tracking-wide uppercase">
+                      {t("models.preferences.lightLabel", {
+                        defaultValue: "Light model",
+                      })}
+                    </Label>
+                    <p className="text-muted-foreground mt-1 text-xs">
+                      {t("models.preferences.lightDescription", {
+                        defaultValue: "Used by Auto mode for simpler turns.",
+                      })}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-muted-foreground text-xs">
+                      {t("models.preferences.autoRouting", {
+                        defaultValue: "Auto",
+                      })}
+                    </span>
+                    <Switch
+                      checked={routingConfig?.enabled ?? false}
+                      onCheckedChange={async (enabled) => {
+                        try {
+                          await setAutoRouting({
+                            enabled,
+                            light_model:
+                              routingConfig?.light_model ||
+                              selectableChatModels.find(
+                                (model) => model.model_name !== defaultModel?.model_name,
+                              )?.model_name ||
+                              defaultModel?.model_name ||
+                              "",
+                            threshold: routingConfig?.threshold ?? 0.35,
+                          })
+                          await syncGatewayForModelSettings()
+                          await fetchModelPreferences()
+                        } catch (err) {
+                          toast.error(err instanceof Error ? err.message : "Failed to update auto routing")
+                        }
+                      }}
+                      disabled={savingLightModel || selectableChatModels.length === 0}
+                    />
+                  </div>
+                </div>
+                <Select
+                  value={routingConfig?.light_model ?? ""}
+                  onValueChange={handleLightModelChange}
+                  disabled={savingLightModel || selectableChatModels.length === 0}
+                >
+                  <SelectTrigger className="mt-3 w-full">
+                    <SelectValue
+                      placeholder={t("models.preferences.lightPlaceholder", {
+                        defaultValue: "Choose a light model",
+                      })}
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {selectableChatModels.map((model) => (
+                      <SelectItem key={`light-${model.index}`} value={model.model_name}>
+                        {model.model_name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="bg-card border-border/60 rounded-xl border p-4 shadow-sm">
+                <Label className="text-xs font-semibold tracking-wide uppercase">
+                  {t("models.preferences.fallbackLabel", {
+                    defaultValue: "Fallback model",
+                  })}
+                </Label>
+                <p className="text-muted-foreground mt-1 text-xs">
+                  {t("models.preferences.fallbackDescription", {
+                    defaultValue: "Used when the primary call fails.",
+                  })}
+                </p>
+                <Select
+                  value={fallbackModelName || "__none__"}
+                  onValueChange={handleFallbackModelChange}
+                  disabled={savingFallbackModel || selectableChatModels.length === 0}
+                >
+                  <SelectTrigger className="mt-3 w-full">
+                    <SelectValue
+                      placeholder={t("models.preferences.fallbackPlaceholder", {
+                        defaultValue: "Choose a fallback model",
+                      })}
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">
+                      {t("models.preferences.none", {
+                        defaultValue: "None",
+                      })}
+                    </SelectItem>
+                    {selectableChatModels.map((model) => (
+                      <SelectItem key={`fallback-${model.index}`} value={model.model_name}>
+                        {model.model_name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             {loading && (
@@ -748,7 +1139,9 @@ export function ModelsPage() {
                     onRotateKey={(model) =>
                       setRotatingModel({ model, type: "text" })
                     }
+                    onToggleChat={handleToggleTextChat}
                     settingDefaultIndex={settingDefaultIndex}
+                    togglingChatIndex={togglingChatIndex}
                   />
                 ))}
               </div>
@@ -774,6 +1167,8 @@ export function ModelsPage() {
                   type="image"
                   onDeleted={fetchImageModels}
                   onRotateKey={(m) => setRotatingModel({ model: m, type: "image" })}
+                  onToggleChat={handleToggleImageChat}
+                  togglingChat={togglingImageChatIndex === model.index}
                 />
               ))}
             </div>
@@ -798,6 +1193,8 @@ export function ModelsPage() {
                   type="video"
                   onDeleted={fetchVideoModels}
                   onRotateKey={(m) => setRotatingModel({ model: m, type: "video" })}
+                  onToggleChat={handleToggleVideoChat}
+                  togglingChat={togglingVideoChatIndex === model.index}
                 />
               ))}
             </div>
@@ -810,6 +1207,105 @@ export function ModelsPage() {
             existingModelNames={models.map((m) => m.model_name)}
             onModelAdded={fetchModels}
           />
+        </TabsContent>
+
+        <TabsContent value="web" className="flex-1 overflow-auto p-4 md:p-6">
+          <div className="mx-auto max-w-3xl space-y-6">
+            <div className="space-y-1">
+              <h2 className="text-lg font-semibold">
+                {t("models.web.title", { defaultValue: "Web Search Configuration" })}
+              </h2>
+              <p className="text-muted-foreground text-sm">
+                {t("models.web.description", { defaultValue: "Configure web search providers to enable real-time information retrieval." })}
+              </p>
+            </div>
+
+            {/* Brave Search */}
+            <div className="bg-card border-border/60 rounded-xl border p-4 shadow-sm space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-medium">{t("models.web.brave.title", { defaultValue: "Brave Search" })}</h3>
+                  <p className="text-muted-foreground text-xs">
+                    {t("models.web.brave.description", { defaultValue: "Privacy-focused search API" })}
+                  </p>
+                </div>
+                <Switch
+                  checked={webSearchConfig.braveEnabled}
+                  onCheckedChange={(checked) =>
+                    setWebSearchConfig((prev) => ({ ...prev, braveEnabled: checked }))
+                  }
+                />
+              </div>
+              {webSearchConfig.braveEnabled && (
+                <div className="space-y-2">
+                  <Label htmlFor="brave-api-key" className="text-xs">
+                    {t("models.web.apiKey", { defaultValue: "API Key" })}
+                  </Label>
+                  <Input
+                    id="brave-api-key"
+                    type="password"
+                    value={webSearchConfig.braveApiKey}
+                    onChange={(e) =>
+                      setWebSearchConfig((prev) => ({ ...prev, braveApiKey: e.target.value }))
+                    }
+                    placeholder={t("models.web.apiKeyPlaceholder", { defaultValue: "Enter your Brave Search API key" })}
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* SerpAPI */}
+            <div className="bg-card border-border/60 rounded-xl border p-4 shadow-sm space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-medium">{t("models.web.serpapi.title", { defaultValue: "SerpAPI" })}</h3>
+                  <p className="text-muted-foreground text-xs">
+                    {t("models.web.serpapi.description", { defaultValue: "Scrape Google and other search engines" })}
+                  </p>
+                </div>
+                <Switch
+                  checked={webSearchConfig.serpapiEnabled}
+                  onCheckedChange={(checked) =>
+                    setWebSearchConfig((prev) => ({ ...prev, serpapiEnabled: checked }))
+                  }
+                />
+              </div>
+              {webSearchConfig.serpapiEnabled && (
+                <div className="space-y-2">
+                  <Label htmlFor="serpapi-key" className="text-xs">
+                    {t("models.web.apiKey", { defaultValue: "API Key" })}
+                  </Label>
+                  <Input
+                    id="serpapi-key"
+                    type="password"
+                    value={webSearchConfig.serpapiKey}
+                    onChange={(e) =>
+                      setWebSearchConfig((prev) => ({ ...prev, serpapiKey: e.target.value }))
+                    }
+                    placeholder={t("models.web.serpapiKeyPlaceholder", { defaultValue: "Enter your SerpAPI key" })}
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* DuckDuckGo */}
+            <div className="bg-card border-border/60 rounded-xl border p-4 shadow-sm">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-medium">{t("models.web.duckduckgo.title", { defaultValue: "DuckDuckGo" })}</h3>
+                  <p className="text-muted-foreground text-xs">
+                    {t("models.web.duckduckgo.description", { defaultValue: "Free search (no API key required)" })}
+                  </p>
+                </div>
+                <Switch
+                  checked={webSearchConfig.duckduckgoEnabled}
+                  onCheckedChange={(checked) =>
+                    setWebSearchConfig((prev) => ({ ...prev, duckduckgoEnabled: checked }))
+                  }
+                />
+              </div>
+            </div>
+          </div>
         </TabsContent>
       </Tabs>
 

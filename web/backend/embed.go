@@ -61,6 +61,7 @@ func registerEmbedRoutes(mux *http.ServeMux) {
 			// Existing static files/directories should be served directly.
 			if cleanPath != "" {
 				if _, statErr := fs.Stat(subFS, cleanPath); statErr == nil {
+					setCacheHeaders(w, cleanPath)
 					fileServer.ServeHTTP(w, r)
 					return
 				}
@@ -71,9 +72,26 @@ func registerEmbedRoutes(mux *http.ServeMux) {
 				}
 			}
 
+			w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
+			w.Header().Set("Pragma", "no-cache")
+
 			indexReq := r.Clone(r.Context())
 			indexReq.URL.Path = "/"
 			fileServer.ServeHTTP(w, indexReq)
 		}),
 	)
+}
+
+func setCacheHeaders(w http.ResponseWriter, filePath string) {
+	ext := path.Ext(filePath)
+	switch ext {
+	case ".js", ".css", ".woff", ".woff2", ".ttf", ".otf", ".eot":
+		w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
+	case ".png", ".jpg", ".jpeg", ".gif", ".svg", ".ico", ".webp", ".avif":
+		w.Header().Set("Cache-Control", "public, max-age=86400")
+	case ".html":
+		w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
+	default:
+		w.Header().Set("Cache-Control", "public, max-age=3600")
+	}
 }

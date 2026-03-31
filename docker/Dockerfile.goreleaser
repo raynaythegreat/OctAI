@@ -4,9 +4,17 @@ ARG TARGETPLATFORM
 
 RUN apk add --no-cache ca-certificates tzdata
 
-COPY $TARGETPLATFORM/picoclaw /usr/local/bin/picoclaw
+COPY $TARGETPLATFORM/octai /usr/local/bin/octai
 COPY docker/entrypoint.sh /entrypoint.sh
 
 RUN chmod +x /entrypoint.sh
+
+RUN addgroup -g 1000 octai && \
+    adduser -D -u 1000 -G octai octai
+
+USER octai
+
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD wget -q --spider http://localhost:18790/health || exit 1
 
 ENTRYPOINT ["/entrypoint.sh"]

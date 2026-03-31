@@ -45,6 +45,7 @@ interface NavItem {
   url: string
   icon: React.ComponentType<{ className?: string }>
   translateTitle?: boolean
+  enabled?: boolean
 }
 
 interface NavGroup {
@@ -131,12 +132,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           url: item.url,
           icon: item.icon,
           translateTitle: false,
+          enabled: item.enabled,
         })),
         isChannelsGroup: true,
       },
       {
         ...baseNavGroups[2],
         items: [
+          {
+            title: "navigation.capabilities",
+            url: "/agent/capabilities",
+            icon: IconBolt,
+            translateTitle: true,
+          },
           {
             title: "navigation.skills",
             url: "/agent/skills",
@@ -180,12 +188,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             translateTitle: true,
           },
           {
-            title: "navigation.capabilities",
-            url: "/agent/capabilities",
-            icon: IconBolt,
-            translateTitle: true,
-          },
-          {
             title: "navigation.plugins",
             url: "/agent/plugins",
             icon: IconPuzzle,
@@ -197,8 +199,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         ...baseNavGroups[3],
         items: [
           {
-            title: "navigation.config",
-            url: "/config",
+            title: "navigation.settings",
+            url: "/settings",
             icon: IconSettings,
             translateTitle: true,
           },
@@ -245,12 +247,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                           <SidebarMenuButton
                             asChild
                             isActive={isActive}
-                            className={`h-9 px-3 ${isActive ? "bg-accent/80 text-foreground font-medium" : "text-muted-foreground hover:bg-muted/60"}`}
+                            className={`h-9 px-3 relative ${isActive ? "bg-accent/80 text-foreground font-medium" : "text-muted-foreground hover:bg-muted/60"}`}
                           >
                             <Link to={item.url}>
-                              <item.icon
-                                className={`size-4 ${isActive ? "opacity-100" : "opacity-60"}`}
-                              />
+                              <div className="relative flex items-center justify-center">
+                                <item.icon
+                                  className={`size-4 ${isActive ? "opacity-100" : "opacity-60"}`}
+                                />
+                                {group.isChannelsGroup && item.enabled !== undefined && (
+                                  <div 
+                                    className={`absolute -bottom-0.5 -right-0.5 size-2 rounded-full border border-background ${item.enabled ? "bg-emerald-500" : "bg-neutral-400"}`}
+                                  />
+                                )}
+                              </div>
                               <span
                                 className={
                                   isActive ? "opacity-100" : "opacity-80"

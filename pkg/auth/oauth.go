@@ -14,6 +14,7 @@ import (
 	"net/url"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"runtime"
 	"strconv"
 	"strings"
@@ -21,13 +22,18 @@ import (
 )
 
 type OAuthProviderConfig struct {
-	Issuer       string
-	ClientID     string
-	ClientSecret string // Required for Google OAuth (confidential client)
-	TokenURL     string // Override token endpoint (Google uses a different URL than issuer)
-	Scopes       string
-	Originator   string
-	Port         int
+	Issuer          string
+	ClientID        string
+	ClientSecret    string
+	TokenURL        string
+	Scopes          string
+	Originator      string
+	Port            int
+	DeviceCodeURL   string // Override device code request endpoint
+	DeviceTokenURL  string // Override device token poll endpoint
+	DeviceVerifyURL string // Override verification URL shown to user
+	DeviceGrantType string // Override grant_type for device token (MiniMax uses custom)
+	ProviderName    string // Provider identifier for token response parsing
 }
 
 func OpenAIOAuthConfig() OAuthProviderConfig {
@@ -41,11 +47,15 @@ func OpenAIOAuthConfig() OAuthProviderConfig {
 }
 
 // AnthropicOAuthConfig returns the OAuth configuration for Anthropic browser login.
-// Client credentials must be provided via environment variables ANTHROPIC_OAUTH_CLIENT_ID and
-// ANTHROPIC_OAUTH_CLIENT_SECRET (from Anthropic Console → OAuth Applications).
+// Client credentials are sourced from (in order of priority):
+//  1. Environment variables ANTHROPIC_OAUTH_CLIENT_ID / ANTHROPIC_OAUTH_CLIENT_SECRET
+//  2. Config file keys auth.anthropic_oauth_client_id / auth.anthropic_oauth_client_secret
 func AnthropicOAuthConfig() (OAuthProviderConfig, error) {
 	clientID := os.Getenv("ANTHROPIC_OAUTH_CLIENT_ID")
 	clientSecret := os.Getenv("ANTHROPIC_OAUTH_CLIENT_SECRET")
+	if clientID == "" || clientSecret == "" {
+		clientID, clientSecret = readOAuthCredsFromConfig("anthropic")
+	}
 	if clientID == "" || clientSecret == "" {
 		return OAuthProviderConfig{}, fmt.Errorf(
 			"Anthropic OAuth requires ANTHROPIC_OAUTH_CLIENT_ID and ANTHROPIC_OAUTH_CLIENT_SECRET environment variables — " +
@@ -63,11 +73,15 @@ func AnthropicOAuthConfig() (OAuthProviderConfig, error) {
 }
 
 // GoogleAntigravityOAuthConfig returns the OAuth configuration for Google Cloud Code Assist (Antigravity).
-// Client credentials must be provided via environment variables GOOGLE_OAUTH_CLIENT_ID and
-// GOOGLE_OAUTH_CLIENT_SECRET (from Google Cloud Console → APIs & Services → Credentials → OAuth 2.0).
+// Client credentials are sourced from (in order of priority):
+//  1. Environment variables GOOGLE_OAUTH_CLIENT_ID / GOOGLE_OAUTH_CLIENT_SECRET
+//  2. Config file keys auth.google_oauth_client_id / auth.google_oauth_client_secret
 func GoogleAntigravityOAuthConfig() (OAuthProviderConfig, error) {
 	clientID := os.Getenv("GOOGLE_OAUTH_CLIENT_ID")
 	clientSecret := os.Getenv("GOOGLE_OAUTH_CLIENT_SECRET")
+	if clientID == "" || clientSecret == "" {
+		clientID, clientSecret = readOAuthCredsFromConfig("google")
+	}
 	if clientID == "" || clientSecret == "" {
 		return OAuthProviderConfig{}, fmt.Errorf(
 			"Google OAuth requires GOOGLE_OAUTH_CLIENT_ID and GOOGLE_OAUTH_CLIENT_SECRET environment variables — " +
@@ -82,6 +96,67 @@ func GoogleAntigravityOAuthConfig() (OAuthProviderConfig, error) {
 		Scopes:       "https://www.googleapis.com/auth/cloud-platform https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/cclog https://www.googleapis.com/auth/experimentsandconfigs",
 		Port:         51121,
 	}, nil
+}
+
+func QwenPortalOAuthConfig() OAuthProviderConfig {
+	return OAuthProviderConfig{
+		Issuer:          "https://chat.qwen.ai",
+		ClientID:        "f0304373b74a44d2b584a3fb70ca9e56",
+		Scopes:          "openid profile email model.completion",
+		DeviceCodeURL:   "https://chat.qwen.ai/api/v1/oauth2/device/authorize",
+		DeviceTokenURL:  "https://chat.qwen.ai/api/v1/oauth2/device/token",
+		DeviceVerifyURL: "https://chat.qwen.ai/oauth2/device",
+		DeviceGrantType: "urn:ietf:params:oauth:grant-type:device_code",
+		ProviderName:    "qwen",
+	}
+}
+
+func MiniMaxOAuthConfig() OAuthProviderConfig {
+	return OAuthProviderConfig{
+		Issuer:          "https://api.minimax.io",
+		ClientID:        "78257093-7e40-4613-99e0-527b14a39113",
+		Scopes:          "openid profile",
+		DeviceCodeURL:   "https://api.minimax.io/v1/oauth2/device/authorize",
+		DeviceTokenURL:  "https://api.minimax.io/v1/oauth2/device/token",
+		DeviceVerifyURL: "https://platform.minimaxi.com/oauth2/device",
+		DeviceGrantType: "urn:ietf:params:oauth:grant-type:user_code",
+		ProviderName:    "minimax",
+	}
+}
+
+func readOAuthCredsFromConfig(provider string) (clientID, clientSecret string) {
+	homePath := os.Getenv("OCTAI_HOME")
+	if homePath == "" {
+		if u, err := os.UserHomeDir(); err == nil {
+			homePath = filepath.Join(u, ".octai")
+		}
+	}
+	if homePath == "" {
+		return "", ""
+	}
+	configPath := filepath.Join(homePath, "config.json")
+	data, err := os.ReadFile(configPath)
+	if err != nil {
+		return "", ""
+	}
+	var cfg struct {
+		Auth map[string]string `json:"auth"`
+	}
+	if err := json.Unmarshal(data, &cfg); err != nil {
+		return "", ""
+	}
+	prefix := provider + "_oauth_"
+	for k, v := range cfg.Auth {
+		if strings.HasPrefix(k, prefix) {
+			switch {
+			case strings.HasSuffix(k, "client_id"):
+				clientID = v
+			case strings.HasSuffix(k, "client_secret"):
+				clientSecret = v
+			}
+		}
+	}
+	return clientID, clientSecret
 }
 
 func decodeBase64(s string) string {
@@ -222,14 +297,18 @@ type DeviceCodeInfo struct {
 }
 
 // RequestDeviceCode requests a device code from the OAuth provider.
-// Returns the info needed for the user to authenticate in a browser.
 func RequestDeviceCode(cfg OAuthProviderConfig) (*DeviceCodeInfo, error) {
+	deviceCodeURL := cfg.DeviceCodeURL
+	if deviceCodeURL == "" {
+		deviceCodeURL = cfg.Issuer + "/api/accounts/deviceauth/usercode"
+	}
+
 	reqBody, _ := json.Marshal(map[string]string{
 		"client_id": cfg.ClientID,
 	})
 
 	resp, err := http.Post(
-		cfg.Issuer+"/api/accounts/deviceauth/usercode",
+		deviceCodeURL,
 		"application/json",
 		strings.NewReader(string(reqBody)),
 	)
@@ -255,18 +334,75 @@ func RequestDeviceCode(cfg OAuthProviderConfig) (*DeviceCodeInfo, error) {
 		deviceResp.Interval = 5
 	}
 
+	verifyURL := cfg.DeviceVerifyURL
+	if verifyURL == "" {
+		verifyURL = cfg.Issuer + "/codex/device"
+	}
+
 	return &DeviceCodeInfo{
 		DeviceAuthID: deviceResp.DeviceAuthID,
 		UserCode:     deviceResp.UserCode,
-		VerifyURL:    cfg.Issuer + "/codex/device",
+		VerifyURL:    verifyURL,
 		Interval:     deviceResp.Interval,
 	}, nil
 }
 
 // PollDeviceCodeOnce makes a single poll attempt to check if the user has authenticated.
-// Returns (credential, nil) on success, (nil, nil) if still pending, or (nil, err) on failure.
 func PollDeviceCodeOnce(cfg OAuthProviderConfig, deviceAuthID, userCode string) (*AuthCredential, error) {
 	return pollDeviceCode(cfg, deviceAuthID, userCode)
+}
+
+func pollDeviceCode(cfg OAuthProviderConfig, deviceAuthID, userCode string) (*AuthCredential, error) {
+	deviceTokenURL := cfg.DeviceTokenURL
+	if deviceTokenURL == "" {
+		deviceTokenURL = cfg.Issuer + "/api/accounts/deviceauth/token"
+	}
+
+	grantType := cfg.DeviceGrantType
+	if grantType == "" {
+		grantType = "urn:ietf:params:oauth:grant-type:device_code"
+	}
+
+	reqBody, _ := json.Marshal(map[string]string{
+		"device_code": deviceAuthID,
+		"grant_type":  grantType,
+		"client_id":   cfg.ClientID,
+	})
+
+	resp, err := http.Post(
+		deviceTokenURL,
+		"application/json",
+		strings.NewReader(string(reqBody)),
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("reading device token response: %w", err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		var errResp struct {
+			Error string `json:"error"`
+		}
+		if json.Unmarshal(body, &errResp) == nil && errResp.Error != "" {
+			if errResp.Error == "authorization_pending" || errResp.Error == "slow_down" {
+				return nil, fmt.Errorf("pending")
+			}
+			return nil, fmt.Errorf("%s", errResp.Error)
+		}
+		return nil, fmt.Errorf("pending")
+	}
+
+	providerName := cfg.ProviderName
+	if providerName == "" {
+		providerName = "openai"
+	}
+
+	return parseDeviceTokenResponse(body, providerName, cfg)
 }
 
 func parseDeviceCodeResponse(body []byte) (deviceCodeResponse, error) {
@@ -315,45 +451,19 @@ func parseFlexibleInt(raw json.RawMessage) (int, error) {
 }
 
 func LoginDeviceCode(cfg OAuthProviderConfig) (*AuthCredential, error) {
-	reqBody, _ := json.Marshal(map[string]string{
-		"client_id": cfg.ClientID,
-	})
-
-	resp, err := http.Post(
-		cfg.Issuer+"/api/accounts/deviceauth/usercode",
-		"application/json",
-		strings.NewReader(string(reqBody)),
-	)
+	info, err := RequestDeviceCode(cfg)
 	if err != nil {
-		return nil, fmt.Errorf("requesting device code: %w", err)
-	}
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, fmt.Errorf("reading device code response: %w", err)
-	}
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("device code request failed: %s", string(body))
-	}
-
-	deviceResp, err := parseDeviceCodeResponse(body)
-	if err != nil {
-		return nil, fmt.Errorf("parsing device code response: %w", err)
-	}
-
-	if deviceResp.Interval < 1 {
-		deviceResp.Interval = 5
+		return nil, err
 	}
 
 	fmt.Printf(
-		"\nTo authenticate, open this URL in your browser:\n\n  %s/codex/device\n\nThen enter this code: %s\n\nWaiting for authentication...\n",
-		cfg.Issuer,
-		deviceResp.UserCode,
+		"\nTo authenticate, open this URL in your browser:\n\n  %s\n\nThen enter this code: %s\n\nWaiting for authentication...\n",
+		info.VerifyURL,
+		info.UserCode,
 	)
 
 	deadline := time.After(15 * time.Minute)
-	ticker := time.NewTicker(time.Duration(deviceResp.Interval) * time.Second)
+	ticker := time.NewTicker(time.Duration(info.Interval) * time.Second)
 	defer ticker.Stop()
 
 	for {
@@ -361,7 +471,7 @@ func LoginDeviceCode(cfg OAuthProviderConfig) (*AuthCredential, error) {
 		case <-deadline:
 			return nil, fmt.Errorf("device code authentication timed out after 15 minutes")
 		case <-ticker.C:
-			cred, err := pollDeviceCode(cfg, deviceResp.DeviceAuthID, deviceResp.UserCode)
+			cred, err := pollDeviceCode(cfg, info.DeviceAuthID, info.UserCode)
 			if err != nil {
 				continue
 			}
@@ -370,44 +480,6 @@ func LoginDeviceCode(cfg OAuthProviderConfig) (*AuthCredential, error) {
 			}
 		}
 	}
-}
-
-func pollDeviceCode(cfg OAuthProviderConfig, deviceAuthID, userCode string) (*AuthCredential, error) {
-	reqBody, _ := json.Marshal(map[string]string{
-		"device_auth_id": deviceAuthID,
-		"user_code":      userCode,
-	})
-
-	resp, err := http.Post(
-		cfg.Issuer+"/api/accounts/deviceauth/token",
-		"application/json",
-		strings.NewReader(string(reqBody)),
-	)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("pending")
-	}
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, fmt.Errorf("reading device token response: %w", err)
-	}
-
-	var tokenResp struct {
-		AuthorizationCode string `json:"authorization_code"`
-		CodeChallenge     string `json:"code_challenge"`
-		CodeVerifier      string `json:"code_verifier"`
-	}
-	if err := json.Unmarshal(body, &tokenResp); err != nil {
-		return nil, err
-	}
-
-	redirectURI := cfg.Issuer + "/deviceauth/callback"
-	return ExchangeCodeForTokens(cfg, tokenResp.AuthorizationCode, tokenResp.CodeVerifier, redirectURI)
 }
 
 func RefreshAccessToken(cred *AuthCredential, cfg OAuthProviderConfig) (*AuthCredential, error) {
@@ -522,12 +594,14 @@ func ExchangeCodeForTokens(cfg OAuthProviderConfig, code, codeVerifier, redirect
 		tokenURL = cfg.TokenURL
 	}
 
-	// Determine provider name from config
-	provider := "openai"
-	if cfg.TokenURL != "" && strings.Contains(cfg.TokenURL, "googleapis.com") {
-		provider = "google-antigravity"
-	} else if cfg.TokenURL != "" && strings.Contains(cfg.TokenURL, "console.anthropic.com") {
-		provider = "anthropic"
+	provider := cfg.ProviderName
+	if provider == "" {
+		provider = "openai"
+		if cfg.TokenURL != "" && strings.Contains(cfg.TokenURL, "googleapis.com") {
+			provider = "google-antigravity"
+		} else if cfg.TokenURL != "" && strings.Contains(cfg.TokenURL, "console.anthropic.com") {
+			provider = "anthropic"
+		}
 	}
 
 	resp, err := http.PostForm(tokenURL, data)
@@ -581,6 +655,43 @@ func parseTokenResponse(body []byte, provider string) (*AuthCredential, error) {
 		cred.AccountID = accountID
 	} else if accountID := extractAccountID(tokenResp.IDToken); accountID != "" {
 		// Recent OpenAI OAuth responses may only include chatgpt_account_id in id_token claims.
+		cred.AccountID = accountID
+	}
+
+	return cred, nil
+}
+
+func parseDeviceTokenResponse(body []byte, provider string, cfg OAuthProviderConfig) (*AuthCredential, error) {
+	var tokenResp struct {
+		AccessToken  string `json:"access_token"`
+		RefreshToken string `json:"refresh_token"`
+		ExpiresIn    int    `json:"expires_in"`
+		IDToken      string `json:"id_token"`
+	}
+	if err := json.Unmarshal(body, &tokenResp); err != nil {
+		return nil, fmt.Errorf("parsing device token response: %w", err)
+	}
+
+	if tokenResp.AccessToken == "" {
+		return nil, fmt.Errorf("no access token in device token response")
+	}
+
+	var expiresAt time.Time
+	if tokenResp.ExpiresIn > 0 {
+		expiresAt = time.Now().Add(time.Duration(tokenResp.ExpiresIn) * time.Second)
+	}
+
+	cred := &AuthCredential{
+		AccessToken:  tokenResp.AccessToken,
+		RefreshToken: tokenResp.RefreshToken,
+		ExpiresAt:    expiresAt,
+		Provider:     provider,
+		AuthMethod:   "oauth",
+	}
+
+	if accountID := extractAccountID(tokenResp.IDToken); accountID != "" {
+		cred.AccountID = accountID
+	} else if accountID := extractAccountID(tokenResp.AccessToken); accountID != "" {
 		cred.AccountID = accountID
 	}
 

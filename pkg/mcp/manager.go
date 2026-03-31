@@ -165,6 +165,25 @@ func (m *Manager) LoadFromMCPConfig(
 		go func(name string, serverCfg config.MCPServerConfig, workspace string) {
 			defer wg.Done()
 
+			for i, arg := range serverCfg.Args {
+				if strings.Contains(arg, "<workspace>") {
+					if workspace == "" {
+						err := fmt.Errorf(
+							"workspace path is empty while resolving <workspace> placeholder for server %s",
+							name,
+						)
+						logger.ErrorCF("mcp", "Invalid MCP server configuration",
+							map[string]any{
+								"server": name,
+								"error":  err.Error(),
+							})
+						errs <- err
+						return
+					}
+					serverCfg.Args[i] = strings.ReplaceAll(arg, "<workspace>", workspace)
+				}
+			}
+
 			// Resolve relative envFile paths relative to workspace
 			if serverCfg.EnvFile != "" && !filepath.IsAbs(serverCfg.EnvFile) {
 				if workspace == "" {

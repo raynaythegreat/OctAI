@@ -1,6 +1,7 @@
 import {
   IconCheck,
   IconLoader2,
+  IconPlugConnected,
   IconRefresh,
   IconTrash,
   IconWifi,
@@ -47,6 +48,15 @@ const PROVIDER_DISPLAY_NAMES: Record<string, string> = {
   litellm: "LiteLLM (proxy)",
   vllm: "VLLM (local)",
   ollama: "Ollama (local)",
+  github: "GitHub Copilot",
+}
+
+const LOCAL_PROVIDERS = new Set(["ollama", "vllm", "github"])
+
+function isLocalProvider(providerName: string, models: ModelInfo[]): boolean {
+  if (LOCAL_PROVIDERS.has(providerName)) return true
+  const apiBase = models[0]?.api_base ?? ""
+  return apiBase.includes("localhost") || apiBase.includes("127.0.0.1")
 }
 
 export function ApiKeyCredentialCard({
@@ -59,9 +69,9 @@ export function ApiKeyCredentialCard({
 }: ApiKeyCredentialCardProps) {
   const { t } = useTranslation()
 
-  // Use the first model as the representative for this provider group
   const primaryModel = models[0]
   const isConfigured = models.some((m) => m.configured)
+  const isLocal = isLocalProvider(providerName, models)
   const displayName =
     PROVIDER_DISPLAY_NAMES[providerName] ??
     providerName.charAt(0).toUpperCase() + providerName.slice(1)
@@ -121,9 +131,64 @@ export function ApiKeyCredentialCard({
 
   const isAnyLoading = isSaving || isTesting || isDeleting || isUpdating
 
+  if (isLocal) {
+    return (
+      <div className="bg-card border-border/60 flex flex-col gap-3 rounded-xl border p-4 shadow-sm">
+        <div className="flex items-start justify-between">
+          <div>
+            <h3 className="text-sm font-semibold">{displayName}</h3>
+            <p className="text-muted-foreground mt-0.5 text-xs">
+              {models.length === 1
+                ? models[0].model_name
+                : `${models.length} models`}
+            </p>
+          </div>
+          <Badge
+            variant="outline"
+            className={cn(
+              "shrink-0 text-xs",
+              isConfigured
+                ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                : "border-border/60 text-muted-foreground",
+            )}
+          >
+            {isConfigured
+              ? t("credentials.local.connected")
+              : t("credentials.local.notRunning")}
+          </Badge>
+        </div>
+
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <IconPlugConnected className="size-4 shrink-0" />
+          <span>
+            {isConfigured
+              ? t("credentials.local.connectedDesc")
+              : t("credentials.local.notRunningDesc")}
+          </span>
+        </div>
+
+        {onUpdateModels && (
+          <Button
+            size="sm"
+            variant="ghost"
+            className="text-muted-foreground h-7 w-full px-3 text-xs"
+            onClick={handleUpdateModels}
+            disabled={isAnyLoading}
+          >
+            {isUpdating ? (
+              <IconLoader2 className="mr-1 size-3 animate-spin" />
+            ) : (
+              <IconRefresh className="mr-1 size-3" />
+            )}
+            {t("credentials.actions.updateModels")}
+          </Button>
+        )}
+      </div>
+    )
+  }
+
   return (
     <div className="bg-card border-border/60 flex flex-col gap-3 rounded-xl border p-4 shadow-sm">
-      {/* Header */}
       <div className="flex items-start justify-between">
         <div>
           <h3 className="text-sm font-semibold">{displayName}</h3>
@@ -148,7 +213,6 @@ export function ApiKeyCredentialCard({
         </Badge>
       </div>
 
-      {/* Key Input */}
       <Input
         type="password"
         value={keyInput}
@@ -166,7 +230,6 @@ export function ApiKeyCredentialCard({
         }}
       />
 
-      {/* Actions */}
       <div className="flex flex-wrap items-center gap-1.5">
         <Button
           size="sm"

@@ -174,11 +174,15 @@ func Run(debug bool, homePath, configPath string, allowEmptyStartup bool) error 
 	defer stopWatch()
 
 	sigChan := make(chan os.Signal, 1)
-	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
+	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM, syscall.SIGHUP)
 
 	for {
 		select {
-		case <-sigChan:
+		case sig := <-sigChan:
+			if sig == syscall.SIGHUP {
+				logger.Info("SIGHUP received, continuing to run")
+				continue
+			}
 			logger.Info("Shutting down...")
 			shutdownGateway(runningServices, agentLoop, provider, true)
 			return nil
@@ -372,14 +376,14 @@ func shutdownGateway(
 	provider providers.LLMProvider,
 	fullShutdown bool,
 ) {
-	if cp, ok := provider.(providers.StatefulProvider); ok && fullShutdown {
-		cp.Close()
-	}
-
 	stopAndCleanupServices(runningServices, gracefulShutdownTimeout, false)
 
 	agentLoop.Stop()
 	agentLoop.Close()
+
+	if cp, ok := provider.(providers.StatefulProvider); ok && fullShutdown {
+		cp.Close()
+	}
 
 	logger.Info("✓ Gateway stopped")
 }

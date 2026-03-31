@@ -18,7 +18,7 @@ import {
   normalizeWsUrlForBrowser,
 } from "@/features/chat/websocket"
 import i18n from "@/i18n"
-import { getChatState, updateChatStore } from "@/store/chat"
+import { getChatState, getThinkingLevel, updateChatStore } from "@/store/chat"
 import { type GatewayState, gatewayAtom } from "@/store/gateway"
 
 const store = getDefaultStore()
@@ -324,7 +324,7 @@ export async function hydrateActiveSession() {
   return hydratePromise
 }
 
-export function sendChatMessage(content: string) {
+export function sendChatMessage(content: string, options?: { webSearch?: boolean }) {
   if (!wsRef || wsRef.readyState !== WebSocket.OPEN) {
     console.warn("WebSocket not connected")
     return false
@@ -342,11 +342,12 @@ export function sendChatMessage(content: string) {
   }))
 
   try {
+    const thinkingLevel = getThinkingLevel()
     socket.send(
       JSON.stringify({
         type: "message.send",
         id,
-        payload: { content },
+        payload: { content, thinking_level: thinkingLevel, web_search: options?.webSearch ?? false },
       }),
     )
     return true

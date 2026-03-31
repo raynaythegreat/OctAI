@@ -36,11 +36,19 @@ func hasModelConfiguration(m *config.ModelConfig) bool {
 		return true
 	}
 
+	if apiKey != "" {
+		return true
+	}
+
+	if hasOAuthCredentialForModel(m) {
+		return true
+	}
+
 	if requiresRuntimeProbe(m) {
 		return true
 	}
 
-	return apiKey != ""
+	return false
 }
 
 // isModelConfigured reports whether a model is currently available to use.
@@ -146,6 +154,20 @@ func oauthProviderForModel(model string) (string, bool) {
 	default:
 		return "", false
 	}
+}
+
+func hasOAuthCredentialForModel(m *config.ModelConfig) bool {
+	provider, ok := oauthProviderForModel(m.Model)
+	if !ok {
+		return false
+	}
+
+	cred, err := oauthGetCredential(provider)
+	if err != nil || cred == nil {
+		return false
+	}
+
+	return strings.TrimSpace(cred.AccessToken) != "" || strings.TrimSpace(cred.RefreshToken) != ""
 }
 
 func modelProtocol(model string) string {

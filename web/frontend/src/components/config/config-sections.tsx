@@ -600,3 +600,27 @@ export function DevicesSection({
     </ConfigSectionCard>
   )
 }
+
+import { getShowDetailedSteps, setShowDetailedSteps } from "@/store/chat"
+
+export function UISettingsSection() {
+  const showDetailedSteps = getShowDetailedSteps()
+
+  const toggleShowDetailedSteps = (checked: boolean) => {
+    setShowDetailedSteps(checked)
+  }
+
+  return (
+    <ConfigSectionCard title="UI Settings">
+      <SwitchCardField
+        label="Show detailed steps in chat"
+        hint="When enabled, shows skill chips, agent branches, and tool use blocks in chat messages"
+        layout="setting-row"
+        checked={showDetailedSteps}
+        onCheckedChange={toggleShowDetailedSteps}
+      />
+    </ConfigSectionCard>
+  )
+}
+
+

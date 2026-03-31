@@ -30,19 +30,19 @@ type TeamResponse struct {
 
 // TeamTemplateResponse is the API representation of a marketplace team template.
 type TeamTemplateResponse struct {
-	ID          string                      `json:"id"`
-	Name        string                      `json:"name"`
-	Description string                      `json:"description"`
-	Category    string                      `json:"category"`
-	Agents      []marketplace.AgentSpec     `json:"agents"`
-	Workflows   []marketplace.WorkflowSpec  `json:"workflows,omitempty"`
-	Author      string                      `json:"author"`
-	Price       float64                     `json:"price"`
-	Rating      float64                     `json:"rating"`
-	Downloads   int64                       `json:"downloads"`
-	Tags        []string                    `json:"tags,omitempty"`
-	CreatedAt   string                      `json:"created_at"`
-	UpdatedAt   string                      `json:"updated_at"`
+	ID          string                     `json:"id"`
+	Name        string                     `json:"name"`
+	Description string                     `json:"description"`
+	Category    string                     `json:"category"`
+	Agents      []marketplace.AgentSpec    `json:"agents"`
+	Workflows   []marketplace.WorkflowSpec `json:"workflows,omitempty"`
+	Author      string                     `json:"author"`
+	Price       float64                    `json:"price"`
+	Rating      float64                    `json:"rating"`
+	Downloads   int64                      `json:"downloads"`
+	Tags        []string                   `json:"tags,omitempty"`
+	CreatedAt   string                     `json:"created_at"`
+	UpdatedAt   string                     `json:"updated_at"`
 }
 
 func (h *Handler) registerTeamRoutes(mux *http.ServeMux) {
@@ -170,53 +170,10 @@ type TeamRequest struct {
 
 func (h *Handler) handleCreateTeam(w http.ResponseWriter, r *http.Request) {
 	var req TeamRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err := decodeJSON(r, &req); err != nil {
 		http.Error(w, "invalid request body", http.StatusBadRequest)
 		return
 	}
-	if req.Name == "" {
-		http.Error(w, "name is required", http.StatusBadRequest)
-		return
-	}
-	if req.ID == "" {
-		req.ID = fmt.Sprintf("team-%d", time.Now().UnixMilli())
-	}
-
-	cfg, err := config.LoadConfig(h.configPath)
-	if err != nil {
-		http.Error(w, fmt.Sprintf("failed to load config: %v", err), http.StatusInternalServerError)
-		return
-	}
-	for _, t := range cfg.Agents.Teams {
-		if t.ID == req.ID {
-			http.Error(w, "team id already exists", http.StatusConflict)
-			return
-		}
-	}
-	cfg.Agents.Teams = append(cfg.Agents.Teams, config.TeamConfig{
-		ID:             req.ID,
-		Name:           req.Name,
-		OrchestratorID: req.OrchestratorID,
-		MemberIDs:      req.MemberIDs,
-		SharedKBPath:   req.SharedKBPath,
-		TokenBudget:    req.TokenBudget,
-		MaxConcurrent:  req.MaxConcurrent,
-	})
-	if err := config.SaveConfig(h.configPath, cfg); err != nil {
-		http.Error(w, fmt.Sprintf("failed to save config: %v", err), http.StatusInternalServerError)
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(TeamResponse{
-		ID:             req.ID,
-		Name:           req.Name,
-		OrchestratorID: req.OrchestratorID,
-		Members:        []TeamMemberResponse{},
-		SharedKBPath:   req.SharedKBPath,
-		TokenBudget:    req.TokenBudget,
-		MaxConcurrent:  req.MaxConcurrent,
-	})
 }
 
 func (h *Handler) handleUpdateTeam(w http.ResponseWriter, r *http.Request) {
@@ -226,50 +183,10 @@ func (h *Handler) handleUpdateTeam(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var req TeamRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err := decodeJSON(r, &req); err != nil {
 		http.Error(w, "invalid request body", http.StatusBadRequest)
 		return
 	}
-
-	cfg, err := config.LoadConfig(h.configPath)
-	if err != nil {
-		http.Error(w, fmt.Sprintf("failed to load config: %v", err), http.StatusInternalServerError)
-		return
-	}
-	found := false
-	for i, t := range cfg.Agents.Teams {
-		if t.ID == teamID {
-			cfg.Agents.Teams[i] = config.TeamConfig{
-				ID:             teamID,
-				Name:           req.Name,
-				OrchestratorID: req.OrchestratorID,
-				MemberIDs:      req.MemberIDs,
-				SharedKBPath:   req.SharedKBPath,
-				TokenBudget:    req.TokenBudget,
-				MaxConcurrent:  req.MaxConcurrent,
-			}
-			found = true
-			break
-		}
-	}
-	if !found {
-		http.Error(w, "team not found", http.StatusNotFound)
-		return
-	}
-	if err := config.SaveConfig(h.configPath, cfg); err != nil {
-		http.Error(w, fmt.Sprintf("failed to save config: %v", err), http.StatusInternalServerError)
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(TeamResponse{
-		ID:             teamID,
-		Name:           req.Name,
-		OrchestratorID: req.OrchestratorID,
-		Members:        []TeamMemberResponse{},
-		SharedKBPath:   req.SharedKBPath,
-		TokenBudget:    req.TokenBudget,
-		MaxConcurrent:  req.MaxConcurrent,
-	})
 }
 
 func (h *Handler) handleDeleteTeam(w http.ResponseWriter, r *http.Request) {

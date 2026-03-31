@@ -1,6 +1,8 @@
 package api
 
 import (
+	"encoding/json"
+	"io"
 	"net/http"
 	"sync"
 
@@ -98,4 +100,10 @@ func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
 
 func (h *Handler) Shutdown() {
 	h.StopGateway()
+}
+
+const maxRequestBodySize = 1 << 20
+
+func decodeJSON(r *http.Request, v any) error {
+	return json.NewDecoder(io.LimitReader(r.Body, maxRequestBodySize)).Decode(v)
 }

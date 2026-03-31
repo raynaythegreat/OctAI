@@ -9,48 +9,101 @@ import { useTranslation } from "react-i18next"
 import { Button } from "@/components/ui/button"
 
 interface ChatEmptyStateProps {
-  hasConfiguredModels: boolean
+  hasSavedModels: boolean
+  hasChatEnabledModels: boolean
+  hasAvailableModels: boolean
   defaultModelName: string
+  isAutoMode: boolean
   isConnected: boolean
 }
 
 export function ChatEmptyState({
-  hasConfiguredModels,
+  hasSavedModels,
+  hasChatEnabledModels,
+  hasAvailableModels,
   defaultModelName,
+  isAutoMode,
   isConnected,
 }: ChatEmptyStateProps) {
   const { t } = useTranslation()
 
-  if (!hasConfiguredModels) {
+  if (!hasSavedModels) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 opacity-70">
-        <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-500">
-          <IconRobotOff className="h-8 w-8" />
+      <div className="animate-in fade-in duration-500 flex h-full flex-col items-center justify-center px-4">
+        <div className="mb-8 flex h-20 w-20 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-500 transition-transform duration-500 hover:scale-105">
+          <IconRobotOff className="h-10 w-10" />
         </div>
-        <h3 className="mb-2 text-xl font-medium">
+        <h3 className="mb-3 text-2xl font-semibold tracking-tight">
           {t("chat.empty.noConfiguredModel")}
         </h3>
-        <p className="text-muted-foreground mb-4 text-center text-sm">
+        <p className="text-muted-foreground mb-6 max-w-sm text-center text-base">
           {t("chat.empty.noConfiguredModelDescription")}
         </p>
-        <Button asChild variant="outline" size="sm" className="px-4">
+        <Button asChild variant="outline" size="sm" className="px-6">
           <Link to="/models">{t("chat.empty.goToModels")}</Link>
         </Button>
       </div>
     )
   }
 
-  if (!defaultModelName) {
+  if (!hasChatEnabledModels) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 opacity-70">
-        <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-500">
-          <IconStar className="h-8 w-8" />
+      <div className="animate-in fade-in duration-500 flex h-full flex-col items-center justify-center px-4">
+        <div className="mb-8 flex h-20 w-20 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-500 transition-transform duration-500 hover:scale-105">
+          <IconStar className="h-10 w-10" />
         </div>
-        <h3 className="mb-2 text-xl font-medium">
+        <h3 className="mb-3 text-2xl font-semibold tracking-tight">
           {t("chat.empty.noSelectedModel")}
         </h3>
-        <p className="text-muted-foreground mb-4 text-center text-sm">
-          {t("chat.empty.noSelectedModelDescription")}
+        <p className="text-muted-foreground mb-6 max-w-sm text-center text-base">
+          {t("chat.empty.noChatEnabledModelDescription", {
+            defaultValue:
+              "Enable at least one model on the Models page to show it in chat.",
+          })}
+        </p>
+        <Button asChild variant="outline" size="sm" className="px-6">
+          <Link to="/models">{t("chat.empty.goToModels")}</Link>
+        </Button>
+      </div>
+    )
+  }
+
+  if (!hasAvailableModels) {
+    return (
+      <div className="animate-in fade-in duration-500 flex h-full flex-col items-center justify-center px-4">
+        <div className="mb-8 flex h-20 w-20 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-500 transition-transform duration-500 hover:scale-105">
+          <IconRobotOff className="h-10 w-10" />
+        </div>
+        <h3 className="mb-3 text-2xl font-semibold tracking-tight">
+          {t("chat.empty.noConfiguredModel")}
+        </h3>
+        <p className="text-muted-foreground mb-6 max-w-sm text-center text-base">
+          {t("chat.empty.noChatReadyModelDescription", {
+            defaultValue:
+              "Your chat-enabled models are not configured yet. Add an API key, connect OAuth, or start the local runtime.",
+          })}
+        </p>
+        <Button asChild variant="outline" size="sm" className="px-6">
+          <Link to="/models">{t("chat.empty.goToModels")}</Link>
+        </Button>
+      </div>
+    )
+  }
+
+  if (!defaultModelName && !isAutoMode) {
+    return (
+      <div className="animate-in fade-in duration-500 flex h-full flex-col items-center justify-center px-4">
+        <div className="mb-8 flex h-20 w-20 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-500 transition-transform duration-500 hover:scale-105">
+          <IconStar className="h-10 w-10" />
+        </div>
+        <h3 className="mb-3 text-2xl font-semibold tracking-tight">
+          {t("chat.empty.noSelectedModel")}
+        </h3>
+        <p className="text-muted-foreground mb-6 max-w-sm text-center text-base">
+          {t("chat.empty.noSelectedModelDescription", {
+            defaultValue:
+              "Choose one of your chat-enabled models from the chat model menu before sending a message.",
+          })}
         </p>
       </div>
     )
@@ -58,14 +111,14 @@ export function ChatEmptyState({
 
   if (!isConnected) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 opacity-70">
-        <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-500">
-          <IconPlugConnectedX className="h-8 w-8" />
+      <div className="animate-in fade-in duration-500 flex h-full flex-col items-center justify-center px-4">
+        <div className="mb-8 flex h-20 w-20 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-500 transition-transform duration-500 hover:scale-105">
+          <IconPlugConnectedX className="h-10 w-10" />
         </div>
-        <h3 className="mb-2 text-xl font-medium">
+        <h3 className="mb-3 text-2xl font-semibold tracking-tight">
           {t("chat.empty.notRunning")}
         </h3>
-        <p className="text-muted-foreground mb-4 text-center text-sm">
+        <p className="text-muted-foreground mb-6 max-w-sm text-center text-base">
           {t("chat.empty.notRunningDescription")}
         </p>
       </div>
@@ -73,12 +126,12 @@ export function ChatEmptyState({
   }
 
   return (
-    <div className="flex flex-col items-center justify-center py-20 opacity-70">
-      <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-violet-500/10">
-        <img src="/favicon.svg" alt="OctAi" className="h-10 w-10" />
+    <div className="animate-in fade-in zoom-in-95 duration-500 flex h-full flex-col items-center justify-center px-4">
+      <div className="mb-8 flex h-20 w-20 items-center justify-center rounded-2xl bg-violet-500/10 transition-all duration-500 hover:scale-105 hover:bg-violet-500/15">
+        <img src="/favicon.svg" alt="OctAi" className="h-14 w-14" />
       </div>
-      <h3 className="mb-2 text-xl font-medium">{t("chat.welcome")}</h3>
-      <p className="text-muted-foreground text-center text-sm">
+      <h3 className="mb-3 text-2xl font-semibold tracking-tight">{t("chat.welcome")}</h3>
+      <p className="text-muted-foreground max-w-sm text-center text-base">
         {t("chat.welcomeDesc")}
       </p>
     </div>

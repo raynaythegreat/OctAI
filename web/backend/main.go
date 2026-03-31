@@ -17,6 +17,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -50,6 +51,15 @@ var (
 
 	noBrowser *bool
 )
+
+func isPortAvailable(port int) bool {
+	ln, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
+	if err != nil {
+		return false
+	}
+	ln.Close()
+	return true
+}
 
 func main() {
 	port := flag.String("port", "18800", "Port to listen on")
@@ -122,6 +132,9 @@ func main() {
 	if err != nil {
 		logger.Errorf("Warning: Failed to initialize OctAi config automatically: %v", err)
 	}
+	if err = utils.ImportLegacyConfigIfNeeded(absPath); err != nil {
+		logger.Errorf("Warning: Failed to import legacy model config automatically: %v", err)
+	}
 
 	var explicitPort bool
 	var explicitPublic bool
@@ -156,6 +169,11 @@ func main() {
 			err = errors.New("must be in range 1-65535")
 		}
 		logger.Fatalf("Invalid port %q: %v", effectivePort, err)
+	}
+
+	if !isPortAvailable(portNum) {
+		logger.ErrorC("web", fmt.Sprintf("Port %d is already in use. Please stop the existing process or choose a different port.", portNum))
+		os.Exit(1)
 	}
 
 	// Determine listen address
@@ -248,12 +266,16 @@ func main() {
 		}
 
 		sigChan := make(chan os.Signal, 1)
-		signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
+		signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM, syscall.SIGHUP)
 
 		// Main event loop - wait for signals or config changes
 		for {
 			select {
-			case <-sigChan:
+			case sig := <-sigChan:
+				if sig == syscall.SIGHUP {
+					logger.Info("SIGHUP received, continuing to run")
+					continue
+				}
 				logger.Info("Shutting down...")
 
 				return

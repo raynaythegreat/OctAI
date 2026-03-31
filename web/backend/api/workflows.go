@@ -118,7 +118,7 @@ type WorkflowCreateRequest struct {
 
 func (h *Handler) handleCreateWorkflow(w http.ResponseWriter, r *http.Request) {
 	var req WorkflowCreateRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err := decodeJSON(r, &req); err != nil {
 		http.Error(w, "invalid request body", http.StatusBadRequest)
 		return
 	}

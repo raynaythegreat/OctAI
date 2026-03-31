@@ -1795,11 +1795,16 @@ turnLoop:
 
 		// Native web search support (from HEAD)
 		_, hasWebSearch := ts.agent.Tools.Get("web_search")
+		ts.agent.ModelMu.RLock()
+		agentProvider := ts.agent.Provider
+		agentThinkingLevel := ts.agent.ThinkingLevel
+		agentFastMode := ts.agent.FastMode
+		ts.agent.ModelMu.RUnlock()
 		useNativeSearch := al.cfg.Tools.Web.PreferNative &&
 			hasWebSearch &&
 			func() bool {
 				// Check if provider supports native search
-				if ns, ok := ts.agent.Provider.(interface{ SupportsNativeSearch() bool }); ok {
+				if ns, ok := agentProvider.(interface{ SupportsNativeSearch() bool }); ok {
 					return ns.SupportsNativeSearch()
 				}
 				return false
@@ -1831,15 +1836,15 @@ turnLoop:
 		if useNativeSearch {
 			llmOpts["native_search"] = true
 		}
-		if ts.agent.ThinkingLevel != ThinkingOff {
-			if tc, ok := ts.agent.Provider.(providers.ThinkingCapable); ok && tc.SupportsThinking() {
-				llmOpts["thinking_level"] = string(ts.agent.ThinkingLevel)
+		if agentThinkingLevel != ThinkingOff {
+			if tc, ok := agentProvider.(providers.ThinkingCapable); ok && tc.SupportsThinking() {
+				llmOpts["thinking_level"] = string(agentThinkingLevel)
 			} else {
 				logger.WarnCF("agent", "thinking_level is set but current provider does not support it, ignoring",
-					map[string]any{"agent_id": ts.agent.ID, "thinking_level": string(ts.agent.ThinkingLevel)})
+					map[string]any{"agent_id": ts.agent.ID, "thinking_level": string(agentThinkingLevel)})
 			}
 		}
-		if ts.agent.FastMode {
+		if agentFastMode {
 			llmOpts["fast_mode"] = true
 		}
 
@@ -1919,7 +1924,7 @@ turnLoop:
 					providerCtx,
 					activeCandidates,
 					func(ctx context.Context, provider, model string) (*providers.LLMResponse, error) {
-						return ts.agent.Provider.Chat(ctx, messagesForCall, toolDefsForCall, model, llmOpts)
+						return agentProvider.Chat(ctx, messagesForCall, toolDefsForCall, model, llmOpts)
 					},
 				)
 				if fbErr != nil {
@@ -1935,7 +1940,7 @@ turnLoop:
 				}
 				return fbResult.Response, nil
 			}
-			return ts.agent.Provider.Chat(providerCtx, messagesForCall, toolDefsForCall, llmModel, llmOpts)
+			return agentProvider.Chat(providerCtx, messagesForCall, toolDefsForCall, llmModel, llmOpts)
 		}
 
 		var response *providers.LLMResponse
@@ -2759,19 +2764,26 @@ func (al *AgentLoop) selectCandidates(
 	userMsg string,
 	history []providers.Message,
 ) (candidates []providers.FallbackCandidate, model string) {
-	if agent.Router == nil || len(agent.LightCandidates) == 0 {
-		return agent.Candidates, resolvedCandidateModel(agent.Candidates, agent.Model)
+	agent.ModelMu.RLock()
+	router := agent.Router
+	lightCandidates := agent.LightCandidates
+	primaryCandidates := agent.Candidates
+	primaryModel := agent.Model
+	agent.ModelMu.RUnlock()
+
+	if router == nil || len(lightCandidates) == 0 {
+		return primaryCandidates, resolvedCandidateModel(primaryCandidates, primaryModel)
 	}
 
-	_, usedLight, score := agent.Router.SelectModel(userMsg, history, agent.Model)
+	_, usedLight, score := router.SelectModel(userMsg, history, primaryModel)
 	if !usedLight {
 		logger.DebugCF("agent", "Model routing: primary model selected",
 			map[string]any{
 				"agent_id":  agent.ID,
 				"score":     score,
-				"threshold": agent.Router.Threshold(),
+				"threshold": router.Threshold(),
 			})
-		return agent.Candidates, resolvedCandidateModel(agent.Candidates, agent.Model)
+		return primaryCandidates, resolvedCandidateModel(primaryCandidates, primaryModel)
 	}
 
 	logger.InfoCF("agent", "Model routing: light model selected",
@@ -3113,11 +3125,15 @@ func (al *AgentLoop) retryLLMCall(
 		al.activeRequests.Add(1)
 		resp, err = func() (*providers.LLMResponse, error) {
 			defer al.activeRequests.Done()
-			return agent.Provider.Chat(
+			agent.ModelMu.RLock()
+			summarizeProvider := agent.Provider
+			summarizeModel := agent.Model
+			agent.ModelMu.RUnlock()
+			return summarizeProvider.Chat(
 				ctx,
 				[]providers.Message{{Role: "user", Content: prompt}},
 				nil,
-				agent.Model,
+				summarizeModel,
 				map[string]any{
 					"max_tokens":       agent.MaxTokens,
 					"temperature":      llmTemperature,
@@ -3529,6 +3545,8 @@ func (al *AgentLoop) buildCommandsRuntime(agent *AgentInstance, opts *processOpt
 			rt.ListSkillNames = agent.ContextBuilder.ListSkillNames
 		}
 		rt.GetModelInfo = func() (string, string) {
+			agent.ModelMu.RLock()
+			defer agent.ModelMu.RUnlock()
 			return agent.Model, resolvedCandidateProvider(agent.Candidates, cfg.Agents.Defaults.Provider)
 		}
 		rt.SwitchModel = func(value string) (string, error) {
@@ -3550,10 +3568,12 @@ func (al *AgentLoop) buildCommandsRuntime(agent *AgentInstance, opts *processOpt
 
 			oldModel := agent.Model
 			oldProvider := agent.Provider
+			agent.ModelMu.Lock()
 			agent.Model = value
 			agent.Provider = nextProvider
 			agent.Candidates = nextCandidates
 			agent.ThinkingLevel = parseThinkingLevel(modelCfg.ThinkingLevel)
+			agent.ModelMu.Unlock()
 
 			if oldProvider != nil && oldProvider != nextProvider {
 				if stateful, ok := oldProvider.(providers.StatefulProvider); ok {

@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"maps"
 	"net/http"
 	"os"
 	"sync"
@@ -25,6 +24,7 @@ type Check struct {
 	Status    string    `json:"status"`
 	Message   string    `json:"message,omitempty"`
 	Timestamp time.Time `json:"timestamp"`
+	CheckFn   func() (bool, string)
 }
 
 type StatusResponse struct {
@@ -105,6 +105,7 @@ func (s *Server) RegisterCheck(name string, checkFn func() (bool, string)) {
 		Status:    statusString(status),
 		Message:   msg,
 		Timestamp: time.Now(),
+		CheckFn:   checkFn,
 	}
 }
 
@@ -163,11 +164,25 @@ func (s *Server) healthHandler(w http.ResponseWriter, r *http.Request) {
 func (s *Server) readyHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	s.mu.RLock()
+	s.mu.Lock()
 	ready := s.ready
-	checks := make(map[string]Check)
-	maps.Copy(checks, s.checks)
-	s.mu.RUnlock()
+	checks := make(map[string]Check, len(s.checks))
+	for name, check := range s.checks {
+		if check.CheckFn != nil {
+			status, msg := check.CheckFn()
+			checks[name] = Check{
+				Name:      name,
+				Status:    statusString(status),
+				Message:   msg,
+				Timestamp: time.Now(),
+				CheckFn:   check.CheckFn,
+			}
+			s.checks[name] = checks[name]
+		} else {
+			checks[name] = check
+		}
+	}
+	s.mu.Unlock()
 
 	if !ready {
 		w.WriteHeader(http.StatusServiceUnavailable)

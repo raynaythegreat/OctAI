@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WorkflowsRouteImport } from './routes/workflows'
 import { Route as TeamsRouteImport } from './routes/teams'
+import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ScheduleRouteImport } from './routes/schedule'
 import { Route as ModelsRouteImport } from './routes/models'
 import { Route as McpRouteImport } from './routes/mcp'
@@ -39,6 +40,11 @@ const WorkflowsRoute = WorkflowsRouteImport.update({
 const TeamsRoute = TeamsRouteImport.update({
   id: '/teams',
   path: '/teams',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ScheduleRoute = ScheduleRouteImport.update({
@@ -149,6 +155,7 @@ export interface FileRoutesByFullPath {
   '/mcp': typeof McpRoute
   '/models': typeof ModelsRoute
   '/schedule': typeof ScheduleRoute
+  '/settings': typeof SettingsRoute
   '/teams': typeof TeamsRoute
   '/workflows': typeof WorkflowsRoute
   '/agent/ai-url': typeof AgentAiUrlRoute
@@ -172,6 +179,7 @@ export interface FileRoutesByTo {
   '/mcp': typeof McpRoute
   '/models': typeof ModelsRoute
   '/schedule': typeof ScheduleRoute
+  '/settings': typeof SettingsRoute
   '/teams': typeof TeamsRoute
   '/workflows': typeof WorkflowsRoute
   '/agent/ai-url': typeof AgentAiUrlRoute
@@ -196,6 +204,7 @@ export interface FileRoutesById {
   '/mcp': typeof McpRoute
   '/models': typeof ModelsRoute
   '/schedule': typeof ScheduleRoute
+  '/settings': typeof SettingsRoute
   '/teams': typeof TeamsRoute
   '/workflows': typeof WorkflowsRoute
   '/agent/ai-url': typeof AgentAiUrlRoute
@@ -221,6 +230,7 @@ export interface FileRouteTypes {
     | '/mcp'
     | '/models'
     | '/schedule'
+    | '/settings'
     | '/teams'
     | '/workflows'
     | '/agent/ai-url'
@@ -244,6 +254,7 @@ export interface FileRouteTypes {
     | '/mcp'
     | '/models'
     | '/schedule'
+    | '/settings'
     | '/teams'
     | '/workflows'
     | '/agent/ai-url'
@@ -267,6 +278,7 @@ export interface FileRouteTypes {
     | '/mcp'
     | '/models'
     | '/schedule'
+    | '/settings'
     | '/teams'
     | '/workflows'
     | '/agent/ai-url'
@@ -291,6 +303,7 @@ export interface RootRouteChildren {
   McpRoute: typeof McpRoute
   ModelsRoute: typeof ModelsRoute
   ScheduleRoute: typeof ScheduleRoute
+  SettingsRoute: typeof SettingsRoute
   TeamsRoute: typeof TeamsRoute
   WorkflowsRoute: typeof WorkflowsRoute
 }
@@ -309,6 +322,13 @@ declare module '@tanstack/react-router' {
       path: '/teams'
       fullPath: '/teams'
       preLoaderRoute: typeof TeamsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/schedule': {
@@ -502,6 +522,7 @@ const rootRouteChildren: RootRouteChildren = {
   McpRoute: McpRoute,
   ModelsRoute: ModelsRoute,
   ScheduleRoute: ScheduleRoute,
+  SettingsRoute: SettingsRoute,
   TeamsRoute: TeamsRoute,
   WorkflowsRoute: WorkflowsRoute,
 }

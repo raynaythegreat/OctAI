@@ -21,6 +21,8 @@ const (
 	oauthProviderOpenAI            = "openai"
 	oauthProviderAnthropic         = "anthropic"
 	oauthProviderGoogleAntigravity = "google-antigravity"
+	oauthProviderQwen              = "qwen"
+	oauthProviderMiniMax           = "minimax"
 
 	oauthMethodBrowser    = "browser"
 	oauthMethodDeviceCode = "device_code"
@@ -42,18 +44,24 @@ var oauthProviderOrder = []string{
 	oauthProviderOpenAI,
 	oauthProviderAnthropic,
 	oauthProviderGoogleAntigravity,
+	oauthProviderQwen,
+	oauthProviderMiniMax,
 }
 
 var oauthProviderMethods = map[string][]string{
 	oauthProviderOpenAI:            {oauthMethodBrowser, oauthMethodDeviceCode, oauthMethodToken},
 	oauthProviderAnthropic:         {oauthMethodToken, oauthMethodBrowser},
 	oauthProviderGoogleAntigravity: {oauthMethodBrowser},
+	oauthProviderQwen:              {oauthMethodDeviceCode},
+	oauthProviderMiniMax:           {oauthMethodDeviceCode},
 }
 
 var oauthProviderLabels = map[string]string{
 	oauthProviderOpenAI:            "OpenAI",
 	oauthProviderAnthropic:         "Anthropic",
 	oauthProviderGoogleAntigravity: "Google Antigravity",
+	oauthProviderQwen:              "Qwen",
+	oauthProviderMiniMax:           "MiniMax",
 }
 
 var (
@@ -231,7 +239,11 @@ func (h *Handler) handleOAuthLogin(w http.ResponseWriter, r *http.Request) {
 		return
 
 	case oauthMethodDeviceCode:
-		cfg := auth.OpenAIOAuthConfig()
+		cfg, err := oauthConfigForProvider(provider)
+		if err != nil {
+			http.Error(w, fmt.Sprintf("failed to get device code config: %v", err), http.StatusInternalServerError)
+			return
+		}
 		info, err := oauthRequestDeviceCode(cfg)
 		if err != nil {
 			http.Error(w, fmt.Sprintf("failed to request device code: %v", err), http.StatusInternalServerError)
@@ -363,7 +375,14 @@ func (h *Handler) handlePollOAuthFlow(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cfg := auth.OpenAIOAuthConfig()
+	cfg, err := oauthConfigForProvider(flow.Provider)
+	if err != nil {
+		h.setOAuthFlowError(flowID, fmt.Sprintf("failed to get provider config: %v", err))
+		updated, _ := h.getOAuthFlow(flowID)
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(flowToResponse(updated))
+		return
+	}
 	cred, err := oauthPollDeviceCodeOnce(cfg, flow.DeviceAuthID, flow.UserCode)
 	if err != nil {
 		if strings.Contains(strings.ToLower(err.Error()), "pending") {
@@ -538,7 +557,8 @@ func normalizeOAuthProvider(raw string) (string, error) {
 	switch provider {
 	case "antigravity":
 		return oauthProviderGoogleAntigravity, nil
-	case oauthProviderOpenAI, oauthProviderAnthropic, oauthProviderGoogleAntigravity:
+	case oauthProviderOpenAI, oauthProviderAnthropic, oauthProviderGoogleAntigravity,
+		oauthProviderQwen, oauthProviderMiniMax:
 		return provider, nil
 	default:
 		return "", fmt.Errorf("unsupported provider %q", raw)
@@ -563,6 +583,10 @@ func oauthConfigForProvider(provider string) (auth.OAuthProviderConfig, error) {
 		return auth.AnthropicOAuthConfig()
 	case oauthProviderGoogleAntigravity:
 		return auth.GoogleAntigravityOAuthConfig()
+	case oauthProviderQwen:
+		return auth.QwenPortalOAuthConfig(), nil
+	case oauthProviderMiniMax:
+		return auth.MiniMaxOAuthConfig(), nil
 	default:
 		return auth.OAuthProviderConfig{}, fmt.Errorf("provider %q does not support browser oauth", provider)
 	}
@@ -748,6 +772,7 @@ func (h *Handler) persistCredentialAndConfig(provider, authMethod string, cred *
 	if err := h.syncProviderAuthMethod(provider, authMethod); err != nil {
 		return fmt.Errorf("syncing provider auth config: %w", err)
 	}
+	autoEnableMCPServers(h.configPath, provider, cp.AccessToken)
 	return nil
 }
 
@@ -784,6 +809,10 @@ func modelBelongsToProvider(provider, model string) bool {
 			lower == "google-antigravity" ||
 			strings.HasPrefix(lower, "antigravity/") ||
 			strings.HasPrefix(lower, "google-antigravity/")
+	case oauthProviderQwen:
+		return lower == "qwen" || strings.HasPrefix(lower, "qwen/")
+	case oauthProviderMiniMax:
+		return lower == "minimax" || strings.HasPrefix(lower, "minimax/")
 	default:
 		return false
 	}
@@ -807,6 +836,18 @@ func defaultModelConfigForProvider(provider, authMethod string) *config.ModelCon
 		return &config.ModelConfig{
 			ModelName:  "gemini-flash",
 			Model:      "antigravity/gemini-3-flash",
+			AuthMethod: authMethod,
+		}
+	case oauthProviderQwen:
+		return &config.ModelConfig{
+			ModelName:  "qwen-max",
+			Model:      "qwen/qwen-max",
+			AuthMethod: authMethod,
+		}
+	case oauthProviderMiniMax:
+		return &config.ModelConfig{
+			ModelName:  "minimax-max",
+			Model:      "minimax/minimax-max",
 			AuthMethod: authMethod,
 		}
 	default:

@@ -4,9 +4,16 @@ ARG TARGETPLATFORM
 
 RUN apk add --no-cache ca-certificates tzdata
 
-COPY $TARGETPLATFORM/picoclaw /usr/local/bin/picoclaw
-COPY $TARGETPLATFORM/picoclaw-launcher /usr/local/bin/picoclaw-launcher
-COPY $TARGETPLATFORM/picoclaw-launcher-tui /usr/local/bin/picoclaw-launcher-tui
+COPY $TARGETPLATFORM/octai /usr/local/bin/octai
+COPY $TARGETPLATFORM/octai-launcher /usr/local/bin/octai-launcher
 
-ENTRYPOINT ["picoclaw-launcher"]
+RUN addgroup -g 1000 octai && \
+    adduser -D -u 1000 -G octai octai
+
+USER octai
+
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD wget -q --spider http://localhost:18800/health || exit 1
+
+ENTRYPOINT ["octai-launcher"]
 CMD ["-public", "-no-browser"]

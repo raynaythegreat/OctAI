@@ -1,4 +1,4 @@
-import { IconArrowUp, IconBrain, IconHammer, IconMessageCircle, IconMicrophone, IconPaperclip, IconPhoto } from "@tabler/icons-react"
+import { IconArrowUp, IconBrain, IconGlobe, IconHammer, IconMessageCircle, IconMicrophone, IconPaperclip, IconPhoto } from "@tabler/icons-react"
 import type { KeyboardEvent } from "react"
 import * as React from "react"
 import { useTranslation } from "react-i18next"
@@ -17,6 +17,8 @@ interface ChatComposerProps {
   onSendWithAttachments?: (content: string, attachments: { file: File; dataUrl?: string }[]) => void
   chatMode?: "chat" | "plan" | "build"
   onCycleMode?: () => void
+  webSearch?: boolean
+  onToggleWebSearch?: () => void
 }
 
 // Slash commands supported by the gateway
@@ -24,6 +26,7 @@ interface SlashCommand {
   name: string
   usage: string
   description: string
+  aliases?: string[]
 }
 
 const SLASH_COMMANDS: SlashCommand[] = [
@@ -78,6 +81,8 @@ export function ChatComposer({
   onSendWithAttachments,
   chatMode = "chat",
   onCycleMode,
+  webSearch = false,
+  onToggleWebSearch,
 }: ChatComposerProps) {
   const { t } = useTranslation()
   const canInput = isConnected && hasDefaultModel
@@ -107,8 +112,9 @@ export function ChatComposer({
         setSkillCommands(
           (data.skills as { name: string; description?: string }[]).map((s) => ({
             name: s.name,
-            usage: `/${s.name}`,
+            usage: `/use ${s.name}`,
             description: s.description || `Run ${s.name} skill`,
+            aliases: [s.name],
           })),
         )
       })
@@ -126,6 +132,26 @@ export function ChatComposer({
     [skillCommands],
   )
 
+  const hasExactCommandMatch = React.useMemo(() => {
+    if (!input.startsWith("/")) return false
+
+    const normalized = input.trim().slice(1).toLowerCase()
+    if (!normalized) return false
+
+    return allCommands.some((cmd) => {
+      const candidates = [
+        cmd.name.toLowerCase(),
+        cmd.usage.replace(/^\//, "").toLowerCase(),
+        ...(cmd.aliases ?? []).map((alias) => alias.toLowerCase()),
+      ]
+
+      return candidates.some((candidate) => {
+        if (!candidate) return false
+        return normalized === candidate || normalized.startsWith(`${candidate} `)
+      })
+    })
+  }, [allCommands, input])
+
   // Slash command autocomplete state
   const [selectedIndex, setSelectedIndex] = React.useState(0)
   const listRef = React.useRef<HTMLUListElement>(null)
@@ -136,17 +162,27 @@ export function ChatComposer({
     if (query === "") return allCommands
     return allCommands
       .map((cmd) => {
-        const name = cmd.name.toLowerCase()
-        if (name === query) return { cmd, score: 100 }
-        if (name.startsWith(query)) return { cmd, score: 50 }
-        if (name.includes(query)) return { cmd, score: 20 }
-        // Subsequence fuzzy match
-        let qi = 0
-        for (let ci = 0; ci < name.length && qi < query.length; ci++) {
-          if (name[ci] === query[qi]) qi++
-        }
-        if (qi === query.length) return { cmd, score: 10 }
-        return { cmd, score: 0 }
+        const matchTerms = [
+          cmd.name.toLowerCase(),
+          cmd.usage.replace(/^\//, "").toLowerCase(),
+          ...(cmd.aliases ?? []).map((alias) => alias.toLowerCase()),
+        ]
+
+        const score = matchTerms.reduce((best, term) => {
+          if (term === query) return 100
+          if (term.startsWith(query)) return Math.max(best, 60)
+          if (term.includes(query)) return Math.max(best, 30)
+
+          let qi = 0
+          for (let ci = 0; ci < term.length && qi < query.length; ci++) {
+            if (term[ci] === query[qi]) qi++
+          }
+          if (qi === query.length) return Math.max(best, 10)
+
+          return best
+        }, 0)
+
+        return { cmd, score }
       })
       .filter((x) => x.score > 0)
       .sort((a, b) => b.score - a.score)
@@ -199,7 +235,12 @@ export function ChatComposer({
         setSelectedIndex((i) => Math.max(i - 1, 0))
         return
       }
-      if (e.key === "Tab" || (e.key === "Enter" && !e.shiftKey)) {
+      if (e.key === "Tab") {
+        e.preventDefault()
+        applyCommand(suggestions[selectedIndex])
+        return
+      }
+      if (e.key === "Enter" && !e.shiftKey && !hasExactCommandMatch) {
         e.preventDefault()
         applyCommand(suggestions[selectedIndex])
         return
@@ -249,8 +290,8 @@ export function ChatComposer({
   }
 
   return (
-    <div className="bg-background shrink-0 px-4 pt-4 pb-[calc(1rem+env(safe-area-inset-bottom))] md:px-8 md:pb-8 lg:px-24 xl:px-48">
-      <div className="mx-auto max-w-[1000px]">
+    <div className="bg-background shrink-0 px-4 pt-3 pb-[calc(1rem+env(safe-area-inset-bottom))] md:px-6 md:pb-6 lg:px-10 xl:px-16">
+      <div className="mx-auto max-w-[1040px]">
         {/* Slash command popup */}
         {showPopup && (
           <div className="bg-card border-border/80 mb-1 overflow-hidden rounded-xl border shadow-lg">
@@ -344,30 +385,50 @@ export function ChatComposer({
           )}
 
           <div className="mt-2 flex items-center justify-between px-1">
-            {/* Left: Chat/Plan/Build mode cycle */}
-            <Button
-              type="button"
-              size="sm"
-              variant="ghost"
-              className={cn(
-                "h-7 gap-1.5 rounded-full px-2.5 text-xs font-medium transition-all",
-                chatMode === "plan" && "bg-amber-500/15 text-amber-400 hover:bg-amber-500/20",
-                chatMode === "chat" && "bg-violet-500/15 text-violet-400 hover:bg-violet-500/20",
-                chatMode === "build" && "bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20",
-              )}
-              onClick={onCycleMode}
-              disabled={!canInput}
-              title={`${chatMode === "build" ? "Build" : chatMode === "plan" ? "Plan" : "Chat"} mode (Tab to cycle)`}
-            >
-              {chatMode === "plan" ? (
-                <IconBrain className="size-3.5" />
-              ) : chatMode === "chat" ? (
-                <IconMessageCircle className="size-3.5" />
-              ) : (
-                <IconHammer className="size-3.5" />
-              )}
-              {chatMode === "plan" ? "Plan" : chatMode === "chat" ? "Chat" : "Build"}
-            </Button>
+            {/* Left: Chat/Plan/Build mode cycle + Web search toggle */}
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                className={cn(
+                  "h-7 gap-1.5 rounded-full px-2.5 text-xs font-medium transition-all",
+                  chatMode === "plan" && "bg-amber-500/15 text-amber-400 hover:bg-amber-500/20",
+                  chatMode === "chat" && "bg-violet-500/15 text-violet-400 hover:bg-violet-500/20",
+                  chatMode === "build" && "bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20",
+                )}
+                onClick={onCycleMode}
+                disabled={!canInput}
+                title={`${chatMode === "build" ? "Build" : chatMode === "plan" ? "Plan" : "Chat"} mode (Tab to cycle)`}
+              >
+                {chatMode === "plan" ? (
+                  <IconBrain className="size-3.5" />
+                ) : chatMode === "chat" ? (
+                  <IconMessageCircle className="size-3.5" />
+                ) : (
+                  <IconHammer className="size-3.5" />
+                )}
+                {chatMode === "plan" ? "Plan" : chatMode === "chat" ? "Chat" : "Build"}
+              </Button>
+
+              {/* Web search toggle */}
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                className={cn(
+                  "h-7 w-7 rounded-full p-0 transition-all",
+                  webSearch
+                    ? "bg-sky-500/15 text-sky-400 hover:bg-sky-500/20 border border-sky-400/50"
+                    : "text-muted-foreground hover:text-sky-400 hover:bg-sky-500/10",
+                )}
+                onClick={onToggleWebSearch}
+                disabled={!canInput}
+                title={webSearch ? "Web search enabled" : "Enable web search"}
+              >
+                <IconGlobe className="size-3.5" />
+              </Button>
+            </div>
 
             {/* Right: media buttons + send */}
             <div className="flex items-center gap-1">

@@ -129,6 +129,7 @@ export interface SidebarChannelNavItem {
   title: string
   url: string
   icon: React.ComponentType<{ className?: string }>
+  enabled: boolean
 }
 
 interface UseSidebarChannelsOptions {
@@ -224,8 +225,9 @@ export function useSidebarChannels({ language, t }: UseSidebarChannelsOptions) {
         title: getChannelDisplayName(channel, t),
         url: `/channels/${channel.name}`,
         icon: CHANNEL_ICON_MAP[channel.name] ?? IconPlug,
+        enabled: enabledMap[channel.name] === true,
       })),
-    [t, visibleChannels],
+    [t, visibleChannels, enabledMap],
   )
 
   const toggleShowAllChannels = React.useCallback(() => {

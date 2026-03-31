@@ -149,6 +149,10 @@ func (h *Handler) gatewayStartReady() (bool, string, error) {
 		return false, "", fmt.Errorf("failed to load config: %w", err)
 	}
 
+	if err := h.ensureUsableGatewayDefaultModel(cfg); err != nil {
+		return false, "", err
+	}
+
 	modelName := strings.TrimSpace(cfg.Agents.Defaults.GetModelName())
 	if modelName == "" {
 		return false, "no default model configured", nil
@@ -167,6 +171,42 @@ func (h *Handler) gatewayStartReady() (bool, string, error) {
 	}
 
 	return true, "", nil
+}
+
+func (h *Handler) ensureUsableGatewayDefaultModel(cfg *config.Config) error {
+	if cfg == nil {
+		return nil
+	}
+
+	current := strings.TrimSpace(cfg.Agents.Defaults.GetModelName())
+	if current != "" {
+		if modelCfg := lookupModelConfig(cfg, current); modelCfg != nil && isModelConfigured(modelCfg) {
+			return nil
+		}
+	}
+
+	fallback := firstUsableGatewayModel(cfg)
+	if fallback == "" {
+		return nil
+	}
+	if fallback == current {
+		return nil
+	}
+
+	cfg.Agents.Defaults.ModelName = fallback
+	return config.SaveConfig(h.configPath, cfg)
+}
+
+func firstUsableGatewayModel(cfg *config.Config) string {
+	for _, m := range cfg.ModelList {
+		if m == nil || m.IsVirtual() {
+			continue
+		}
+		if isModelConfigured(m) {
+			return m.ModelName
+		}
+	}
+	return ""
 }
 
 func lookupModelConfig(cfg *config.Config, modelName string) *config.ModelConfig {
@@ -360,6 +400,9 @@ func (h *Handler) startGatewayLocked(initialStatus string, existingPid int) (int
 	cfg, err := config.LoadConfig(h.configPath)
 	if err != nil {
 		return 0, fmt.Errorf("failed to load config: %w", err)
+	}
+	if err := h.ensureUsableGatewayDefaultModel(cfg); err != nil {
+		return 0, fmt.Errorf("failed to select usable default model: %w", err)
 	}
 	defaultModelName := strings.TrimSpace(cfg.Agents.Defaults.GetModelName())
 

@@ -103,7 +103,7 @@ func (h *Handler) handleAddReferenceURL(w http.ResponseWriter, r *http.Request) 
 		URL   string `json:"url"`
 		Notes string `json:"notes"`
 	}
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil || req.URL == "" {
+	if err := decodeJSON(r, &req); err != nil || req.URL == "" {
 		http.Error(w, "url is required", http.StatusBadRequest)
 		return
 	}
@@ -218,7 +218,7 @@ func (h *Handler) handleUpdateReferenceURL(w http.ResponseWriter, r *http.Reques
 		Notes    *string `json:"notes"`
 		Category *string `json:"category"`
 	}
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err := decodeJSON(r, &req); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}

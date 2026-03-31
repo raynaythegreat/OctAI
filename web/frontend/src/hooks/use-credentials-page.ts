@@ -27,12 +27,14 @@ import { toast } from "sonner"
 
 type FlowWatchMode = "" | "status" | "poll"
 
-const OAUTH_PROTOCOLS = new Set(["openai", "antigravity", "google-antigravity"])
+const OAUTH_PROTOCOLS = new Set(["openai", "antigravity", "google-antigravity", "qwen", "minimax"])
 
 function getProviderLabel(provider: OAuthProvider | ""): string {
   if (provider === "openai") return "OpenAI"
   if (provider === "anthropic") return "Anthropic"
   if (provider === "google-antigravity") return "Google Antigravity"
+  if (provider === "qwen") return "Qwen"
+  if (provider === "minimax") return "MiniMax"
   return ""
 }
 
@@ -231,6 +233,8 @@ export function useCredentialsPage() {
   const openaiStatus = providersMap.get("openai")
   const anthropicStatus = providersMap.get("anthropic")
   const antigravityStatus = providersMap.get("google-antigravity")
+  const qwenStatus = providersMap.get("qwen")
+  const minimaxStatus = providersMap.get("minimax")
 
   const bumpActionToken = useCallback(() => {
     actionTokenRef.current += 1
@@ -296,52 +300,59 @@ export function useCredentialsPage() {
     [bumpActionToken, isActionTokenCurrent, t],
   )
 
-  const startOpenAIDeviceCode = useCallback(async () => {
-    const actionToken = bumpActionToken()
-    setActiveAction("openai:device")
-    setError("")
+  const startDeviceCode = useCallback(
+    async (provider: OAuthProvider) => {
+      const actionToken = bumpActionToken()
+      setActiveAction(`${provider}:device`)
+      setError("")
 
-    try {
-      const resp = await loginOAuth({
-        provider: "openai",
-        method: "device_code",
-      })
-      if (!isActionTokenCurrent(actionToken)) {
-        return
-      }
-      if (!resp.flow_id || !resp.user_code || !resp.verify_url) {
-        throw new Error(t("credentials.errors.invalidDeviceResponse"))
-      }
+      try {
+        const resp = await loginOAuth({
+          provider,
+          method: "device_code",
+        })
+        if (!isActionTokenCurrent(actionToken)) {
+          return
+        }
+        if (!resp.flow_id || !resp.user_code || !resp.verify_url) {
+          throw new Error(t("credentials.errors.invalidDeviceResponse"))
+        }
 
-      const flow: OAuthFlowState = {
-        flow_id: resp.flow_id,
-        provider: "openai",
-        method: "device_code",
-        status: "pending",
-        user_code: resp.user_code,
-        verify_url: resp.verify_url,
-        interval: resp.interval,
-        expires_at: resp.expires_at,
-      }
+        const flow: OAuthFlowState = {
+          flow_id: resp.flow_id,
+          provider,
+          method: "device_code",
+          status: "pending",
+          user_code: resp.user_code,
+          verify_url: resp.verify_url,
+          interval: resp.interval,
+          expires_at: resp.expires_at,
+        }
 
-      setDeviceFlow(flow)
-      setDeviceSheetOpen(true)
-      setActiveFlow(flow)
-      setWatchFlowID(resp.flow_id)
-      setWatchMode("poll")
-      setPollIntervalMs(Math.max(1000, (resp.interval ?? 5) * 1000))
-    } catch (err) {
-      if (!isActionTokenCurrent(actionToken)) {
-        return
+        setDeviceFlow(flow)
+        setDeviceSheetOpen(true)
+        setActiveFlow(flow)
+        setWatchFlowID(resp.flow_id)
+        setWatchMode("poll")
+        setPollIntervalMs(Math.max(1000, (resp.interval ?? 5) * 1000))
+      } catch (err) {
+        if (!isActionTokenCurrent(actionToken)) {
+          return
+        }
+        setActiveAction("")
+        setError(
+          err instanceof Error
+            ? err.message
+            : t("credentials.errors.loginFailed"),
+        )
       }
-      setActiveAction("")
-      setError(
-        err instanceof Error
-          ? err.message
-          : t("credentials.errors.loginFailed"),
-      )
-    }
-  }, [bumpActionToken, isActionTokenCurrent, t])
+    },
+    [bumpActionToken, isActionTokenCurrent, t],
+  )
+
+  const startOpenAIDeviceCode = useCallback(() => {
+    return startDeviceCode("openai")
+  }, [startDeviceCode])
 
   const saveToken = useCallback(
     async (provider: OAuthProvider, token: string) => {
@@ -424,7 +435,7 @@ export function useCredentialsPage() {
       if (watchMode === "poll") {
         setWatchFlowID("")
         setWatchMode("")
-        if (activeAction === "openai:device") {
+        if (activeAction.endsWith(":device")) {
           setActiveAction("")
         }
       }
@@ -690,6 +701,8 @@ export function useCredentialsPage() {
     openaiStatus,
     anthropicStatus,
     antigravityStatus,
+    qwenStatus,
+    minimaxStatus,
     logoutDialogOpen,
     logoutConfirmProvider,
     logoutProviderLabel,
@@ -699,6 +712,7 @@ export function useCredentialsPage() {
     setAnthropicToken,
     startBrowserOAuth,
     startOpenAIDeviceCode,
+    startDeviceCode,
     stopLoading,
     saveToken,
     askLogout,

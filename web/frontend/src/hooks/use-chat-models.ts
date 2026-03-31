@@ -1,6 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { toast } from "sonner"
 
+import {
+  getGatewayStatus,
+  restartGateway,
+  startGateway,
+} from "@/api/gateway"
 import { type ModelInfo, getAutoRouting, getModels, setAutoRouting, setDefaultModel } from "@/api/models"
 
 interface UseChatModelsOptions {
@@ -21,15 +26,25 @@ function isLocalModel(model: ModelInfo): boolean {
 export function useChatModels({ isConnected }: UseChatModelsOptions) {
   const [modelList, setModelList] = useState<ModelInfo[]>([])
   const [defaultModelName, setDefaultModelName] = useState("")
-  const [isAutoMode, setIsAutoMode] = useState(false)
+  const [isAutoMode, setIsAutoMode] = useState(true)
   const setDefaultRequestIdRef = useRef(0)
+  const autoSelectingRef = useRef(false)
 
   const loadModels = useCallback(async () => {
     try {
       const data = await getModels()
       setModelList(data.models)
-      if (data.models.some((m) => m.model_name === data.default_model)) {
+      if (
+        data.models.some(
+          (m) =>
+            m.model_name === data.default_model &&
+            m.chat_enabled &&
+            m.configured,
+        )
+      ) {
         setDefaultModelName(data.default_model)
+      } else {
+        setDefaultModelName("")
       }
     } catch {
       // silently fail
@@ -54,15 +69,36 @@ export function useChatModels({ isConnected }: UseChatModelsOptions) {
     return () => clearTimeout(timerId)
   }, [isConnected, loadModels, loadAutoRouting])
 
+  const syncGatewayForModelChange = useCallback(async () => {
+    try {
+      const status = await getGatewayStatus()
+      if (status.gateway_status === "running") {
+        await restartGateway()
+        return
+      }
+      if (
+        (status.gateway_status === "stopped" || status.gateway_status === "error") &&
+        status.gateway_start_allowed
+      ) {
+        await startGateway()
+      }
+    } catch (err) {
+      console.error("Failed to sync gateway after model change:", err)
+    }
+  }, [])
+
   const toggleAutoMode = useCallback(async (enabled: boolean) => {
     try {
       await setAutoRouting({ enabled })
       setIsAutoMode(enabled)
+      await loadModels()
+      await loadAutoRouting()
+      await syncGatewayForModelChange()
       toast(enabled ? "Auto mode enabled" : "Auto mode disabled")
     } catch (err) {
       console.error("Failed to toggle auto mode:", err)
     }
-  }, [])
+  }, [loadAutoRouting, loadModels, syncGatewayForModelChange])
 
   const handleSetDefault = useCallback(
     async (modelName: string) => {
@@ -77,14 +113,31 @@ export function useChatModels({ isConnected }: UseChatModelsOptions) {
         }
 
         setModelList(data.models)
-        if (data.models.some((m) => m.model_name === data.default_model)) {
+        if (
+          data.models.some(
+            (m) =>
+              m.model_name === data.default_model &&
+              m.chat_enabled &&
+              m.configured,
+          )
+        ) {
           setDefaultModelName(data.default_model)
+        } else {
+          setDefaultModelName("")
         }
+        await syncGatewayForModelChange()
       } catch (err) {
         console.error("Failed to set default model:", err)
       }
     },
-    [defaultModelName],
+    [defaultModelName, syncGatewayForModelChange],
+  )
+
+  const hasSavedModels = useMemo(() => modelList.length > 0, [modelList])
+
+  const chatEnabledModels = useMemo(
+    () => modelList.filter((m) => m.chat_enabled),
+    [modelList],
   )
 
   const hasConfiguredModels = useMemo(
@@ -92,27 +145,68 @@ export function useChatModels({ isConnected }: UseChatModelsOptions) {
     [modelList],
   )
 
+  const availableModels = useMemo(
+    () => chatEnabledModels.filter((m) => m.configured),
+    [chatEnabledModels],
+  )
+
+  const hasChatEnabledModels = useMemo(
+    () => chatEnabledModels.length > 0,
+    [chatEnabledModels],
+  )
+
   const oauthModels = useMemo(
-    () => modelList.filter((m) => m.configured && m.auth_method === "oauth"),
-    [modelList],
+    () => availableModels.filter((m) => m.auth_method === "oauth"),
+    [availableModels],
   )
 
   const localModels = useMemo(
-    () => modelList.filter((m) => m.configured && isLocalModel(m)),
-    [modelList],
+    () => availableModels.filter((m) => isLocalModel(m)),
+    [availableModels],
   )
 
   const apiKeyModels = useMemo(
     () =>
-      modelList.filter(
-        (m) => m.configured && m.auth_method !== "oauth" && !isLocalModel(m),
+      availableModels.filter(
+        (m) => m.auth_method !== "oauth" && !isLocalModel(m),
       ),
-    [modelList],
+    [availableModels],
   )
+
+  const hasAvailableModels = useMemo(
+    () => availableModels.length > 0,
+    [availableModels],
+  )
+
+  useEffect(() => {
+    if (!isAutoMode || autoSelectingRef.current) {
+      return
+    }
+    const hasValidDefault = modelList.some(
+      (m) => m.model_name === defaultModelName && m.chat_enabled && m.configured,
+    )
+    if (hasValidDefault || availableModels.length === 0) {
+      return
+    }
+
+    autoSelectingRef.current = true
+    void handleSetDefault(availableModels[0].model_name).finally(() => {
+      autoSelectingRef.current = false
+    })
+  }, [availableModels, defaultModelName, handleSetDefault, isAutoMode, modelList])
+
+  useEffect(() => {
+    if (!modelList.some((m) => m.model_name === defaultModelName && m.chat_enabled && m.configured)) {
+      setDefaultModelName("")
+    }
+  }, [defaultModelName, modelList])
 
   return {
     defaultModelName,
+    hasSavedModels,
     hasConfiguredModels,
+    hasChatEnabledModels,
+    hasAvailableModels,
     apiKeyModels,
     oauthModels,
     localModels,

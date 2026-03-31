@@ -76,7 +76,7 @@ func CreateProviderFromConfig(cfg *config.ModelConfig) (LLMProvider, string, err
 	switch protocol {
 	case "openai":
 		// OpenAI with OAuth/token auth (Codex-style)
-		if cfg.AuthMethod == "oauth" || cfg.AuthMethod == "token" {
+		if cfg.AuthMethod == "oauth" || cfg.AuthMethod == "token" || (cfg.AuthMethod == "" && cfg.APIKey() == "" && hasStoredProviderCredential("openai")) {
 			provider, err := createCodexAuthProvider()
 			if err != nil {
 				return nil, "", err
@@ -292,6 +292,14 @@ func CreateProviderFromConfig(cfg *config.ModelConfig) (LLMProvider, string, err
 	default:
 		return nil, "", fmt.Errorf("unknown protocol %q in model %q", protocol, cfg.Model)
 	}
+}
+
+func hasStoredProviderCredential(provider string) bool {
+	cred, err := getCredential(provider)
+	if err != nil || cred == nil {
+		return false
+	}
+	return strings.TrimSpace(cred.AccessToken) != "" || strings.TrimSpace(cred.RefreshToken) != ""
 }
 
 // getDefaultAPIBase returns the default API base URL for a given protocol.

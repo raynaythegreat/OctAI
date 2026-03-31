@@ -414,7 +414,7 @@ func (h *Handler) handleUpdateAuditRetention(w http.ResponseWriter, r *http.Requ
 	}
 
 	var req AuditRetentionRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err := decodeJSON(r, &req); err != nil {
 		writeJSONError(w, "invalid request body", http.StatusBadRequest)
 		return
 	}

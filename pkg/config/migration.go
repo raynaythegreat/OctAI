@@ -515,22 +515,39 @@ func loadConfigV0(data []byte) (migratable, error) {
 func loadConfig(data []byte) (*Config, error) {
 	cfg := DefaultConfig()
 
-	// Pre-scan the JSON to check how many model_list entries the user provided.
-	// Go's JSON decoder reuses existing slice backing-array elements rather than
-	// zero-initializing them, so fields absent from the user's JSON (e.g. api_base)
-	// would silently inherit values from the DefaultConfig template at the same
-	// index position. We only reset cfg.ModelList when the user actually provides
-	// entries; when count is 0 we keep DefaultConfig's built-in list as fallback.
-	var tmp Config
-	if err := json.Unmarshal(data, &tmp); err != nil {
+	// Pre-scan the raw JSON to determine whether model_list is present.
+	// We need to distinguish three cases:
+	//   1. model_list absent  → keep DefaultConfig models
+	//   2. model_list: []     → keep DefaultConfig models (explicit empty = use defaults)
+	//   3. model_list: [...]  → use user's entries, drop defaults
+	// Go's json.Unmarshal treats both (1) and (2) as len==0, so we must
+	// inspect the raw JSON to tell them apart.
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
 		return nil, err
 	}
-	if len(tmp.ModelList) > 0 {
+	modelListRaw, hasKey := raw["model_list"]
+	userProvidedModels := false
+	if hasKey {
+		var arr []json.RawMessage
+		if json.Unmarshal(modelListRaw, &arr) == nil && len(arr) > 0 {
+			userProvidedModels = true
+		}
+		// len == 0 or unmarshal error → explicit empty or null → keep defaults
+	}
+	if userProvidedModels {
 		cfg.ModelList = nil
 	}
 
 	if err := json.Unmarshal(data, cfg); err != nil {
 		return nil, err
 	}
+
+	// If model_list was explicitly [] in JSON, json.Unmarshal will have
+	// overwritten cfg.ModelList with an empty slice. Restore defaults.
+	if hasKey && !userProvidedModels && len(cfg.ModelList) == 0 {
+		cfg.ModelList = DefaultConfig().ModelList
+	}
+
 	return cfg, nil
 }

@@ -12,6 +12,7 @@ import { useTranslation } from "react-i18next"
 import type { ModelInfo } from "@/api/models"
 import { testModelKey } from "@/api/models"
 import { Button } from "@/components/ui/button"
+import { Switch } from "@/components/ui/switch"
 
 interface ModelCardProps {
   model: ModelInfo
@@ -19,7 +20,9 @@ interface ModelCardProps {
   onSetDefault: (model: ModelInfo) => void
   onDelete: (model: ModelInfo) => void
   onRotateKey: (model: ModelInfo) => void
+  onToggleChat: (model: ModelInfo, enabled: boolean) => void
   settingDefault: boolean
+  togglingChat: boolean
 }
 
 export function ModelCard({
@@ -28,12 +31,19 @@ export function ModelCard({
   onSetDefault,
   onDelete,
   onRotateKey,
+  onToggleChat,
   settingDefault,
+  togglingChat,
 }: ModelCardProps) {
   const { t } = useTranslation()
   const isOAuth = model.auth_method === "oauth"
+  const isAvailable = model.available ?? model.configured
+  const runtimeUnavailable = model.configured && !isAvailable
   const canSetDefault =
-    model.configured && !model.is_default && !model.is_virtual
+    model.configured &&
+    model.chat_enabled &&
+    !model.is_default &&
+    !model.is_virtual
 
   const [testing, setTesting] = useState(false)
   const [testResult, setTestResult] = useState<{
@@ -63,8 +73,10 @@ export function ModelCard({
     <div
       className={[
         "group/card hover:bg-muted/30 relative flex w-full max-w-[36rem] flex-col gap-3 justify-self-start rounded-xl border p-4 transition-colors hover:shadow-xs",
-        model.configured
+        isAvailable
           ? "border-border/60 bg-card"
+          : runtimeUnavailable
+            ? "border-amber-500/40 bg-amber-500/5"
           : "border-border/50 bg-card/60",
       ].join(" ")}
     >
@@ -75,13 +87,19 @@ export function ModelCard({
               "mt-0.5 h-2 w-2 shrink-0 rounded-full",
               model.is_default
                 ? "bg-green-400 shadow-[0_0_0_2px_rgba(74,222,128,0.35)]"
-                : model.configured
+                : isAvailable
                   ? "bg-green-500"
+                  : runtimeUnavailable
+                    ? "bg-amber-500"
                   : "bg-muted-foreground/25",
             ].join(" ")}
             title={
-              model.configured
+              isAvailable
                 ? t("models.status.configured")
+                : runtimeUnavailable
+                  ? t("models.status.runtimeUnavailable", {
+                      defaultValue: "Configured, but not reachable right now",
+                    })
                 : t("models.status.unconfigured")
             }
           />
@@ -167,6 +185,12 @@ export function ModelCard({
           <span className="text-muted-foreground bg-muted rounded px-1.5 py-0.5 text-[10px] font-medium">
             OAuth
           </span>
+        ) : runtimeUnavailable ? (
+          <span className="rounded bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-medium text-amber-700 dark:text-amber-300">
+            {t("models.status.runtimeUnavailableShort", {
+              defaultValue: "Runtime offline",
+            })}
+          </span>
         ) : model.configured && model.api_key ? (
           <span className="text-muted-foreground/70 flex items-center gap-1 font-mono text-[11px]">
             <IconKey className="size-3" />
@@ -188,6 +212,30 @@ export function ModelCard({
           {testing && <IconLoader2 className="size-3 animate-spin" />}
           {t("models.action.test", { defaultValue: "Test" })}
         </Button>
+      </div>
+
+      <div className="border-border/50 flex items-center justify-between gap-3 border-t pt-3">
+        <div className="min-w-0">
+          <p className="text-sm font-medium">
+            {t("models.chatVisibility.label", {
+              defaultValue: "Show in chat",
+            })}
+          </p>
+          <p className="text-muted-foreground text-xs">
+            {t("models.chatVisibility.description", {
+              defaultValue:
+                "Only chat-enabled and configured models appear in the chat menu.",
+            })}
+          </p>
+        </div>
+        <Switch
+          checked={model.chat_enabled}
+          onCheckedChange={(enabled) => onToggleChat(model, enabled)}
+          disabled={togglingChat || model.is_virtual}
+          aria-label={t("models.chatVisibility.label", {
+            defaultValue: "Show in chat",
+          })}
+        />
       </div>
 
       {testResult && (

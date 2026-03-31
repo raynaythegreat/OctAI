@@ -56,7 +56,7 @@ func (h *Handler) handleGetLauncherConfig(w http.ResponseWriter, r *http.Request
 
 func (h *Handler) handleUpdateLauncherConfig(w http.ResponseWriter, r *http.Request) {
 	var payload launcherConfigPayload
-	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+	if err := decodeJSON(r, &payload); err != nil {
 		http.Error(w, fmt.Sprintf("Invalid JSON: %v", err), http.StatusBadRequest)
 		return
 	}
