@@ -5,7 +5,7 @@ ARG TARGETPLATFORM
 RUN apk add --no-cache ca-certificates tzdata
 
 COPY $TARGETPLATFORM/octai /usr/local/bin/octai
-COPY $TARGETPLATFORM/octai-launcher /usr/local/bin/octai-launcher
+COPY $TARGETPLATFORM/aibhq-launcher /usr/local/bin/aibhq-launcher
 
 RUN addgroup -g 1000 octai && \
     adduser -D -u 1000 -G octai octai
@@ -15,5 +15,5 @@ USER octai
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD wget -q --spider http://localhost:18800/health || exit 1
 
-ENTRYPOINT ["octai-launcher"]
+ENTRYPOINT ["aibhq-launcher"]
 CMD ["-public", "-no-browser"]
