@@ -1,4 +1,4 @@
-// OctAi Web Console - Web-based chat and management interface
+// OctAi Dashboard Server - Web-based chat and management interface
 //
 // Provides a web UI for chatting with OctAi via the Pico Channel WebSocket,
 // with configuration management and gateway process control.
@@ -56,7 +56,7 @@ type Options struct {
 	ExplicitPublic bool // true when the caller explicitly set Public
 }
 
-// Run starts the OctAi web console with the given options.
+// Run starts the OctAi web dashboard with the given options.
 func Run(opts Options) error {
 	noBrowserFlag = opts.NoBrowser
 

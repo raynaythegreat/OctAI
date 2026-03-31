@@ -70,7 +70,7 @@ func (t *ReferenceURLSearchTool) Execute(_ context.Context, args map[string]any)
 	data, err := os.ReadFile(t.dataPath)
 	if os.IsNotExist(err) {
 		return &ToolResult{
-			ForLLM:  "No reference URLs have been saved yet. Ask the user to add references via the Reference URLs page in the OctAi web UI.",
+			ForLLM:  "No reference URLs have been saved yet. Ask the user to add references via the Reference URLs page in the OctAi web dashboard.",
 			ForUser: "",
 			Silent:  true,
 		}

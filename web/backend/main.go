@@ -1,15 +1,15 @@
 //go:build ignore
 
-// OctAi Web Console - Web-based chat and management interface
+// OctAi Dashboard Backend - Web-based chat and management interface
 //
 // Provides a web UI for chatting with OctAi via the Pico Channel WebSocket,
 // with configuration management and gateway process control.
 //
 // Usage:
 //
-//	go build -o octai-web ./web/backend/
-//	./octai-web [config.json]
-//	./octai-web -public config.json
+//	go build -o octai-dashboard ./web/backend/
+//	./octai-dashboard [config.json]
+//	./octai-dashboard -public config.json
 
 package main
 

@@ -1,4 +1,4 @@
-# OctAi Web
+# OctAi Web Dashboard
 
 This directory contains the standalone web service for `octai`.
 It provides a complete unified web interface, acting as a dashboard, configuration center, and interactive console (channel client) for the core `octai` engine.
@@ -40,7 +40,7 @@ Build the frontend and embed it into a single Go binary:
 make build
 ```
 
-The output binary is `backend/octai-web`.
+The output binary is `backend/octai`.
 
 ### Other Commands
 

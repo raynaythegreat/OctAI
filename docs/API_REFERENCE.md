@@ -1,10 +1,10 @@
 # API Reference
 
-> REST API documentation for OctAi Web Backend
+> REST API documentation for OctAi Dashboard Backend
 
 ## Overview
 
-The OctAi web backend provides a RESTful API for managing configuration, sessions, models, and gateway lifecycle.
+The OctAi dashboard backend provides a RESTful API for managing configuration, sessions, models, and gateway lifecycle.
 
 **Base URL**: `http://localhost:18800`
 
